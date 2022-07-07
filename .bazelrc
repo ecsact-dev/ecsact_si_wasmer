@@ -1,0 +1,21 @@
+startup --windows_enable_symlinks
+
+build --enable_platform_specific_config
+build --incompatible_enable_cc_toolchain_resolution
+build --incompatible_strict_action_env
+
+build:windows --platforms=//bazel/platforms:windows
+build:windows --extra_execution_platforms=//bazel/platforms:windows
+build:windows --cxxopt=/std:c++latest
+
+build:linux --platforms=//bazel/platforms:linux
+build:linux --extra_execution_platforms=//bazel/platforms:linux
+build:linux --extra_toolchains=@llvm_toolchain//:cc-toolchain-x86_64-linux
+build:linux --cxxopt=-stdlib=libstdc++
+build:linux --host_cxxopt=-stdlib=libstdc++
+build:linux --linkopt=-lstdc++
+build:linux --host_linkopt=-lstdc++
+build:linux --cxxopt=-std=c++20
+build:linux --host_cxxopt=-std=c++20
+
+try-import %workspace%/user.bazelrc
