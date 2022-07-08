@@ -1,0 +1,20 @@
+{
+	"version": "0.2.0",
+	"configurations": [
+		{
+			"name": "//example:wasmer_example",
+			"type": "lldb",
+			"request": "launch",
+			"program": "${workspaceFolder}/bazel-bin/example/wasmer_example",
+			"args": [
+				"${workspaceFolder}/bazel-bin/example/system_impls.wasm"
+			],
+			"cwd": "${workspaceFolder}",
+			"preLaunchTask": "build //example:wasmer_example",
+			"sourceLanguages": [
+				"cpp"
+			]
+		}
+	],
+	"compounds": []
+}

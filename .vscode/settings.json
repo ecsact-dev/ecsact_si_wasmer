@@ -2,7 +2,8 @@
 	"editor.defaultFormatter": "xaver.clang-format",
 	"editor.formatOnSave": true,
 	"lldb.launch.sourceMap": {
-		"/proc/self/cwd": "${workspaceFolder}"
+		"/proc/self/cwd": "${workspaceFolder}",
+		"bazel-ecsactsi-wasm": "${workspaceFolder}"
 	},
 	"files.insertFinalNewline": true,
 	"files.eol": "\n",
