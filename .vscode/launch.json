@@ -6,6 +6,9 @@
 			"type": "lldb",
 			"request": "launch",
 			"program": "${workspaceFolder}/bazel-bin/example/wasmer_example",
+			"windows": {
+				"program": "${workspaceFolder}/bazel-bin/example/wasmer_example.exe"
+			},
 			"args": [
 				"${workspaceFolder}/bazel-bin/example/system_impls.wasm"
 			],
@@ -13,7 +16,7 @@
 			"preLaunchTask": "build //example:wasmer_example",
 			"sourceLanguages": [
 				"cpp"
-			]
+			],
 		}
 	],
 	"compounds": []

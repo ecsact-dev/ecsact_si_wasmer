@@ -3,10 +3,12 @@ startup --windows_enable_symlinks
 build --enable_platform_specific_config
 build --incompatible_enable_cc_toolchain_resolution
 build --incompatible_strict_action_env
+build --extra_execution_platforms=//:wasm
 
 build:windows --platforms=//bazel/platforms:windows
 build:windows --extra_execution_platforms=//bazel/platforms:windows
 build:windows --cxxopt=/std:c++latest
+build:windows --host_cxxopt=/std:c++latest
 
 build:linux --platforms=//bazel/platforms:linux
 build:linux --extra_execution_platforms=//bazel/platforms:linux

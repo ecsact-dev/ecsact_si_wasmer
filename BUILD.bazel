@@ -20,3 +20,11 @@ cc_library(
         "@ecsact//lib/runtime",
     ],
 )
+
+platform(
+    name = "wasm",
+    constraint_values = [
+        "@platforms//cpu:wasm64",
+        "@bazel_tools//tools/cpp:clang",
+    ],
+)
