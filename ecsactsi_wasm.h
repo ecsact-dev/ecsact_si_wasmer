@@ -8,6 +8,42 @@
 
 #include <ecsact/runtime/common.h>
 
+#ifndef ECSACTSI_WASM_API_VISIBILITY
+#	ifdef ECSACTSI_WASM_API_LOAD_AT_RUNTIME
+#		define ECSACTSI_WASM_API_VISIBILITY
+#	else
+#		ifdef ECSACTSI_WASM_API_EXPORT
+#			ifdef _WIN32
+#				define ECSACTSI_WASM_API_VISIBILITY __declspec(dllexport)
+#			else
+#				define ECSACTSI_WASM_API_VISIBILITY __attribute__((visibility("default")))
+#			endif
+#		else
+#			ifdef _WIN32
+#				define ECSACTSI_WASM_API_VISIBILITY __declspec(dllimport)
+#			else
+#				define ECSACTSI_WASM_API_VISIBILITY
+#			endif
+#		endif
+#	endif
+#endif // ECSACTSI_WASM_API_VISIBILITY
+
+#ifndef ECSACTSI_WASM_API
+#	ifdef __cplusplus
+#		define ECSACTSI_WASM_API extern "C" ECSACTSI_WASM_API_VISIBILITY
+#	else
+#		define ECSACTSI_WASM_API extern ECSACTSI_WASM_API_VISIBILITY
+# endif
+#endif // ECSACTSI_WASM_API
+
+#ifndef ECSACTSI_WASM_API_FN
+#	ifdef ECSACTSI_WASM_API_LOAD_AT_RUNTIME
+#		define ECSACTSI_WASM_API_FN(ret, name) ECSACTSI_WASM_API ret (*name)
+#	else
+#		define ECSACTSI_WASM_API_FN(ret, name) ECSACTSI_WASM_API ret name
+#	endif
+#endif // ECSACTSI_WASM_API_FN
+
 typedef enum ecsactsi_wasm_error {
 	/**
 	 * No error.
@@ -70,7 +106,7 @@ typedef enum ecsactsi_wasm_error {
  * @return `ECSACTSI_WASM_OK` if no error. If there is an error for _any_ of the
  *         systems then **none of the systems are loaded**.
  */
-ecsactsi_wasm_error ecsactsi_wasm_load_file
+ECSACTSI_WASM_API_FN(ecsactsi_wasm_error, ecsactsi_wasm_load_file)
 	( const char*        wasm_file_path
 	, int                systems_count
 	, ecsact_system_id*  system_ids
@@ -94,7 +130,7 @@ typedef void (*ecsactsi_wasm_trap_handler)
  *        function trap occurs. Calling this overwrites the last handler. May be
  *        `NULL` to remove the current handler.
  */
-void ecsactsi_wasm_set_trap_handler
+ECSACTSI_WASM_API_FN(void, ecsactsi_wasm_set_trap_handler)
 	( ecsactsi_wasm_trap_handler handler
 	);
 

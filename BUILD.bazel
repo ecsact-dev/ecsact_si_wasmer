@@ -20,13 +20,3 @@ cc_library(
         "@ecsact//lib/runtime",
     ],
 )
-
-cc_library(
-    name = "ecsactsi_wasm_wasmer",
-    srcs = [":sources"],
-    defines = ["ECSACTSI_WASM_WASMER=1"],
-    deps = [
-        ":ecsactsi_wasm",
-        "@wasmer//:wasmer-c-api",
-    ],
-)
