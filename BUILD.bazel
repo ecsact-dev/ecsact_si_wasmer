@@ -3,6 +3,13 @@ load("@rules_cc//cc:defs.bzl", "cc_library")
 package(default_visibility = ["//visibility:public"])
 
 filegroup(
+    name = "headers",
+    srcs = [
+        "ecsactsi_wasm.h",
+    ],
+)
+
+filegroup(
     name = "sources",
     srcs = [
         "ecsactsi_wasm.cc",
