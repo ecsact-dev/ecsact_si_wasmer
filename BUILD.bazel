@@ -2,10 +2,31 @@ load("@rules_cc//cc:defs.bzl", "cc_library")
 
 package(default_visibility = ["//visibility:public"])
 
+filegroup(
+    name = "sources",
+    srcs = [
+        "ecsactsi_wasm.cc",
+        "wasm_ecsact_pointer_map.cc",
+        "wasm_ecsact_pointer_map.hh",
+        "wasm_ecsact_system_execution.cc",
+        "wasm_ecsact_system_execution.h",
+    ],
+)
+
 cc_library(
     name = "ecsactsi_wasm",
     hdrs = ["ecsactsi_wasm.h"],
     deps = [
         "@ecsact//lib/runtime",
+    ],
+)
+
+cc_library(
+    name = "ecsactsi_wasm_wasmer",
+    srcs = [":sources"],
+    defines = ["ECSACTSI_WASM_WASMER=1"],
+    deps = [
+        ":ecsactsi_wasm",
+        "@wasmer//:wasmer-c-api",
     ],
 )

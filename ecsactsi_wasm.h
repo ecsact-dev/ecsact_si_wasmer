@@ -1,3 +1,8 @@
+/**
+ * @file
+ * @brief Ecsact System Implementation with WebAssembly header
+ */
+
 #ifndef ECSACTSI_WASM_H
 #define ECSACTSI_WASM_H
 
@@ -20,22 +25,35 @@ typedef enum ecsactsi_wasm_error {
 	ECSACTSI_WASM_ERR_FILE_READ_FAIL,
 
 	/**
-	 * No system implementation export found.
+	 * Unable to compile WASM file module.
 	 */
-	ECSACTSI_WASM_ERR_INVALID_EXPORT,
-} ecsactsi_wasm_error;
+	ECSACTSI_WASM_ERR_COMPILE_FAIL,
 
-/**
- * Load WASM file at path `wasm_file_path` and call 
- * `ecsact_set_system_execution_impl` for each wasm export that matches the
- * system names retrieved from the ecsact runtime meta API. If your runtime
- * does not have the meta API use `ecsactsi_wasm_load_file` instead.
- * @param wasm_file_path path to WASM file
- * @returns `ECSACTSI_WASM_OK` if successful
- */
-ecsactsi_wasm_error ecsactsi_wasm_load_file_meta
-	( const char*  wasm_file_path
-	);
+	/**
+	 * Unable to instantiate WASM file module.
+	 */
+	ECSACTSI_WASM_ERR_INSTANTIATE_FAIL,
+
+	/**
+	 * Export name was not found in WASM file.
+	 */
+	ECSACTSI_WASM_ERR_EXPORT_NOT_FOUND,
+
+	/**
+	 * Export name was found, but was not a function.
+	 */
+	ECSACTSI_WASM_ERR_EXPORT_INVALID,
+
+	/**
+	 * WASM file contains an unknown guest import.
+	 */
+	ECSACTSI_WASM_ERR_GUEST_IMPORT_UNKNOWN,
+
+	/**
+	 * WASM file contains correctly named guest import, but was not a function
+	 */
+	ECSACTSI_WASM_ERR_GUEST_IMPORT_INVALID,
+} ecsactsi_wasm_error;
 
 /**
  * Load WASM file at path `wasm_file_path` and call 
@@ -57,6 +75,27 @@ ecsactsi_wasm_error ecsactsi_wasm_load_file
 	, int                systems_count
 	, ecsact_system_id*  system_ids
 	, const char**       wasm_exports
+	);
+
+/**
+ * @param system_id System ID associated with the impl that triggered the trap
+ * @param trap_message The trap message contents. Null-terminated string.
+ */
+typedef void (*ecsactsi_wasm_trap_handler)
+	( ecsact_system_id  system_id
+	, const char*       trap_message
+	);
+
+/**
+ * Register a function to be called when a system implementation trap occurs. It
+ * is recommended that a trap handler is set otherwise the trap message will be
+ * quietly discarded.
+ * @param handler The handler function that will be called when a system impl
+ *        function trap occurs. Calling this overwrites the last handler. May be
+ *        `NULL` to remove the current handler.
+ */
+void ecsactsi_wasm_set_trap_handler
+	( ecsactsi_wasm_trap_handler handler
 	);
 
 #endif//ECSACTSI_WASM_H

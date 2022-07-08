@@ -1,10 +1,63 @@
 load("@rules_cc//cc:defs.bzl", "cc_binary")
+load("@ecsact_entt//runtime:index.bzl", "ecsact_entt_runtime")
+load("@emsdk//emscripten_toolchain:wasm_rules.bzl", "wasm_cc_binary")
 
 cc_binary(
-    name = "example_wasmer",
-    srcs = ["example.cc"],
+    name = "system_impls",
+    srcs = [
+        "system_impls.cc",
+        ":example_runtime__private_srcs",
+    ],
+    features = [
+        "wasm_standalone",
+        "wasm_no_entry",
+        "-wasm_warnings_as_errors",
+        "-wasm_error_on_undefined_symbols",
+        "-exceptions",
+    ],
+    linkshared = True,
     deps = [
+        ":example_runtime__public_cc",
+        "@ecsact//lib/runtime/dynamic",
+    ],
+)
+
+_system_names = [
+    "ExampleSystem",
+]
+
+wasm_cc_binary(
+    name = "system_impls_wasm",
+    backend = "llvm",
+    cc_target = ":system_impls",
+    exported_functions = [
+        "_example__%s" % system_name
+        for system_name in _system_names
+    ],
+    outputs = ["system_impls.wasm"],
+)
+
+ecsact_entt_runtime(
+    name = "example_runtime",
+    srcs = ["example.ecsact"],
+    ECSACT_ENTT_RUNTIME_PACKAGE = "::example::package",
+    ECSACT_ENTT_RUNTIME_USER_HEADER = "example/example.ecsact.meta.hh",
+    main = "example.ecsact",
+    system_impls = ["dynamic"],
+)
+
+cc_binary(
+    name = "wasmer_example",
+    srcs = [
+        "example.cc",
+        "//:sources",
+        "@ecsact//lib/runtime-cpp:srcs",
+    ],
+    deps = [
+        ":example_runtime",
         "//:ecsactsi_wasm",
+        "@ecsact//lib/runtime-cpp",
         "@magic_enum",
+        "@wasmer//:wasmer-c-api",
     ],
 )

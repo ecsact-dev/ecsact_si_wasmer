@@ -4,6 +4,54 @@ load("@bazel_tools//tools/build_defs/repo:git.bzl", "git_repository")
 load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
 
 http_archive(
+    name = "com_github_skypjack_entt",
+    sha256 = "f7031545130bfc06f5fe6b2f8c87dcbd4c1254fab86657e2788b70dfeea57965",
+    strip_prefix = "entt-3.10.1",
+    url = "https://github.com/skypjack/entt/archive/refs/tags/v3.10.1.tar.gz",
+)
+
+http_archive(
+    name = "boost",
+    sha256 = "c41441a6e9f8038ad626e9f937ddc3675ab896b6c3512eefc6840037b3816d03",
+    strip_prefix = "boost-563e8e0de4eac4b48a02d296581dc2454127608e",
+    urls = ["https://github.com/bazelboost/boost/archive/563e8e0de4eac4b48a02d296581dc2454127608e.zip"],
+)
+
+load("@boost//:index.bzl", "boost_http_archives")
+
+boost_http_archives()
+
+_nlohmann_json_build_file = """
+load("@rules_cc//cc:defs.bzl", "cc_library")
+
+cc_library(
+    name = "json",
+    visibility = ["//visibility:public"],
+    includes = ["include"],
+    hdrs = glob(["include/**/*.hpp"]),
+    strip_include_prefix = "include",
+)
+"""
+
+http_archive(
+    name = "nlohmann_json",
+    build_file_content = _nlohmann_json_build_file,
+    sha256 = "62c585468054e2d8e7c2759c0d990fd339d13be988577699366fe195162d16cb",
+    url = "https://github.com/nlohmann/json/releases/download/v3.10.4/include.zip",
+)
+
+http_archive(
+    name = "com_google_protobuf",
+    sha256 = "7308590dbb95e77066b99c5674eed855c8257e70658d2af586f4a81ff0eea2b1",
+    strip_prefix = "protobuf-3.18.0",
+    urls = ["https://github.com/protocolbuffers/protobuf/releases/download/v3.18.0/protobuf-cpp-3.18.0.tar.gz"],
+)
+
+load("@com_google_protobuf//:protobuf_deps.bzl", "protobuf_deps")
+
+protobuf_deps()
+
+http_archive(
     name = "com_grail_bazel_toolchain",
     sha256 = "644b7c35adbfbf312d86176660a196e67e7a2c3f20114941a60d0379f2b4771f",
     strip_prefix = "bazel-toolchain-9e71d562023dc7994e747110ee1ca345ad6b4413",
@@ -30,6 +78,7 @@ git_repository(
     name = "ecsact",
     commit = "9343d507a4fe28bf99d7e9d8c9b49a42b2d754c8",
     remote = "git@github.com:seaube/ecsact.git",
+    shallow_since = "1657204650 -0700",
 )
 
 git_repository(
@@ -59,3 +108,22 @@ http_archive(
 load("@hedron_compile_commands//:workspace_setup.bzl", "hedron_compile_commands_setup")
 
 hedron_compile_commands_setup()
+
+http_archive(
+    name = "emsdk",
+    sha256 = "a755b38d5f5c6e5d73ff0f08dc9f7f2e0305230a5585cac82a02064740e93303",
+    strip_prefix = "emsdk-50586ea897efd496f94ddf55236fbdd54c60465c/bazel",
+    url = "https://github.com/zaucy/emsdk/archive/50586ea897efd496f94ddf55236fbdd54c60465c.zip",
+)
+
+load("@emsdk//:deps.bzl", emsdk_deps = "deps")
+
+emsdk_deps()
+
+load("@emsdk//:emscripten_deps.bzl", emsdk_emscripten_deps = "emscripten_deps")
+
+emsdk_emscripten_deps()
+
+load("@emsdk//:toolchains.bzl", "register_emscripten_toolchains")
+
+register_emscripten_toolchains()
