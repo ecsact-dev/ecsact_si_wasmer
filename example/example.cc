@@ -20,11 +20,10 @@ void print_load_error
 {
 	std::cerr
 		<< "[ERROR] loading wasm file " << wasm_path << " failed: "
-		<< magic_enum::enum_name(err)  << "\n";
+		<< magic_enum::enum_name(err) << "\n\n";
 }
 
 int main(int argc, char* argv[]) {
-	// std::raise(SIGTRAP);
 	std::vector<std::string> wasm_file_paths;
 
 	for(int i=1; argc > i; ++i) {
