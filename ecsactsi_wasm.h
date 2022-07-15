@@ -113,6 +113,14 @@ ECSACTSI_WASM_API_FN(ecsactsi_wasm_error, ecsactsi_wasm_load_file)
 	, const char**       wasm_exports
 	);
 
+ECSACTSI_WASM_API_FN(ecsactsi_wasm_error, ecsactsi_wasm_load)
+	( char*              wasm_data
+	, int                wasm_data_size
+	, int                systems_count
+	, ecsact_system_id*  system_ids
+	, const char**       wasm_exports
+	);
+
 /**
  * @param system_id System ID associated with the impl that triggered the trap
  * @param trap_message The trap message contents. Null-terminated string.

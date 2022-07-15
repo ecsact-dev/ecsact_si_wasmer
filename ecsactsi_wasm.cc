@@ -196,26 +196,18 @@ namespace {
 	}
 }
 
-ecsactsi_wasm_error ecsactsi_wasm_load_file
-	( const char*        wasm_file_path
+ecsactsi_wasm_error ecsactsi_wasm_load
+	( char*              wasm_data
+	, int                wasm_data_size
 	, int                systems_count
 	, ecsact_system_id*  system_ids
 	, const char**       wasm_exports
 	)
 {
-	FILE* file = std::fopen(wasm_file_path, "rb");
-	if(!file) {
-		return ECSACTSI_WASM_ERR_FILE_OPEN_FAIL;
-	}
-
-	wasm_file_binary file_bin;
-	{
-		const bool read_success = wasm_file_binary::read(file, file_bin);
-		std::fclose(file);
-		if(!read_success) {
-			return ECSACTSI_WASM_ERR_FILE_READ_FAIL;
-		}
-	}
+	wasm_byte_vec_t binary{
+		.size = static_cast<size_t>(wasm_data_size),
+		.data = wasm_data,
+	};
 
 	decltype(modules) pending_modules;
 
@@ -227,7 +219,7 @@ ecsactsi_wasm_error ecsactsi_wasm_load_file
 		// There needs to be one module and one store per system for thread safety
 		pending_info.system_module = wasm_module_new(
 			pending_info.store,
-			&file_bin.binary
+			&binary
 		);
 
 		if(!pending_info.system_module) {
@@ -347,6 +339,36 @@ ecsactsi_wasm_error ecsactsi_wasm_load_file
 	}
 
 	return ECSACTSI_WASM_OK;
+}
+
+ecsactsi_wasm_error ecsactsi_wasm_load_file
+	( const char*        wasm_file_path
+	, int                systems_count
+	, ecsact_system_id*  system_ids
+	, const char**       wasm_exports
+	)
+{
+	FILE* file = std::fopen(wasm_file_path, "rb");
+	if(!file) {
+		return ECSACTSI_WASM_ERR_FILE_OPEN_FAIL;
+	}
+
+	wasm_file_binary file_bin;
+	{
+		const bool read_success = wasm_file_binary::read(file, file_bin);
+		std::fclose(file);
+		if(!read_success) {
+			return ECSACTSI_WASM_ERR_FILE_READ_FAIL;
+		}
+	}
+
+	return ecsactsi_wasm_load(
+		file_bin.binary.data,
+		file_bin.binary.size,
+		systems_count,
+		system_ids,
+		wasm_exports
+	);
 }
 
 void ecsactsi_wasm_set_trap_handler
