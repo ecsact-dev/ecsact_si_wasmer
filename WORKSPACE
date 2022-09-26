@@ -4,6 +4,33 @@ load("@bazel_tools//tools/build_defs/repo:git.bzl", "git_repository")
 load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
 
 http_archive(
+    name = "ecsact_lang_cpp",
+    sha256 = "3f0d0395d5277e4333b465e1d43599ea15956c3430c44eeacfe7dbb67366a46b",
+    strip_prefix = "ecsact_lang_cpp-5c0ab3fd7ad4243e1721191af8e178cae8686c2a",
+    url = "https://github.com/ecsact-dev/ecsact_lang_cpp/archive/5c0ab3fd7ad4243e1721191af8e178cae8686c2a.zip",
+)
+
+http_archive(
+    name = "rules_ecsact",
+    sha256 = "f47dc87a0f948d9f8d4458df32c7b3b2191d94be5ba675798100f4534098a646",
+    strip_prefix = "rules_ecsact-0.1.3",
+    url = "https://github.com/ecsact-dev/rules_ecsact/archive/refs/tags/0.1.3.tar.gz",
+)
+
+load("@rules_ecsact//ecsact:repositories.bzl", "ecsact_register_toolchains", "rules_ecsact_dependencies")
+
+rules_ecsact_dependencies()
+
+ecsact_register_toolchains()
+
+http_archive(
+    name = "ecsact_rt_entt",
+    sha256 = "a41ff69de20b63f1abbf4577fbfc3a9581272d1bf93d72113e7511f14fc45067",
+    strip_prefix = "ecsact_rt_entt-46bbcf6b93c52e808aba4769b5f65df1f4ecc0e9",
+    urls = ["https://github.com/ecsact-dev/ecsact_rt_entt/archive/46bbcf6b93c52e808aba4769b5f65df1f4ecc0e9.zip"],
+)
+
+http_archive(
     name = "com_github_skypjack_entt",
     sha256 = "f7031545130bfc06f5fe6b2f8c87dcbd4c1254fab86657e2788b70dfeea57965",
     strip_prefix = "entt-3.10.1",
@@ -74,11 +101,11 @@ load("@llvm_toolchain//:toolchains.bzl", "llvm_register_toolchains")
 
 llvm_register_toolchains()
 
-git_repository(
-    name = "ecsact",
-    commit = "9343d507a4fe28bf99d7e9d8c9b49a42b2d754c8",
-    remote = "git@github.com:seaube/ecsact.git",
-    shallow_since = "1657204650 -0700",
+http_archive(
+    name = "ecsact_runtime",
+    sha256 = "b5935092ef9a59e1bb328754bd9f7da8cd42f32b698a5c140a6a4a1f158aa38c",
+    strip_prefix = "ecsact_runtime-c7dd47db3e0c5ad565e4c17d94a4eb36b95f39a4",
+    url = "https://github.com/ecsact-dev/ecsact_runtime/archive/c7dd47db3e0c5ad565e4c17d94a4eb36b95f39a4.zip",
 )
 
 git_repository(

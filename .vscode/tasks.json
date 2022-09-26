@@ -2,6 +2,16 @@
 	"version": "2.0.0",
 	"tasks": [
 		{
+			"label": "Refresh compile_commands.json",
+			"command": "bazel",
+			"type": "shell",
+			"args": [
+				"run",
+				"@hedron_compile_commands//:refresh_all"
+			],
+			"problemMatcher": []
+		},
+		{
 			"label": "build //example:wasmer_example",
 			"command": "bazel build //example:wasmer_example //example:system_impls_wasm",
 			"type": "shell",
@@ -9,10 +19,5 @@
 			"problemMatcher": [],
 			"group": "build"
 		},
-		{
-			"label": "Refresh compile_commands.json",
-			"command": "bazel run @hedron_compile_commands//:refresh_all",
-			"problemMatcher": []
-		}
 	]
 }

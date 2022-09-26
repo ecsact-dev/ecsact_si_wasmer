@@ -26,5 +26,6 @@
 		"editor.insertSpaces": true,
 		"editor.detectIndentation": false
 	},
-	"files.associations": {}
+	"files.associations": {},
+	"C_Cpp.default.compileCommands": "${workspaceFolder}/compile_commands.json",
 }

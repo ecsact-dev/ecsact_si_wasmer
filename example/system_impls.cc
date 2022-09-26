@@ -1,9 +1,7 @@
-// #include <ecsact/runtime/dynamic.h>
+#include "example.ecsact.hh"
+#include "example.ecsact.systems.hh"
 
-#include "example/example.ecsact.hh"
-#include "example/example.ecsact.systems.hh"
-
-void example::ExampleSystem(ExampleSystem::context& ctx) {
+void example::ExampleSystem::impl(context& ctx) {
 	auto comp = ctx.get<example::ExampleComponent>();
 	comp.num += 1;
 	ctx.update(comp);

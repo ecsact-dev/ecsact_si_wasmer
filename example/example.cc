@@ -4,12 +4,11 @@
 #include <iostream>
 #include <csignal>
 #include "magic_enum.hpp"
-#include <ecsact/runtime/core.h>
-#include <ecsact/runtime.hh>
+#include "ecsact/runtime/core.h"
+#include "ecsact/runtime/core.hh"
 #include "ecsactsi_wasm.h"
 
-#include "example/example.ecsact.hh"
-#include "example/example.ecsact.systems.hh"
+#include "example.ecsact.hh"
 
 namespace fs = std::filesystem;
 
@@ -49,16 +48,16 @@ int main(int argc, char* argv[]) {
 		}
 	}
 
-	ecsact::registry test_registry;
+	ecsact::core::registry test_registry("Test Registry");
 	auto test_entity = test_registry.create_entity();
 	test_registry.add_component(test_entity, example::ExampleComponent{});
 
 	for(auto& wasm_path : wasm_file_paths) {
-		std::vector<ecsact_system_id> system_ids;
+		std::vector<ecsact_system_like_id> system_ids;
 		std::vector<const char*> wasm_exports;
 
 		system_ids.push_back(
-			static_cast<ecsact_system_id>(example::ExampleSystem::id)
+			ecsact_id_cast<ecsact_system_like_id>(example::ExampleSystem::id)
 		);
 		wasm_exports.push_back("example__ExampleSystem");
 
@@ -81,7 +80,7 @@ int main(int argc, char* argv[]) {
 
 	for(int i=0; 10 >i; ++i) {
 		std::cout << "execute systems count: " << i + 1 << "\n";
-		test_registry.execute_systems();
+		ecsact_execute_systems(test_registry.id(), 1, nullptr, nullptr);
 
 		const auto& comp =
 			test_registry.get_component<example::ExampleComponent>(test_entity);

@@ -7,7 +7,7 @@
 #define WASM_ECSACT_SYSTEM_EXECUTION__H
 
 #include <wasm.h>
-#include <ecsact/runtime/common.h>
+#include "ecsact/runtime/common.h"
 
 void set_wasm_ecsact_system_execution_context_memory
 	( ecsact_system_execution_context*  ctx

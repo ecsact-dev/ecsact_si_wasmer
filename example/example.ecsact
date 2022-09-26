@@ -1,9 +1,9 @@
 main package example;
 
 component ExampleComponent {
-	int32 num;
+	i32 num;
 }
 
 system ExampleSystem {
-	required ExampleComponent;
+	readwrite ExampleComponent;
 }

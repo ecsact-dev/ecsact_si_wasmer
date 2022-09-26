@@ -3,20 +3,18 @@
 	"configurations": [
 		{
 			"name": "//example:wasmer_example",
-			"type": "lldb",
+			"type": "cppdbg",
 			"request": "launch",
 			"program": "${workspaceFolder}/bazel-bin/example/wasmer_example",
 			"windows": {
+				"type": "cppvsdbg",
 				"program": "${workspaceFolder}/bazel-bin/example/wasmer_example.exe"
 			},
 			"args": [
 				"${workspaceFolder}/bazel-bin/example/system_impls.wasm"
 			],
 			"cwd": "${workspaceFolder}",
-			"preLaunchTask": "build //example:wasmer_example",
-			"sourceLanguages": [
-				"cpp"
-			],
+			"preLaunchTask": "build //example:wasmer_example"
 		}
 	],
 	"compounds": []

@@ -24,7 +24,7 @@ cc_library(
     name = "ecsactsi_wasm",
     hdrs = ["ecsactsi_wasm.h"],
     deps = [
-        "@ecsact//lib/runtime",
+        "@ecsact_runtime//:common",
     ],
 )
 

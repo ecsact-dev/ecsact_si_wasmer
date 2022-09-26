@@ -1,7 +1,6 @@
 #include "ecsactsi_wasm.h"
 
 #include <map>
-#include <iostream> // TODO(zaucy): remove this
 #include <unordered_map>
 #include <mutex>
 #include <vector>
@@ -12,8 +11,8 @@
 #include <cstdlib>
 #include <cstdio>
 #include <functional>
-#include <ecsact/runtime/dynamic.h>
-#include <ecsact/runtime/meta.h>
+#include "ecsact/runtime/dynamic.h"
+#include "ecsact/runtime/meta.h"
 
 #include "wasm_ecsact_system_execution.h"
 #include "wasm_ecsact_pointer_map.hh"
@@ -55,7 +54,7 @@ namespace {
 	};
 
 	std::shared_mutex modules_mutex;
-	std::map<ecsact_system_id, wasm_system_module_info> modules;
+	std::map<ecsact_system_like_id, wasm_system_module_info> modules;
 	ecsactsi_wasm_trap_handler trap_handler;
 
 	using allowed_guest_imports_t = std::unordered_map
@@ -197,11 +196,11 @@ namespace {
 }
 
 ecsactsi_wasm_error ecsactsi_wasm_load
-	( char*              wasm_data
-	, int                wasm_data_size
-	, int                systems_count
-	, ecsact_system_id*  system_ids
-	, const char**       wasm_exports
+	( char*                   wasm_data
+	, int                     wasm_data_size
+	, int                     systems_count
+	, ecsact_system_like_id*  system_ids
+	, const char**            wasm_exports
 	)
 {
 	wasm_byte_vec_t binary{
@@ -234,8 +233,6 @@ ecsactsi_wasm_error ecsactsi_wasm_load
 		int system_impl_export_function_index = -1;
 		bool found_all_exports = false;
 
-		std::cout << "exports.size=" << exports.size << "\n";
-
 		for(size_t expi=0; exports.size > expi; ++expi) {
 			auto export_name = wasm_exporttype_name(exports.data[expi]);
 			auto export_type = wasm_exporttype_type(exports.data[expi]);
@@ -249,7 +246,6 @@ ecsactsi_wasm_error ecsactsi_wasm_load
 
 			std::string_view export_name_str(export_name->data, export_name->size);
 			if(export_name_str == std::string_view(wasm_exports[index])) {
-				std::cout << "export_name_str=" << export_name_str << "\n";
 				if(export_type_kind != WASM_EXTERN_FUNC) {
 					return ECSACTSI_WASM_ERR_EXPORT_INVALID;
 				}
@@ -342,10 +338,10 @@ ecsactsi_wasm_error ecsactsi_wasm_load
 }
 
 ecsactsi_wasm_error ecsactsi_wasm_load_file
-	( const char*        wasm_file_path
-	, int                systems_count
-	, ecsact_system_id*  system_ids
-	, const char**       wasm_exports
+	( const char*             wasm_file_path
+	, int                     systems_count
+	, ecsact_system_like_id*  system_ids
+	, const char**            wasm_exports
 	)
 {
 	FILE* file = std::fopen(wasm_file_path, "rb");

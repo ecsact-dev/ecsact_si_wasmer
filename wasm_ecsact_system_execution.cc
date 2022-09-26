@@ -3,7 +3,7 @@
 #include <cassert>
 #include <iostream>
 #include <unordered_map>
-#include <ecsact/runtime/dynamic.h>
+#include "ecsact/runtime/dynamic.h"
 
 #include "wasm_ecsact_pointer_map.hh"
 
@@ -20,12 +20,13 @@ namespace {
 		);
 	}
 
-	ecsact_component_id get_component_id
+	template<typename EcsactID>
+	EcsactID ecsact_id_from_wasm_i32
 		( const wasm_val_t&  val
 		)
 	{
 		assert(val.kind == WASM_I32);
-		return static_cast<ecsact_component_id>(val.of.i32);
+		return static_cast<EcsactID>(val.of.i32);
 	}
 
 	void* get_void_ptr
@@ -87,7 +88,7 @@ wasm_trap_t* wasm_ecsact_system_execution_context_add
 
 	ecsact_system_execution_context_add(
 		ctx,
-		get_component_id(args->data[1]),
+		ecsact_id_from_wasm_i32<ecsact_component_like_id>(args->data[1]),
 		get_const_void_ptr(args->data[2], memory)
 	);
 
@@ -101,7 +102,7 @@ wasm_trap_t* wasm_ecsact_system_execution_context_remove
 {
 	ecsact_system_execution_context_remove(
 		get_execution_context(args->data[0]),
-		get_component_id(args->data[1])
+		ecsact_id_from_wasm_i32<ecsact_component_like_id>(args->data[1])
 	);
 	return nullptr;
 }
@@ -116,7 +117,7 @@ wasm_trap_t* wasm_ecsact_system_execution_context_get
 
 	ecsact_system_execution_context_get(
 		ctx,
-		get_component_id(args->data[1]),
+		ecsact_id_from_wasm_i32<ecsact_component_like_id>(args->data[1]),
 		get_void_ptr(args->data[2], memory)
 	);
 
@@ -133,7 +134,7 @@ wasm_trap_t* wasm_ecsact_system_execution_context_update
 
 	ecsact_system_execution_context_update(
 		ctx,
-		get_component_id(args->data[1]),
+		ecsact_id_from_wasm_i32<ecsact_component_like_id>(args->data[1]),
 		get_const_void_ptr(args->data[2], memory)
 	);
 
@@ -147,7 +148,7 @@ wasm_trap_t* wasm_ecsact_system_execution_context_has
 {
 	bool has_component = ecsact_system_execution_context_has(
 		get_execution_context(args->data[0]),
-		get_component_id(args->data[1])
+		ecsact_id_from_wasm_i32<ecsact_component_like_id>(args->data[1])
 	);
 
 	results->data[0].kind = WASM_I32;

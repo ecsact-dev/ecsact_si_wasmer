@@ -6,7 +6,7 @@
 #ifndef ECSACTSI_WASM_H
 #define ECSACTSI_WASM_H
 
-#include <ecsact/runtime/common.h>
+#include "ecsact/runtime/common.h"
 
 #ifndef ECSACTSI_WASM_API_VISIBILITY
 #	ifdef ECSACTSI_WASM_API_LOAD_AT_RUNTIME
@@ -107,18 +107,18 @@ typedef enum ecsactsi_wasm_error {
  *         systems then **none of the systems are loaded**.
  */
 ECSACTSI_WASM_API_FN(ecsactsi_wasm_error, ecsactsi_wasm_load_file)
-	( const char*        wasm_file_path
-	, int                systems_count
-	, ecsact_system_id*  system_ids
-	, const char**       wasm_exports
+	( const char*             wasm_file_path
+	, int                     systems_count
+	, ecsact_system_like_id*  system_ids
+	, const char**            wasm_exports
 	);
 
 ECSACTSI_WASM_API_FN(ecsactsi_wasm_error, ecsactsi_wasm_load)
-	( char*              wasm_data
-	, int                wasm_data_size
-	, int                systems_count
-	, ecsact_system_id*  system_ids
-	, const char**       wasm_exports
+	( char*                   wasm_data
+	, int                     wasm_data_size
+	, int                     systems_count
+	, ecsact_system_like_id*  system_ids
+	, const char**            wasm_exports
 	);
 
 /**
@@ -126,8 +126,8 @@ ECSACTSI_WASM_API_FN(ecsactsi_wasm_error, ecsactsi_wasm_load)
  * @param trap_message The trap message contents. Null-terminated string.
  */
 typedef void (*ecsactsi_wasm_trap_handler)
-	( ecsact_system_id  system_id
-	, const char*       trap_message
+	( ecsact_system_like_id  system_id
+	, const char*            trap_message
 	);
 
 /**
