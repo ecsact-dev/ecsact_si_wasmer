@@ -195,3 +195,19 @@ wasm_trap_t* wasm_ecsact_system_execution_context_same
 
 	return nullptr;
 }
+
+wasm_trap_t* wasm_ecsact_system_execution_context_other
+	( const wasm_val_vec_t*  args
+	, wasm_val_vec_t*        results
+	)
+{
+	auto other = ecsact_system_execution_context_other(
+		get_execution_context(args->data[0]),
+		ecsact_id_from_wasm_i32<ecsact_entity_id>(args->data[1])
+	);
+  
+	results->data[0].kind = WASM_I32;
+  results->data[0].of.i32 = ecsactsi_wasm::as_guest_pointer(other);
+
+	return nullptr;
+}
