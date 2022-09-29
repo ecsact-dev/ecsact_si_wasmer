@@ -59,4 +59,9 @@ wasm_trap_t* wasm_ecsact_system_execution_context_same
 	, wasm_val_vec_t*        results
 	);
 
+wasm_trap_t* wasm_ecsact_system_execution_context_other
+	( const wasm_val_vec_t*  args
+	, wasm_val_vec_t*        results
+	);
+
 #endif//WASM_ECSACT_SYSTEM_EXECUTION__H

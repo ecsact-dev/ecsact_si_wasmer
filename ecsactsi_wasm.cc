@@ -19,6 +19,20 @@
 
 using namespace std::string_literals;
 
+static inline wasm_functype_t* wasm_functype_new_4_0
+	( wasm_valtype_t* p1
+	, wasm_valtype_t* p2
+	, wasm_valtype_t* p3
+	, wasm_valtype_t* p4
+	)
+{
+  wasm_valtype_t* ps[4] = {p1, p2, p3, p4};
+  wasm_valtype_vec_t params, results;
+  wasm_valtype_vec_new(&params, 4, ps);
+  wasm_valtype_vec_new_empty(&results);
+  return wasm_functype_new(&params, &results);
+}
+
 namespace {
 	struct wasm_system_module_info {
 		wasm_module_t* system_module = {};
@@ -66,14 +80,51 @@ namespace {
 		{
 			"ecsact_system_execution_context_action",
 			[](wasm_store_t* store) -> wasm_func_t* {
-				wasm_functype_t* fn_type = wasm_functype_new_1_1(
-					wasm_valtype_new(WASM_ANYREF), // context
-					wasm_valtype_new(WASM_ANYREF)  // action data (return)
+				wasm_functype_t* fn_type = wasm_functype_new_2_0(
+					wasm_valtype_new(WASM_I32), // context
+					wasm_valtype_new(WASM_I32)  // out_action_data
 				);
 				wasm_func_t* fn = wasm_func_new(
 					store,
 					fn_type,
 					&wasm_ecsact_system_execution_context_action
+				);
+
+				wasm_functype_delete(fn_type);
+
+				return fn;
+			},
+		},
+		{
+			"ecsact_system_execution_context_parent",
+			[](wasm_store_t* store) -> wasm_func_t* {
+				wasm_functype_t* fn_type = wasm_functype_new_1_1(
+					wasm_valtype_new(WASM_I32), // context
+					wasm_valtype_new(WASM_I32)  // parent context (return)
+				);
+				wasm_func_t* fn = wasm_func_new(
+					store,
+					fn_type,
+					&wasm_ecsact_system_execution_context_parent
+				);
+
+				wasm_functype_delete(fn_type);
+
+				return fn;
+			},
+		},
+		{
+			"ecsact_system_execution_context_same",
+			[](wasm_store_t* store) -> wasm_func_t* {
+				wasm_functype_t* fn_type = wasm_functype_new_2_1(
+					wasm_valtype_new(WASM_I32), // context a
+					wasm_valtype_new(WASM_I32), // context b
+					wasm_valtype_new(WASM_I32)  // same bool (return)
+				);
+				wasm_func_t* fn = wasm_func_new(
+					store,
+					fn_type,
+					&wasm_ecsact_system_execution_context_same
 				);
 
 				wasm_functype_delete(fn_type);
@@ -120,6 +171,44 @@ namespace {
 			},
 		},
 		{
+			"ecsact_system_execution_context_has",
+			[](wasm_store_t* store) -> wasm_func_t* {
+				wasm_functype_t* fn_type = wasm_functype_new_2_0(
+					wasm_valtype_new(WASM_I32),  // context
+					wasm_valtype_new(WASM_I32)   // component_id
+				);
+				wasm_func_t* fn = wasm_func_new(
+					store,
+					fn_type,
+					&wasm_ecsact_system_execution_context_has
+				);
+
+				wasm_functype_delete(fn_type);
+
+				return fn;
+			},
+		},
+		{
+			"ecsact_system_execution_context_generate",
+			[](wasm_store_t* store) -> wasm_func_t* {
+				wasm_functype_t* fn_type = wasm_functype_new_4_0(
+					wasm_valtype_new(WASM_I32),  // context
+					wasm_valtype_new(WASM_I32),  // component_count
+					wasm_valtype_new(WASM_I32),  // component_ids
+					wasm_valtype_new(WASM_I32)   // components_data
+				);
+				wasm_func_t* fn = wasm_func_new(
+					store,
+					fn_type,
+					&wasm_ecsact_system_execution_context_generate
+				);
+
+				wasm_functype_delete(fn_type);
+
+				return fn;
+			},
+		},
+		{
 			"ecsact_system_execution_context_add",
 			[](wasm_store_t* store) -> wasm_func_t* {
 				wasm_functype_t* fn_type = wasm_functype_new_3_0(
@@ -156,6 +245,25 @@ namespace {
 				return fn;
 			},
 		},
+		{
+			"ecsact_system_execution_context_other",
+			[](wasm_store_t* store) -> wasm_func_t* {
+				wasm_functype_t* fn_type = wasm_functype_new_2_1(
+					wasm_valtype_new(WASM_I32),  // context
+					wasm_valtype_new(WASM_I32),  // entity_id
+					wasm_valtype_new(WASM_I32)   // other context (return)
+				);
+				wasm_func_t* fn = wasm_func_new(
+					store,
+					fn_type,
+					&wasm_ecsact_system_execution_context_other
+				);
+
+				wasm_functype_delete(fn_type);
+
+				return fn;
+			},
+		}
 	};
 
 	wasm_engine_t* engine() {

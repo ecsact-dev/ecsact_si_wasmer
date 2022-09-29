@@ -73,7 +73,13 @@ wasm_trap_t* wasm_ecsact_system_execution_context_action
 	, wasm_val_vec_t*        results
 	)
 {
-	// TODO(zaucy): unimplemented
+	auto ctx = get_execution_context(args->data[0]);
+	auto memory = mem_map.at(ctx);
+
+	ecsact_system_execution_context_action(
+		ctx,
+		get_void_ptr(args->data[1], memory)
+	);
 
 	return nullptr;
 }
@@ -152,7 +158,7 @@ wasm_trap_t* wasm_ecsact_system_execution_context_has
 	);
 
 	results->data[0].kind = WASM_I32;
-  results->data[0].of.i32 = has_component ? 1 : 0;
+	results->data[0].of.i32 = has_component ? 1 : 0;
 
 	return nullptr;
 }
@@ -162,9 +168,15 @@ wasm_trap_t* wasm_ecsact_system_execution_context_generate
 	, wasm_val_vec_t*        results
 	)
 {
-	// ecsact_system_execution_context_generate(
-	// 	get_execution_context(args->data[0]),
-	// );
+	auto ctx = get_execution_context(args->data[0]);
+	auto memory = mem_map.at(ctx);
+
+	ecsact_system_execution_context_generate(
+		ctx,
+		args->data[1].of.i32,
+		static_cast<ecsact_component_id*>(get_void_ptr(args->data[2], memory)),
+		static_cast<const void**>(get_void_ptr(args->data[3], memory))
+	);
 	return nullptr;
 }
 
@@ -175,6 +187,11 @@ wasm_trap_t* wasm_ecsact_system_execution_context_parent
 {
 	auto parent = ecsact_system_execution_context_parent(
 		get_execution_context(args->data[0])
+	);
+
+	results->data[0].kind = WASM_I32;
+	results->data[0].of.i32 = ecsactsi_wasm::as_guest_pointer(
+		const_cast<void*>(static_cast<const void*>(parent))
 	);
 
 	return nullptr;
@@ -189,9 +206,9 @@ wasm_trap_t* wasm_ecsact_system_execution_context_same
 		get_execution_context(args->data[0]),
 		get_execution_context(args->data[1])
 	);
-  
+	
 	results->data[0].kind = WASM_I32;
-  results->data[0].of.i32 = same ? 1 : 0;
+	results->data[0].of.i32 = same ? 1 : 0;
 
 	return nullptr;
 }
@@ -205,9 +222,9 @@ wasm_trap_t* wasm_ecsact_system_execution_context_other
 		get_execution_context(args->data[0]),
 		ecsact_id_from_wasm_i32<ecsact_entity_id>(args->data[1])
 	);
-  
+	
 	results->data[0].kind = WASM_I32;
-  results->data[0].of.i32 = ecsactsi_wasm::as_guest_pointer(other);
+	results->data[0].of.i32 = ecsactsi_wasm::as_guest_pointer(other);
 
 	return nullptr;
 }
