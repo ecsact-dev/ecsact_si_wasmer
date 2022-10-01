@@ -103,9 +103,9 @@ llvm_register_toolchains()
 
 http_archive(
     name = "ecsact_runtime",
-    sha256 = "b5935092ef9a59e1bb328754bd9f7da8cd42f32b698a5c140a6a4a1f158aa38c",
-    strip_prefix = "ecsact_runtime-c7dd47db3e0c5ad565e4c17d94a4eb36b95f39a4",
-    url = "https://github.com/ecsact-dev/ecsact_runtime/archive/c7dd47db3e0c5ad565e4c17d94a4eb36b95f39a4.zip",
+    sha256 = "80b722a8790447627b621877c171a96d5e7d09005bfbed7d8b388cb37cefa7b6",
+    strip_prefix = "ecsact_runtime-f7ee18fe96c4400672caccf5475835d54281582c",
+    url = "https://github.com/ecsact-dev/ecsact_runtime/archive/f7ee18fe96c4400672caccf5475835d54281582c.zip",
 )
 
 git_repository(
