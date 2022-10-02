@@ -228,3 +228,17 @@ wasm_trap_t* wasm_ecsact_system_execution_context_other
 
 	return nullptr;
 }
+
+wasm_trap_t* wasm_ecsact_system_execution_context_entity
+	( const wasm_val_vec_t*  args
+	, wasm_val_vec_t*        results
+	)
+{
+	auto entity = ecsact_system_execution_context_entity(
+		get_execution_context(args->data[0])
+	);
+	results->data[0].kind = WASM_I32;
+	results->data[0].of.i32 = static_cast<int32_t>(entity);
+
+	return nullptr;
+}

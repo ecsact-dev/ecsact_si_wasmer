@@ -263,6 +263,24 @@ namespace {
 
 				return fn;
 			},
+		},
+		{
+			"ecsact_system_execution_context_entity",
+			[](wasm_store_t* store) -> wasm_func_t* {
+				wasm_functype_t* fn_type = wasm_functype_new_1_1(
+					wasm_valtype_new(WASM_I32),  // context
+					wasm_valtype_new(WASM_I32)   // entity 9return)
+				);
+				wasm_func_t* fn = wasm_func_new(
+					store,
+					fn_type,
+					&wasm_ecsact_system_execution_context_entity
+				);
+
+				wasm_functype_delete(fn_type);
+
+				return fn;
+			},
 		}
 	};
 
