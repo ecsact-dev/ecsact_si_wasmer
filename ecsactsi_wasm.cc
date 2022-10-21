@@ -19,316 +19,305 @@
 
 using namespace std::string_literals;
 
-static inline wasm_functype_t* wasm_functype_new_4_0
-	( wasm_valtype_t* p1
-	, wasm_valtype_t* p2
-	, wasm_valtype_t* p3
-	, wasm_valtype_t* p4
-	)
-{
-  wasm_valtype_t* ps[4] = {p1, p2, p3, p4};
-  wasm_valtype_vec_t params, results;
-  wasm_valtype_vec_new(&params, 4, ps);
-  wasm_valtype_vec_new_empty(&results);
-  return wasm_functype_new(&params, &results);
+static inline wasm_functype_t* wasm_functype_new_4_0(
+	wasm_valtype_t* p1,
+	wasm_valtype_t* p2,
+	wasm_valtype_t* p3,
+	wasm_valtype_t* p4
+) {
+	wasm_valtype_t*    ps[4] = {p1, p2, p3, p4};
+	wasm_valtype_vec_t params, results;
+	wasm_valtype_vec_new(&params, 4, ps);
+	wasm_valtype_vec_new_empty(&results);
+	return wasm_functype_new(&params, &results);
 }
 
 namespace {
-	struct wasm_system_module_info {
-		wasm_module_t* system_module = {};
-		wasm_instance_t* instance = {};
-		const wasm_func_t* system_impl_func = {};
-		wasm_memory_t* system_impl_memory = {};
-		wasm_store_t* store = {};
-	};
+struct wasm_system_module_info {
+	wasm_module_t*     system_module = {};
+	wasm_instance_t*   instance = {};
+	const wasm_func_t* system_impl_func = {};
+	wasm_memory_t*     system_impl_memory = {};
+	wasm_store_t*      store = {};
+};
 
-	// Utility to load wasm file which automatically cleans up upon destruction
-	struct wasm_file_binary {
-		wasm_byte_vec_t binary = {};
+// Utility to load wasm file which automatically cleans up upon destruction
+struct wasm_file_binary {
+	wasm_byte_vec_t binary = {};
 
-		static bool read(FILE* file, wasm_file_binary& out_file) {
-			std::fseek(file, 0L, SEEK_END);
-			auto file_size = std::ftell(file);
-			std::fseek(file, 0L, SEEK_SET);
-			wasm_byte_vec_new_uninitialized(&out_file.binary, file_size);
+	static bool read(FILE* file, wasm_file_binary& out_file) {
+		std::fseek(file, 0L, SEEK_END);
+		auto file_size = std::ftell(file);
+		std::fseek(file, 0L, SEEK_SET);
+		wasm_byte_vec_new_uninitialized(&out_file.binary, file_size);
 
-			if(std::fread(out_file.binary.data, file_size, 1, file) != 1) {
-				return false;
-			}
-
-			return true;
+		if(std::fread(out_file.binary.data, file_size, 1, file) != 1) {
+			return false;
 		}
 
-		~wasm_file_binary() {
-			if(binary.data != nullptr) {
-				wasm_byte_vec_delete(&binary);
-				binary = {};
-			}
-		}
-	};
-
-	std::shared_mutex modules_mutex;
-	std::map<ecsact_system_like_id, wasm_system_module_info> modules;
-	ecsactsi_wasm_trap_handler trap_handler;
-
-	using allowed_guest_imports_t = std::unordered_map
-		< std::string
-		, std::function<wasm_func_t*(wasm_store_t*)>
-		>;
-
-	const allowed_guest_imports_t allowed_guest_imports{
-		{
-			"ecsact_system_execution_context_action",
-			[](wasm_store_t* store) -> wasm_func_t* {
-				wasm_functype_t* fn_type = wasm_functype_new_2_0(
-					wasm_valtype_new(WASM_I32), // context
-					wasm_valtype_new(WASM_I32)  // out_action_data
-				);
-				wasm_func_t* fn = wasm_func_new(
-					store,
-					fn_type,
-					&wasm_ecsact_system_execution_context_action
-				);
-
-				wasm_functype_delete(fn_type);
-
-				return fn;
-			},
-		},
-		{
-			"ecsact_system_execution_context_parent",
-			[](wasm_store_t* store) -> wasm_func_t* {
-				wasm_functype_t* fn_type = wasm_functype_new_1_1(
-					wasm_valtype_new(WASM_I32), // context
-					wasm_valtype_new(WASM_I32)  // parent context (return)
-				);
-				wasm_func_t* fn = wasm_func_new(
-					store,
-					fn_type,
-					&wasm_ecsact_system_execution_context_parent
-				);
-
-				wasm_functype_delete(fn_type);
-
-				return fn;
-			},
-		},
-		{
-			"ecsact_system_execution_context_same",
-			[](wasm_store_t* store) -> wasm_func_t* {
-				wasm_functype_t* fn_type = wasm_functype_new_2_1(
-					wasm_valtype_new(WASM_I32), // context a
-					wasm_valtype_new(WASM_I32), // context b
-					wasm_valtype_new(WASM_I32)  // same bool (return)
-				);
-				wasm_func_t* fn = wasm_func_new(
-					store,
-					fn_type,
-					&wasm_ecsact_system_execution_context_same
-				);
-
-				wasm_functype_delete(fn_type);
-
-				return fn;
-			},
-		},
-		{
-			"ecsact_system_execution_context_get",
-			[](wasm_store_t* store) -> wasm_func_t* {
-				wasm_functype_t* fn_type = wasm_functype_new_3_0(
-					wasm_valtype_new(WASM_I32),  // context
-					wasm_valtype_new(WASM_I32),  // component_id
-					wasm_valtype_new(WASM_I32)   // out_component_data
-				);
-				wasm_func_t* fn = wasm_func_new(
-					store,
-					fn_type,
-					&wasm_ecsact_system_execution_context_get
-				);
-
-				wasm_functype_delete(fn_type);
-
-				return fn;
-			},
-		},
-		{
-			"ecsact_system_execution_context_update",
-			[](wasm_store_t* store) -> wasm_func_t* {
-				wasm_functype_t* fn_type = wasm_functype_new_3_0(
-					wasm_valtype_new(WASM_I32),  // context
-					wasm_valtype_new(WASM_I32),  // component_id
-					wasm_valtype_new(WASM_I32)   // component_data
-				);
-				wasm_func_t* fn = wasm_func_new(
-					store,
-					fn_type,
-					&wasm_ecsact_system_execution_context_update
-				);
-
-				wasm_functype_delete(fn_type);
-
-				return fn;
-			},
-		},
-		{
-			"ecsact_system_execution_context_has",
-			[](wasm_store_t* store) -> wasm_func_t* {
-				wasm_functype_t* fn_type = wasm_functype_new_2_0(
-					wasm_valtype_new(WASM_I32),  // context
-					wasm_valtype_new(WASM_I32)   // component_id
-				);
-				wasm_func_t* fn = wasm_func_new(
-					store,
-					fn_type,
-					&wasm_ecsact_system_execution_context_has
-				);
-
-				wasm_functype_delete(fn_type);
-
-				return fn;
-			},
-		},
-		{
-			"ecsact_system_execution_context_generate",
-			[](wasm_store_t* store) -> wasm_func_t* {
-				wasm_functype_t* fn_type = wasm_functype_new_4_0(
-					wasm_valtype_new(WASM_I32),  // context
-					wasm_valtype_new(WASM_I32),  // component_count
-					wasm_valtype_new(WASM_I32),  // component_ids
-					wasm_valtype_new(WASM_I32)   // components_data
-				);
-				wasm_func_t* fn = wasm_func_new(
-					store,
-					fn_type,
-					&wasm_ecsact_system_execution_context_generate
-				);
-
-				wasm_functype_delete(fn_type);
-
-				return fn;
-			},
-		},
-		{
-			"ecsact_system_execution_context_add",
-			[](wasm_store_t* store) -> wasm_func_t* {
-				wasm_functype_t* fn_type = wasm_functype_new_3_0(
-					wasm_valtype_new(WASM_I32),  // context
-					wasm_valtype_new(WASM_I32),  // component_id
-					wasm_valtype_new(WASM_I32)   // component_data
-				);
-				wasm_func_t* fn = wasm_func_new(
-					store,
-					fn_type,
-					&wasm_ecsact_system_execution_context_add
-				);
-
-				wasm_functype_delete(fn_type);
-
-				return fn;
-			},
-		},
-		{
-			"ecsact_system_execution_context_remove",
-			[](wasm_store_t* store) -> wasm_func_t* {
-				wasm_functype_t* fn_type = wasm_functype_new_2_0(
-					wasm_valtype_new(WASM_I32),  // context
-					wasm_valtype_new(WASM_I32)   // component_id
-				);
-				wasm_func_t* fn = wasm_func_new(
-					store,
-					fn_type,
-					&wasm_ecsact_system_execution_context_remove
-				);
-
-				wasm_functype_delete(fn_type);
-
-				return fn;
-			},
-		},
-		{
-			"ecsact_system_execution_context_other",
-			[](wasm_store_t* store) -> wasm_func_t* {
-				wasm_functype_t* fn_type = wasm_functype_new_2_1(
-					wasm_valtype_new(WASM_I32),  // context
-					wasm_valtype_new(WASM_I32),  // entity_id
-					wasm_valtype_new(WASM_I32)   // other context (return)
-				);
-				wasm_func_t* fn = wasm_func_new(
-					store,
-					fn_type,
-					&wasm_ecsact_system_execution_context_other
-				);
-
-				wasm_functype_delete(fn_type);
-
-				return fn;
-			},
-		},
-		{
-			"ecsact_system_execution_context_entity",
-			[](wasm_store_t* store) -> wasm_func_t* {
-				wasm_functype_t* fn_type = wasm_functype_new_1_1(
-					wasm_valtype_new(WASM_I32),  // context
-					wasm_valtype_new(WASM_I32)   // entity 9return)
-				);
-				wasm_func_t* fn = wasm_func_new(
-					store,
-					fn_type,
-					&wasm_ecsact_system_execution_context_entity
-				);
-
-				wasm_functype_delete(fn_type);
-
-				return fn;
-			},
-		}
-	};
-
-	wasm_engine_t* engine() {
-		static wasm_engine_t* engine = wasm_engine_new();
-		return engine;
+		return true;
 	}
 
-	void ecsactsi_wasm_system_impl
-		( ecsact_system_execution_context* ctx
-		)
+	~wasm_file_binary() {
+		if(binary.data != nullptr) {
+			wasm_byte_vec_delete(&binary);
+			binary = {};
+		}
+	}
+};
+
+std::shared_mutex                                        modules_mutex;
+std::map<ecsact_system_like_id, wasm_system_module_info> modules;
+ecsactsi_wasm_trap_handler                               trap_handler;
+
+using allowed_guest_imports_t =
+	std::unordered_map<std::string, std::function<wasm_func_t*(wasm_store_t*)>>;
+
+const allowed_guest_imports_t allowed_guest_imports{
 	{
-		std::shared_lock lk(modules_mutex);
-		auto system_id = ecsact_system_execution_context_id(ctx);
-		auto& info = modules.at(system_id);
+		"ecsact_system_execution_context_action",
+		[](wasm_store_t* store) -> wasm_func_t* {
+			wasm_functype_t* fn_type = wasm_functype_new_2_0(
+				wasm_valtype_new(WASM_I32), // context
+				wasm_valtype_new(WASM_I32) // out_action_data
+			);
+			wasm_func_t* fn = wasm_func_new(
+				store,
+				fn_type,
+				&wasm_ecsact_system_execution_context_action
+			);
 
-		set_wasm_ecsact_system_execution_context_memory(
-			ctx,
-			info.system_impl_memory
-		);
+			wasm_functype_delete(fn_type);
 
-		wasm_val_t as[1] = {{}};
-		as[0].kind = WASM_I32;
-		as[0].of.i32 = ecsactsi_wasm::as_guest_pointer(ctx);
+			return fn;
+		},
+	},
+	{
+		"ecsact_system_execution_context_parent",
+		[](wasm_store_t* store) -> wasm_func_t* {
+			wasm_functype_t* fn_type = wasm_functype_new_1_1(
+				wasm_valtype_new(WASM_I32), // context
+				wasm_valtype_new(WASM_I32) // parent context (return)
+			);
+			wasm_func_t* fn = wasm_func_new(
+				store,
+				fn_type,
+				&wasm_ecsact_system_execution_context_parent
+			);
 
-		wasm_val_vec_t args = WASM_ARRAY_VEC(as);
-		wasm_val_vec_t results = WASM_EMPTY_VEC;
-		wasm_trap_t* trap = wasm_func_call(info.system_impl_func, &args, &results);
+			wasm_functype_delete(fn_type);
 
-		if(trap_handler != nullptr && trap != nullptr) {
-			wasm_message_t trap_msg;
-			wasm_trap_message(trap, &trap_msg);
-			std::string trap_msg_str{trap_msg.data, trap_msg.size};
-			trap_handler(system_id, trap_msg_str.c_str());
-		}
+			return fn;
+		},
+	},
+	{
+		"ecsact_system_execution_context_same",
+		[](wasm_store_t* store) -> wasm_func_t* {
+			wasm_functype_t* fn_type = wasm_functype_new_2_1(
+				wasm_valtype_new(WASM_I32), // context a
+				wasm_valtype_new(WASM_I32), // context b
+				wasm_valtype_new(WASM_I32) // same bool (return)
+			);
+			wasm_func_t* fn = wasm_func_new(
+				store,
+				fn_type,
+				&wasm_ecsact_system_execution_context_same
+			);
 
-		set_wasm_ecsact_system_execution_context_memory(ctx, nullptr);
-	}
+			wasm_functype_delete(fn_type);
+
+			return fn;
+		},
+	},
+	{
+		"ecsact_system_execution_context_get",
+		[](wasm_store_t* store) -> wasm_func_t* {
+			wasm_functype_t* fn_type = wasm_functype_new_3_0(
+				wasm_valtype_new(WASM_I32), // context
+				wasm_valtype_new(WASM_I32), // component_id
+				wasm_valtype_new(WASM_I32) // out_component_data
+			);
+			wasm_func_t* fn = wasm_func_new(
+				store,
+				fn_type,
+				&wasm_ecsact_system_execution_context_get
+			);
+
+			wasm_functype_delete(fn_type);
+
+			return fn;
+		},
+	},
+	{
+		"ecsact_system_execution_context_update",
+		[](wasm_store_t* store) -> wasm_func_t* {
+			wasm_functype_t* fn_type = wasm_functype_new_3_0(
+				wasm_valtype_new(WASM_I32), // context
+				wasm_valtype_new(WASM_I32), // component_id
+				wasm_valtype_new(WASM_I32) // component_data
+			);
+			wasm_func_t* fn = wasm_func_new(
+				store,
+				fn_type,
+				&wasm_ecsact_system_execution_context_update
+			);
+
+			wasm_functype_delete(fn_type);
+
+			return fn;
+		},
+	},
+	{
+		"ecsact_system_execution_context_has",
+		[](wasm_store_t* store) -> wasm_func_t* {
+			wasm_functype_t* fn_type = wasm_functype_new_2_0(
+				wasm_valtype_new(WASM_I32), // context
+				wasm_valtype_new(WASM_I32) // component_id
+			);
+			wasm_func_t* fn = wasm_func_new(
+				store,
+				fn_type,
+				&wasm_ecsact_system_execution_context_has
+			);
+
+			wasm_functype_delete(fn_type);
+
+			return fn;
+		},
+	},
+	{
+		"ecsact_system_execution_context_generate",
+		[](wasm_store_t* store) -> wasm_func_t* {
+			wasm_functype_t* fn_type = wasm_functype_new_4_0(
+				wasm_valtype_new(WASM_I32), // context
+				wasm_valtype_new(WASM_I32), // component_count
+				wasm_valtype_new(WASM_I32), // component_ids
+				wasm_valtype_new(WASM_I32) // components_data
+			);
+			wasm_func_t* fn = wasm_func_new(
+				store,
+				fn_type,
+				&wasm_ecsact_system_execution_context_generate
+			);
+
+			wasm_functype_delete(fn_type);
+
+			return fn;
+		},
+	},
+	{
+		"ecsact_system_execution_context_add",
+		[](wasm_store_t* store) -> wasm_func_t* {
+			wasm_functype_t* fn_type = wasm_functype_new_3_0(
+				wasm_valtype_new(WASM_I32), // context
+				wasm_valtype_new(WASM_I32), // component_id
+				wasm_valtype_new(WASM_I32) // component_data
+			);
+			wasm_func_t* fn = wasm_func_new(
+				store,
+				fn_type,
+				&wasm_ecsact_system_execution_context_add
+			);
+
+			wasm_functype_delete(fn_type);
+
+			return fn;
+		},
+	},
+	{
+		"ecsact_system_execution_context_remove",
+		[](wasm_store_t* store) -> wasm_func_t* {
+			wasm_functype_t* fn_type = wasm_functype_new_2_0(
+				wasm_valtype_new(WASM_I32), // context
+				wasm_valtype_new(WASM_I32) // component_id
+			);
+			wasm_func_t* fn = wasm_func_new(
+				store,
+				fn_type,
+				&wasm_ecsact_system_execution_context_remove
+			);
+
+			wasm_functype_delete(fn_type);
+
+			return fn;
+		},
+	},
+	{
+		"ecsact_system_execution_context_other",
+		[](wasm_store_t* store) -> wasm_func_t* {
+			wasm_functype_t* fn_type = wasm_functype_new_2_1(
+				wasm_valtype_new(WASM_I32), // context
+				wasm_valtype_new(WASM_I32), // entity_id
+				wasm_valtype_new(WASM_I32) // other context (return)
+			);
+			wasm_func_t* fn = wasm_func_new(
+				store,
+				fn_type,
+				&wasm_ecsact_system_execution_context_other
+			);
+
+			wasm_functype_delete(fn_type);
+
+			return fn;
+		},
+	},
+	{
+		"ecsact_system_execution_context_entity",
+		[](wasm_store_t* store) -> wasm_func_t* {
+			wasm_functype_t* fn_type = wasm_functype_new_1_1(
+				wasm_valtype_new(WASM_I32), // context
+				wasm_valtype_new(WASM_I32) // entity 9return)
+			);
+			wasm_func_t* fn = wasm_func_new(
+				store,
+				fn_type,
+				&wasm_ecsact_system_execution_context_entity
+			);
+
+			wasm_functype_delete(fn_type);
+
+			return fn;
+		},
+	}};
+
+wasm_engine_t* engine() {
+	static wasm_engine_t* engine = wasm_engine_new();
+	return engine;
 }
 
-ecsactsi_wasm_error ecsactsi_wasm_load
-	( char*                   wasm_data
-	, int                     wasm_data_size
-	, int                     systems_count
-	, ecsact_system_like_id*  system_ids
-	, const char**            wasm_exports
-	)
-{
+void ecsactsi_wasm_system_impl(ecsact_system_execution_context* ctx) {
+	std::shared_lock lk(modules_mutex);
+	auto             system_id = ecsact_system_execution_context_id(ctx);
+	auto&            info = modules.at(system_id);
+
+	set_wasm_ecsact_system_execution_context_memory(ctx, info.system_impl_memory);
+
+	wasm_val_t as[1] = {{}};
+	as[0].kind = WASM_I32;
+	as[0].of.i32 = ecsactsi_wasm::as_guest_pointer(ctx);
+
+	wasm_val_vec_t args = WASM_ARRAY_VEC(as);
+	wasm_val_vec_t results = WASM_EMPTY_VEC;
+	wasm_trap_t*   trap = wasm_func_call(info.system_impl_func, &args, &results);
+
+	if(trap_handler != nullptr && trap != nullptr) {
+		wasm_message_t trap_msg;
+		wasm_trap_message(trap, &trap_msg);
+		std::string trap_msg_str{trap_msg.data, trap_msg.size};
+		trap_handler(system_id, trap_msg_str.c_str());
+	}
+
+	set_wasm_ecsact_system_execution_context_memory(ctx, nullptr);
+}
+} // namespace
+
+ecsactsi_wasm_error ecsactsi_wasm_load(
+	char*                  wasm_data,
+	int                    wasm_data_size,
+	int                    systems_count,
+	ecsact_system_like_id* system_ids,
+	const char**           wasm_exports
+) {
 	wasm_byte_vec_t binary{
 		.size = static_cast<size_t>(wasm_data_size),
 		.data = wasm_data,
@@ -336,16 +325,13 @@ ecsactsi_wasm_error ecsactsi_wasm_load
 
 	decltype(modules) pending_modules;
 
-	for(int index=0; systems_count > index; ++index) {
-		auto system_id = system_ids[index];
+	for(int index = 0; systems_count > index; ++index) {
+		auto  system_id = system_ids[index];
 		auto& pending_info = pending_modules[system_id];
 		pending_info.store = wasm_store_new(engine());
 
 		// There needs to be one module and one store per system for thread safety
-		pending_info.system_module = wasm_module_new(
-			pending_info.store,
-			&binary
-		);
+		pending_info.system_module = wasm_module_new(pending_info.store, &binary);
 
 		if(!pending_info.system_module) {
 			return ECSACTSI_WASM_ERR_COMPILE_FAIL;
@@ -355,16 +341,15 @@ ecsactsi_wasm_error ecsactsi_wasm_load
 		wasm_exporttype_vec_t exports;
 		wasm_module_imports(pending_info.system_module, &imports);
 		wasm_module_exports(pending_info.system_module, &exports);
-		int system_impl_export_memory_index = -1;
-		int system_impl_export_function_index = -1;
+		int  system_impl_export_memory_index = -1;
+		int  system_impl_export_function_index = -1;
 		bool found_all_exports = false;
 
-		for(size_t expi=0; exports.size > expi; ++expi) {
+		for(size_t expi = 0; exports.size > expi; ++expi) {
 			auto export_name = wasm_exporttype_name(exports.data[expi]);
 			auto export_type = wasm_exporttype_type(exports.data[expi]);
-			auto export_type_kind = static_cast<wasm_externkind_enum>(
-				wasm_externtype_kind(export_type)
-			);
+			auto export_type_kind =
+				static_cast<wasm_externkind_enum>(wasm_externtype_kind(export_type));
 
 			if(export_type_kind == WASM_EXTERN_MEMORY) {
 				system_impl_export_memory_index = expi;
@@ -379,11 +364,12 @@ ecsactsi_wasm_error ecsactsi_wasm_load
 				system_impl_export_function_index = expi;
 			}
 
-			found_all_exports =
-				system_impl_export_memory_index != -1 &&
+			found_all_exports = system_impl_export_memory_index != -1 &&
 				system_impl_export_function_index != -1;
 
-			if(found_all_exports) break;
+			if(found_all_exports) {
+				break;
+			}
 		}
 
 		if(system_impl_export_function_index == -1) {
@@ -392,13 +378,12 @@ ecsactsi_wasm_error ecsactsi_wasm_load
 
 		std::vector<wasm_extern_t*> externs;
 		externs.reserve(std::min(static_cast<size_t>(8), imports.size));
-		for(size_t impi=0; imports.size > impi; ++impi) {
+		for(size_t impi = 0; imports.size > impi; ++impi) {
 			auto import_name = wasm_importtype_name(imports.data[impi]);
 			auto import_type = wasm_importtype_type(imports.data[impi]);
-			auto import_type_kind = static_cast<wasm_externkind_enum>(
-				wasm_externtype_kind(import_type)
-			);
-			
+			auto import_type_kind =
+				static_cast<wasm_externkind_enum>(wasm_externtype_kind(import_type));
+
 			std::string import_name_str(import_name->data, import_name->size);
 
 			if(!allowed_guest_imports.contains(import_name_str)) {
@@ -412,7 +397,7 @@ ecsactsi_wasm_error ecsactsi_wasm_load
 			auto guest_import_fn =
 				allowed_guest_imports.at(import_name_str)(pending_info.store);
 			externs.push_back(wasm_func_as_extern(guest_import_fn));
-			
+
 			// TODO(zaucy): Determine if we need to delete function here or later
 			// wasm_func_delete(guest_import_fn);
 		}
@@ -463,13 +448,12 @@ ecsactsi_wasm_error ecsactsi_wasm_load
 	return ECSACTSI_WASM_OK;
 }
 
-ecsactsi_wasm_error ecsactsi_wasm_load_file
-	( const char*             wasm_file_path
-	, int                     systems_count
-	, ecsact_system_like_id*  system_ids
-	, const char**            wasm_exports
-	)
-{
+ecsactsi_wasm_error ecsactsi_wasm_load_file(
+	const char*            wasm_file_path,
+	int                    systems_count,
+	ecsact_system_like_id* system_ids,
+	const char**           wasm_exports
+) {
 	FILE* file = std::fopen(wasm_file_path, "rb");
 	if(!file) {
 		return ECSACTSI_WASM_ERR_FILE_OPEN_FAIL;
@@ -493,10 +477,7 @@ ecsactsi_wasm_error ecsactsi_wasm_load_file
 	);
 }
 
-void ecsactsi_wasm_set_trap_handler
-	( ecsactsi_wasm_trap_handler handler
-	)
-{
+void ecsactsi_wasm_set_trap_handler(ecsactsi_wasm_trap_handler handler) {
 	std::shared_lock lk(modules_mutex);
 	trap_handler = handler;
 }

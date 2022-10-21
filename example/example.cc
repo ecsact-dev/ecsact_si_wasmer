@@ -12,20 +12,16 @@
 
 namespace fs = std::filesystem;
 
-void print_load_error
-	( ecsactsi_wasm_error  err
-	, const std::string&   wasm_path
-	)
-{
-	std::cerr
-		<< "[ERROR] loading wasm file " << wasm_path << " failed: "
-		<< magic_enum::enum_name(err) << "\n\n";
+void print_load_error(ecsactsi_wasm_error err, const std::string& wasm_path) {
+	std::cerr //
+		<< "[ERROR] loading wasm file " << wasm_path
+		<< " failed: " << magic_enum::enum_name(err) << "\n\n";
 }
 
 int main(int argc, char* argv[]) {
 	std::vector<std::string> wasm_file_paths;
 
-	for(int i=1; argc > i; ++i) {
+	for(int i = 1; argc > i; ++i) {
 		std::string arg(argv[i]);
 
 		if(arg.starts_with('-')) {
@@ -49,12 +45,12 @@ int main(int argc, char* argv[]) {
 	}
 
 	ecsact::core::registry test_registry("Test Registry");
-	auto test_entity = test_registry.create_entity();
+	auto                   test_entity = test_registry.create_entity();
 	test_registry.add_component(test_entity, example::ExampleComponent{});
 
 	for(auto& wasm_path : wasm_file_paths) {
 		std::vector<ecsact_system_like_id> system_ids;
-		std::vector<const char*> wasm_exports;
+		std::vector<const char*>           wasm_exports;
 
 		system_ids.push_back(
 			ecsact_id_cast<ecsact_system_like_id>(example::ExampleSystem::id)
@@ -78,7 +74,7 @@ int main(int argc, char* argv[]) {
 		std::cout << "Loaded " << wasm_path << " successfully!\n";
 	}
 
-	for(int i=0; 10 >i; ++i) {
+	for(int i = 0; 10 > i; ++i) {
 		std::cout << "execute systems count: " << i + 1 << "\n";
 		ecsact_execute_systems(test_registry.id(), 1, nullptr, nullptr);
 

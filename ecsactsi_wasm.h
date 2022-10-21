@@ -16,7 +16,8 @@
 #			ifdef _WIN32
 #				define ECSACTSI_WASM_API_VISIBILITY __declspec(dllexport)
 #			else
-#				define ECSACTSI_WASM_API_VISIBILITY __attribute__((visibility("default")))
+#				define ECSACTSI_WASM_API_VISIBILITY \
+					__attribute__((visibility("default")))
 #			endif
 #		else
 #			ifdef _WIN32
@@ -33,12 +34,12 @@
 #		define ECSACTSI_WASM_API extern "C" ECSACTSI_WASM_API_VISIBILITY
 #	else
 #		define ECSACTSI_WASM_API extern ECSACTSI_WASM_API_VISIBILITY
-# endif
+#	endif
 #endif // ECSACTSI_WASM_API
 
 #ifndef ECSACTSI_WASM_API_FN
 #	ifdef ECSACTSI_WASM_API_LOAD_AT_RUNTIME
-#		define ECSACTSI_WASM_API_FN(ret, name) ECSACTSI_WASM_API ret (*name)
+#		define ECSACTSI_WASM_API_FN(ret, name) ECSACTSI_WASM_API ret(*name)
 #	else
 #		define ECSACTSI_WASM_API_FN(ret, name) ECSACTSI_WASM_API ret name
 #	endif
@@ -92,43 +93,39 @@ typedef enum ecsactsi_wasm_error {
 } ecsactsi_wasm_error;
 
 /**
- * Load WASM file at path `wasm_file_path` and call 
+ * Load WASM file at path `wasm_file_path` and call
  * `ecsact_set_system_execution_impl` for the specified `system_ids` matching
  * the `wasm_exports` names.
  * @param wasm_file_path path to WASM file
  * @param systems_count Length of `system_ids` and `wasm_exports`
- * @param system_ids Sequential array of system ids that will have their system 
+ * @param system_ids Sequential array of system ids that will have their system
  *        implementations set to by the wasm exports dicated by `wasm_exports`
  *        in the same order. Length is determined by `systems_count`.
- * @param wasm_exports Sequential array of wasm export names used as system 
+ * @param wasm_exports Sequential array of wasm export names used as system
  *        implementations in the same order as `system_ids`. Length is
  *        determined by `systems_count`.
  * @return `ECSACTSI_WASM_OK` if no error. If there is an error for _any_ of the
  *         systems then **none of the systems are loaded**.
  */
 ECSACTSI_WASM_API_FN(ecsactsi_wasm_error, ecsactsi_wasm_load_file)
-	( const char*             wasm_file_path
-	, int                     systems_count
-	, ecsact_system_like_id*  system_ids
-	, const char**            wasm_exports
-	);
+(const char*            wasm_file_path,
+ int                    systems_count,
+ ecsact_system_like_id* system_ids,
+ const char**           wasm_exports);
 
 ECSACTSI_WASM_API_FN(ecsactsi_wasm_error, ecsactsi_wasm_load)
-	( char*                   wasm_data
-	, int                     wasm_data_size
-	, int                     systems_count
-	, ecsact_system_like_id*  system_ids
-	, const char**            wasm_exports
-	);
+(char*                  wasm_data,
+ int                    wasm_data_size,
+ int                    systems_count,
+ ecsact_system_like_id* system_ids,
+ const char**           wasm_exports);
 
 /**
  * @param system_id System ID associated with the impl that triggered the trap
  * @param trap_message The trap message contents. Null-terminated string.
  */
-typedef void (*ecsactsi_wasm_trap_handler)
-	( ecsact_system_like_id  system_id
-	, const char*            trap_message
-	);
+typedef void (*ecsactsi_wasm_trap_handler
+)(ecsact_system_like_id system_id, const char* trap_message);
 
 /**
  * Register a function to be called when a system implementation trap occurs. It
@@ -139,7 +136,6 @@ typedef void (*ecsactsi_wasm_trap_handler)
  *        `NULL` to remove the current handler.
  */
 ECSACTSI_WASM_API_FN(void, ecsactsi_wasm_set_trap_handler)
-	( ecsactsi_wasm_trap_handler handler
-	);
+(ecsactsi_wasm_trap_handler handler);
 
-#endif//ECSACTSI_WASM_H
+#endif // ECSACTSI_WASM_H
