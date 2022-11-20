@@ -5,16 +5,16 @@ load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
 
 http_archive(
     name = "ecsact_lang_cpp",
-    sha256 = "b06ebbbb9ed87dad1c997dc08cd608e9dcf7df652922505eea8c54907b027607",
-    strip_prefix = "ecsact_lang_cpp-0195aae568e8c1c3de0e74bcd2ea215b0629e96b",
-    url = "https://github.com/ecsact-dev/ecsact_lang_cpp/archive/0195aae568e8c1c3de0e74bcd2ea215b0629e96b.zip",
+    sha256 = "0585f5f5c17f58223bb88cbfc24998cdeee4f5f9a8b1549ae06a9e652cb0ada0",
+    strip_prefix = "ecsact_lang_cpp-79a01049ce243251f095cf601738a5f41be6f0b0",
+    url = "https://github.com/ecsact-dev/ecsact_lang_cpp/archive/79a01049ce243251f095cf601738a5f41be6f0b0.zip",
 )
 
 http_archive(
     name = "rules_ecsact",
-    sha256 = "3bf4e0147d2f38c9d883ec7c6b1a5d6d0aeb2bff89d3837bd9796a6a13125488",
-    strip_prefix = "rules_ecsact-0.1.8",
-    url = "https://github.com/ecsact-dev/rules_ecsact/archive/refs/tags/0.1.8.tar.gz",
+    sha256 = "219dd42502ff8adb3072b284ed12699e89df37f084aa968daef846eeafddf7ab",
+    strip_prefix = "rules_ecsact-0.1.10",
+    url = "https://github.com/ecsact-dev/rules_ecsact/archive/refs/tags/0.1.10.tar.gz",
 )
 
 load("@rules_ecsact//ecsact:repositories.bzl", "ecsact_register_toolchains", "rules_ecsact_dependencies")
