@@ -65,8 +65,11 @@ def _wasmer_config(rctx, wasmer, args, using_system_wasmer = False):
         fail("wasmer config failed (exit code={}): {}".format(result.return_code, result.stderr))
     return result.stdout.strip()
 
+def _is_windows(os):
+    return os.name == "windows 10" or os.name == "windows server 2019"
+
 def _wasmer_platform(os):
-    if os.name == "windows 10":
+    if _is_windows(os):
         return "windows-amd64"
     if os.name == "linux":
         return "linux-amd64"
@@ -86,7 +89,7 @@ def _wasmer_repo(rctx):
             url = _wasmer_download_url(rctx.os, rctx.attr.wasmer_version),
         )
 
-        if rctx.os.name == "windows 10":
+        if _is_windows(rctx.os):
             wasmer = rctx.path("bin/wasmer.exe")
         else:
             wasmer = rctx.path("bin/wasmer")
