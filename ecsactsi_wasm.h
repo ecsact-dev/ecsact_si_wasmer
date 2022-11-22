@@ -108,24 +108,30 @@ typedef enum ecsactsi_wasm_error {
  *         systems then **none of the systems are loaded**.
  */
 ECSACTSI_WASM_API_FN(ecsactsi_wasm_error, ecsactsi_wasm_load_file)
-(const char*            wasm_file_path,
- int                    systems_count,
- ecsact_system_like_id* system_ids,
- const char**           wasm_exports);
+( //
+	const char*            wasm_file_path,
+	int                    systems_count,
+	ecsact_system_like_id* system_ids,
+	const char**           wasm_exports
+);
 
 ECSACTSI_WASM_API_FN(ecsactsi_wasm_error, ecsactsi_wasm_load)
-(char*                  wasm_data,
- int                    wasm_data_size,
- int                    systems_count,
- ecsact_system_like_id* system_ids,
- const char**           wasm_exports);
+( //
+	char*                  wasm_data,
+	int                    wasm_data_size,
+	int                    systems_count,
+	ecsact_system_like_id* system_ids,
+	const char**           wasm_exports
+);
 
 /**
  * @param system_id System ID associated with the impl that triggered the trap
  * @param trap_message The trap message contents. Null-terminated string.
  */
-typedef void (*ecsactsi_wasm_trap_handler
-)(ecsact_system_like_id system_id, const char* trap_message);
+typedef void (*ecsactsi_wasm_trap_handler)( //
+	ecsact_system_like_id system_id,
+	const char*           trap_message
+);
 
 /**
  * Register a function to be called when a system implementation trap occurs. It
@@ -136,6 +142,8 @@ typedef void (*ecsactsi_wasm_trap_handler
  *        `NULL` to remove the current handler.
  */
 ECSACTSI_WASM_API_FN(void, ecsactsi_wasm_set_trap_handler)
-(ecsactsi_wasm_trap_handler handler);
+( //
+	ecsactsi_wasm_trap_handler handler
+);
 
 #endif // ECSACTSI_WASM_H
