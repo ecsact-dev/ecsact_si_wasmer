@@ -5,9 +5,9 @@ load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
 
 http_archive(
     name = "ecsact_lang_cpp",
-    sha256 = "0585f5f5c17f58223bb88cbfc24998cdeee4f5f9a8b1549ae06a9e652cb0ada0",
-    strip_prefix = "ecsact_lang_cpp-79a01049ce243251f095cf601738a5f41be6f0b0",
-    url = "https://github.com/ecsact-dev/ecsact_lang_cpp/archive/79a01049ce243251f095cf601738a5f41be6f0b0.zip",
+    sha256 = "d336b58a72085bdeaded3461de7150628bcb0b5dde0dc6d0044b617cdbd31082",
+    strip_prefix = "ecsact_lang_cpp-4e60b08fe7d657c5f4a33c1d76a2278a5ce7dd55",
+    url = "https://github.com/ecsact-dev/ecsact_lang_cpp/archive/4e60b08fe7d657c5f4a33c1d76a2278a5ce7dd55.zip",
 )
 
 http_archive(
