@@ -57,6 +57,7 @@ cc_binary(
         "//:sources",
     ],
     copts = copts,
+    defines = ["ECSACTSI_WASM_API="],
     deps = [
         ":runtime",
         "//:ecsactsi_wasm",
