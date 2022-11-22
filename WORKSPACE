@@ -116,7 +116,10 @@ git_repository(
 
 load("//:wasmer.bzl", "wasmer_repo")
 
-wasmer_repo(name = "wasmer")
+wasmer_repo(
+    name = "wasmer",
+    wasmer_version = "2.3.0",
+)
 
 http_archive(
     name = "magic_enum",
