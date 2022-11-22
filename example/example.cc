@@ -45,7 +45,8 @@ int main(int argc, char* argv[]) {
 	}
 
 	ecsact::core::registry test_registry("Test Registry");
-	auto                   test_entity = test_registry.create_entity();
+
+	auto test_entity = test_registry.create_entity();
 	test_registry.add_component(test_entity, example::ExampleComponent{});
 
 	for(auto& wasm_path : wasm_file_paths) {

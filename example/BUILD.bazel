@@ -1,4 +1,4 @@
-load("@rules_cc//cc:defs.bzl", "cc_binary")
+load("@rules_cc//cc:defs.bzl", "cc_binary", "cc_test")
 load("//bazel:copts.bzl", "copts")
 load("@emsdk//emscripten_toolchain:wasm_rules.bzl", "wasm_cc_binary")
 load("@ecsact_rt_entt//runtime:index.bzl", "ecsact_entt_runtime")
@@ -66,5 +66,19 @@ cc_binary(
         "@ecsact_runtime//:meta",
         "@magic_enum",
         "@wasmer//:wasmer-c-api",
+    ],
+)
+
+cc_test(
+    name = "wasmer_example_test",
+    srcs = ["test.cc"],
+    args = [
+        "--exe=$(location :wasmer_example)",
+        "$(location :system_impls.wasm)",
+    ],
+    copts = copts,
+    data = [
+        ":system_impls.wasm",
+        ":wasmer_example",
     ],
 )
