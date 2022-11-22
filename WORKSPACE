@@ -25,9 +25,9 @@ ecsact_register_toolchains()
 
 http_archive(
     name = "ecsact_rt_entt",
-    sha256 = "0b4f60e4a2f92e6fd27048b6f6e703c7716c51e3d1e85f4c385fec5fdf7c6625",
-    strip_prefix = "ecsact_rt_entt-2d465f01a4667dccecde4286359625eb12203926",
-    urls = ["https://github.com/ecsact-dev/ecsact_rt_entt/archive/2d465f01a4667dccecde4286359625eb12203926.zip"],
+    sha256 = "da70a04bdddfb9e652e24caa5a2f09811006b2c6fe456239cc0fef1cd6ed1169",
+    strip_prefix = "ecsact_rt_entt-b1a3c4b44113997ea8227e22ec18b39b30434f95",
+    urls = ["https://github.com/ecsact-dev/ecsact_rt_entt/archive/b1a3c4b44113997ea8227e22ec18b39b30434f95.zip"],
 )
 
 http_archive(
