@@ -39,9 +39,11 @@ platform(
 
 refresh_compile_commands(
     name = "refresh_compile_commands",
+    tags = ["manual"],
     targets = {
         "//:ecsactsi_wasm": "",
         "//example:runtime": "",
         "//example:system_impls": "",
+        "//example:wasmer_example": "",
     },
 )
