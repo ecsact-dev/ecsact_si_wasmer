@@ -7,7 +7,7 @@
 			"type": "shell",
 			"args": [
 				"run",
-				"@hedron_compile_commands//:refresh_all"
+				"//:refresh_compile_commands"
 			],
 			"problemMatcher": []
 		},
