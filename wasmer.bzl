@@ -59,7 +59,7 @@ cc_library(
 def _wasmer_config(rctx, wasmer, args):
     result = rctx.execute([wasmer, "config"] + args)
     if result.return_code != 0:
-        fail("wasmer config failed (exit_code={}): {}".format(result.exit_code, result.stderr))
+        fail("wasmer config failed (exit code={}): {}".format(result.return_code, result.stderr))
     return result.stdout.strip()
 
 def _wasmer_platform(os):
