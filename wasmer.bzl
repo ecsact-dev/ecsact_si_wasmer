@@ -115,6 +115,7 @@ def _wasmer_repo(rctx):
     build_file_contents = {
         "linux": _linux_wasmer_build_file_contents,
         "windows 10": _windows_wasmer_build_file_contents,
+        "windows server 2019": _windows_wasmer_build_file_contents,
     }
 
     if not rctx.os.name in build_file_contents:
