@@ -37,6 +37,7 @@ cc_binary(
 
 _system_names = [
     "ExampleSystem",
+    "Generator",
 ]
 
 wasm_cc_binary(
