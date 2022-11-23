@@ -169,5 +169,10 @@ int main(int argc, char* argv[]) {
 	}
 
 	std::cout << "\n (( Done ))\n";
+
+	if(wasm_trap_happened) {
+		return 1;
+	}
+
 	return 0;
 }
