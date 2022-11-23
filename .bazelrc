@@ -7,6 +7,7 @@ build --enable_runfiles
 
 build:windows --platforms=//bazel/platforms:windows
 build:windows --host_platform=//bazel/platforms:windows
+build:windows --features=compiler_param_file
 
 build:linux --platforms=//bazel/platforms:linux
 build:linux --extra_toolchains=@llvm_toolchain//:cc-toolchain-x86_64-linux
