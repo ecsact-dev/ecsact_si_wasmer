@@ -4,17 +4,24 @@ load("@bazel_tools//tools/build_defs/repo:git.bzl", "git_repository")
 load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
 
 http_archive(
-    name = "ecsact_lang_cpp",
-    sha256 = "0585f5f5c17f58223bb88cbfc24998cdeee4f5f9a8b1549ae06a9e652cb0ada0",
-    strip_prefix = "ecsact_lang_cpp-79a01049ce243251f095cf601738a5f41be6f0b0",
-    url = "https://github.com/ecsact-dev/ecsact_lang_cpp/archive/79a01049ce243251f095cf601738a5f41be6f0b0.zip",
+    name = "ecsact_runtime",
+    sha256 = "bc90154e1b4c9b9c26138b50429d642189e4db1bff1f84aa7a861d82b36b8293",
+    strip_prefix = "ecsact_runtime-bf6e3965ef00d7bfc4070660a1427a0dd1bf50a4",
+    url = "https://github.com/ecsact-dev/ecsact_runtime/archive/bf6e3965ef00d7bfc4070660a1427a0dd1bf50a4.zip",
 )
 
 http_archive(
     name = "rules_ecsact",
-    sha256 = "219dd42502ff8adb3072b284ed12699e89df37f084aa968daef846eeafddf7ab",
-    strip_prefix = "rules_ecsact-0.1.10",
-    url = "https://github.com/ecsact-dev/rules_ecsact/archive/refs/tags/0.1.10.tar.gz",
+    sha256 = "e6d888c63aa536b5b7c6af10d217cdb8ad98b2262fa9d02515a99edbd0d94eea",
+    strip_prefix = "rules_ecsact-0.2.1",
+    url = "https://github.com/ecsact-dev/rules_ecsact/archive/refs/tags/0.2.1.tar.gz",
+)
+
+http_archive(
+    name = "ecsact_lang_cpp",
+    sha256 = "f66c5d31cc303022c313a424f4c432c41ff517b73143915436c6c6f06a969a47",
+    strip_prefix = "ecsact_lang_cpp-34d73ebce5e99ae9711efa79a30ca7acda8599f0",
+    url = "https://github.com/ecsact-dev/ecsact_lang_cpp/archive/34d73ebce5e99ae9711efa79a30ca7acda8599f0.zip",
 )
 
 load("@rules_ecsact//ecsact:repositories.bzl", "ecsact_register_toolchains", "rules_ecsact_dependencies")
@@ -25,9 +32,9 @@ ecsact_register_toolchains()
 
 http_archive(
     name = "ecsact_rt_entt",
-    sha256 = "0b4f60e4a2f92e6fd27048b6f6e703c7716c51e3d1e85f4c385fec5fdf7c6625",
-    strip_prefix = "ecsact_rt_entt-2d465f01a4667dccecde4286359625eb12203926",
-    urls = ["https://github.com/ecsact-dev/ecsact_rt_entt/archive/2d465f01a4667dccecde4286359625eb12203926.zip"],
+    sha256 = "da70a04bdddfb9e652e24caa5a2f09811006b2c6fe456239cc0fef1cd6ed1169",
+    strip_prefix = "ecsact_rt_entt-b1a3c4b44113997ea8227e22ec18b39b30434f95",
+    urls = ["https://github.com/ecsact-dev/ecsact_rt_entt/archive/b1a3c4b44113997ea8227e22ec18b39b30434f95.zip"],
 )
 
 http_archive(
@@ -101,13 +108,6 @@ load("@llvm_toolchain//:toolchains.bzl", "llvm_register_toolchains")
 
 llvm_register_toolchains()
 
-http_archive(
-    name = "ecsact_runtime",
-    sha256 = "",
-    strip_prefix = "ecsact_runtime-f7ee18fe96c4400672caccf5475835d54281582c",
-    url = "https://github.com/ecsact-dev/ecsact_runtime/archive/f7ee18fe96c4400672caccf5475835d54281582c.zip",
-)
-
 git_repository(
     name = "ecsact_entt",
     commit = "47fdb9612d2f1273592aeb3434c2b3110662c9b7",
@@ -116,7 +116,10 @@ git_repository(
 
 load("//:wasmer.bzl", "wasmer_repo")
 
-wasmer_repo(name = "wasmer")
+wasmer_repo(
+    name = "wasmer",
+    wasmer_version = "2.3.0",
+)
 
 http_archive(
     name = "magic_enum",

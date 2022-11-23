@@ -6,11 +6,14 @@ build --incompatible_strict_action_env
 build --enable_runfiles
 
 build:windows --platforms=//bazel/platforms:windows
+build:windows --host_platform=//bazel/platforms:windows
 
 build:linux --platforms=//bazel/platforms:linux
 build:linux --extra_toolchains=@llvm_toolchain//:cc-toolchain-x86_64-linux
 
 common:ci --announce_rc
+common:ci --verbose_failures
+common:ci --keep_going
 common:ci --disk_cache=~/.cache/bazel-disk-cache
 
 try-import %workspace%/user.bazelrc
