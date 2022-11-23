@@ -1,8 +1,16 @@
 main package example;
 
-component WillRemove;
-component WillAdd;
-component Spawner;
+component WillRemove {
+	i32 dummy;
+}
+
+component WillAdd {
+	i32 dummy;
+}
+
+component Spawner {
+
+}
 
 component ExampleComponent {
 	i32 num;
@@ -27,7 +35,7 @@ system CheckShouldRemove {
 }
 
 system RemovesSystem {
-	include WillRemove;
+	readwrite WillRemove;
 	removes ExampleComponent;
 }
 

@@ -120,6 +120,7 @@ int main(int argc, char* argv[]) {
 			ecsact_id_cast<ecsact_system_like_id>(example::Generator::id),
 			ecsact_id_cast<ecsact_system_like_id>(example::AddsSystem::id),
 			ecsact_id_cast<ecsact_system_like_id>(example::CheckShouldRemove::id),
+			ecsact_id_cast<ecsact_system_like_id>(example::RemovesSystem::id),
 		};
 
 		std::vector<const char*> wasm_exports{
@@ -127,6 +128,7 @@ int main(int argc, char* argv[]) {
 			"example__Generator",
 			"example__AddsSystem",
 			"example__CheckShouldRemove",
+			"example__RemovesSystem",
 		};
 
 		assert(system_ids.size() == wasm_exports.size());
