@@ -4,6 +4,13 @@ load("@bazel_tools//tools/build_defs/repo:git.bzl", "git_repository")
 load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
 
 http_archive(
+    name = "ecsact_runtime",
+    sha256 = "28d92869984b59ddbb0e17d6684052f3d39bfbec8cfc10b555d3b80024bb22f4",
+    strip_prefix = "ecsact_runtime-78fedaa2c46ae0435f34b2ea6c48441d0e7e67d0",
+    url = "https://github.com/ecsact-dev/ecsact_runtime/archive/78fedaa2c46ae0435f34b2ea6c48441d0e7e67d0.zip",
+)
+
+http_archive(
     name = "rules_ecsact",
     sha256 = "e6d888c63aa536b5b7c6af10d217cdb8ad98b2262fa9d02515a99edbd0d94eea",
     strip_prefix = "rules_ecsact-0.2.1",
@@ -100,13 +107,6 @@ llvm_toolchain(
 load("@llvm_toolchain//:toolchains.bzl", "llvm_register_toolchains")
 
 llvm_register_toolchains()
-
-http_archive(
-    name = "ecsact_runtime",
-    sha256 = "",
-    strip_prefix = "ecsact_runtime-f7ee18fe96c4400672caccf5475835d54281582c",
-    url = "https://github.com/ecsact-dev/ecsact_runtime/archive/f7ee18fe96c4400672caccf5475835d54281582c.zip",
-)
 
 git_repository(
     name = "ecsact_entt",
