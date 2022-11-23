@@ -29,14 +29,6 @@ cc_library(
     ],
 )
 
-platform(
-    name = "wasm",
-    constraint_values = [
-        "@platforms//cpu:wasm64",
-        "@bazel_tools//tools/cpp:clang",
-    ],
-)
-
 refresh_compile_commands(
     name = "refresh_compile_commands",
     tags = ["manual"],

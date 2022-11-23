@@ -8,7 +8,7 @@
 #include "ecsact/runtime/core.hh"
 #include "ecsactsi_wasm.h"
 
-#include "example.ecsact.hh"
+#include "example/runtime__public_hdrs/example.ecsact.hh"
 
 namespace fs = std::filesystem;
 
