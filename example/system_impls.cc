@@ -20,3 +20,24 @@ void example__Generator(ecsact_system_execution_context* c_ctx) {
 void example::Generator::impl(context& ctx) {
 	ctx._ctx.generate(example::WillAdd{});
 }
+
+void example__AddsSystem(ecsact_system_execution_context* c_ctx) {
+	example::AddsSystem::context ctx{ecsact::execution_context{c_ctx}};
+	example::AddsSystem::impl(ctx);
+}
+
+void example::AddsSystem::impl(context& ctx) {
+	ctx.add(example::ExampleComponent{.num = 400});
+}
+
+void example__CheckShouldRemove(ecsact_system_execution_context* c_ctx) {
+	example::CheckShouldRemove::context ctx{ecsact::execution_context{c_ctx}};
+	example::CheckShouldRemove::impl(ctx);
+}
+
+void example::CheckShouldRemove::impl(context& ctx) {
+	auto comp = ctx.get<example::ExampleComponent>();
+	if(comp.num > 405) {
+		ctx.add<example::WillRemove>();
+	}
+}

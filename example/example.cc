@@ -115,17 +115,19 @@ int main(int argc, char* argv[]) {
 	test_registry.add_component(test_entity, example::ExampleComponent{});
 
 	for(auto& wasm_path : wasm_file_paths) {
-		std::vector<ecsact_system_like_id> system_ids;
-		std::vector<const char*>           wasm_exports;
+		std::vector<ecsact_system_like_id> system_ids{
+			ecsact_id_cast<ecsact_system_like_id>(example::ExampleSystem::id),
+			ecsact_id_cast<ecsact_system_like_id>(example::Generator::id),
+			ecsact_id_cast<ecsact_system_like_id>(example::AddsSystem::id),
+			ecsact_id_cast<ecsact_system_like_id>(example::CheckShouldRemove::id),
+		};
 
-		system_ids.push_back(
-			ecsact_id_cast<ecsact_system_like_id>(example::ExampleSystem::id)
-		);
-		system_ids.push_back(
-			ecsact_id_cast<ecsact_system_like_id>(example::Generator::id)
-		);
-		wasm_exports.push_back("example__ExampleSystem");
-		wasm_exports.push_back("example__Generator");
+		std::vector<const char*> wasm_exports{
+			"example__ExampleSystem",
+			"example__Generator",
+			"example__AddsSystem",
+			"example__CheckShouldRemove",
+		};
 
 		assert(system_ids.size() == wasm_exports.size());
 

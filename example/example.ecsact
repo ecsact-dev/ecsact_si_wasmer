@@ -21,6 +21,11 @@ system AddsSystem {
 	adds ExampleComponent;
 }
 
+system CheckShouldRemove {
+	readwrite ExampleComponent;
+	adds WillRemove;
+}
+
 system RemovesSystem {
 	include WillRemove;
 	removes ExampleComponent;
