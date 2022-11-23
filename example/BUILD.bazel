@@ -37,6 +37,10 @@ cc_binary(
 
 _system_names = [
     "ExampleSystem",
+    "Generator",
+    "AddsSystem",
+    "CheckShouldRemove",
+    "RemovesSystem",
 ]
 
 wasm_cc_binary(

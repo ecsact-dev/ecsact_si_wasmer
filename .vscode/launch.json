@@ -14,7 +14,10 @@
 				"${workspaceFolder}/bazel-bin/example/system_impls.wasm"
 			],
 			"cwd": "${workspaceFolder}",
-			"preLaunchTask": "build //example:wasmer_example"
+			"preLaunchTask": "build //example:wasmer_example",
+			"sourceFileMap": {
+				"E:/.cache/bazel/output_base/execroot/ecsactsi_wasm": "${workspaceFolder}"
+			}
 		}
 	],
 	"compounds": []
