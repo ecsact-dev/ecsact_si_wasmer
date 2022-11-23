@@ -3,6 +3,7 @@
 #include <cassert>
 #include <iostream>
 #include <unordered_map>
+#include <vector>
 #include "ecsact/runtime/dynamic.h"
 
 #include "wasm_ecsact_pointer_map.hh"
