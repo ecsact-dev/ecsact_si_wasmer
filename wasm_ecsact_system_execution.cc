@@ -231,6 +231,12 @@ wasm_trap_t* wasm_ecsact_system_execution_context_other(
 		info->system_impl_memory
 	);
 
+	auto prev = info->other_contexts;
+	info->other_contexts = new ecsact_internal_execution_context_linked_list{
+		.ctx = other,
+		.next = prev,
+	};
+
 	results->data[0].kind = WASM_I32;
 	results->data[0].of.i32 = ecsactsi_wasm::as_guest_pointer(other);
 

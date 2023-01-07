@@ -304,6 +304,14 @@ void ecsactsi_wasm_system_impl(ecsact_system_execution_context* ctx) {
 		trap_handler(system_id, trap_msg_str.c_str());
 	}
 
+	auto other_ll = info->other_contexts;
+	while(other_ll) {
+		set_wasm_ecsact_system_execution_context_memory(other_ll->ctx, nullptr);
+		auto next = other_ll->next;
+		delete other_ll;
+		other_ll = next;
+	}
+
 	set_wasm_ecsact_system_execution_context_memory(ctx, nullptr);
 }
 } // namespace
@@ -331,7 +339,7 @@ ecsactsi_wasm_error ecsactsi_wasm_load(
 
 	for(int index = 0; systems_count > index; ++index) {
 		auto  system_id = system_ids[index];
-		auto& pending_info = pending_modules[system_id];
+		auto& pending_info = pending_modules[system_id] = {};
 		pending_info.store = wasm_store_new(engine());
 
 		// There needs to be one module and one store per system for thread safety
