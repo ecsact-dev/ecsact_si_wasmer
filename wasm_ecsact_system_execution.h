@@ -9,9 +9,21 @@
 #include <wasm.h>
 #include "ecsact/runtime/common.h"
 
+struct ecsact_internal_wasm_system_module_info {
+	wasm_module_t*     system_module = {};
+	wasm_instance_t*   instance = {};
+	const wasm_func_t* system_impl_func = {};
+	wasm_memory_t*     system_impl_memory = {};
+	wasm_store_t*      store = {};
+};
+
 void set_wasm_ecsact_system_execution_context_memory(
 	ecsact_system_execution_context* ctx,
 	wasm_memory_t*                   memory
+);
+
+ecsact_internal_wasm_system_module_info* get_ecsact_internal_module_info(
+	ecsact_system_like_id sys_id
 );
 
 wasm_trap_t* wasm_ecsact_system_execution_context_action(
