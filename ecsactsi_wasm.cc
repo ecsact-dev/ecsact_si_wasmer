@@ -7,6 +7,7 @@
 #include <string>
 #include <string_view>
 #include <shared_mutex>
+#include <cassert>
 #include <wasm.h>
 #include <cstdlib>
 #include <cstdio>
@@ -33,14 +34,6 @@ static inline wasm_functype_t* wasm_functype_new_4_0(
 }
 
 namespace {
-struct wasm_system_module_info {
-	wasm_module_t*     system_module = {};
-	wasm_instance_t*   instance = {};
-	const wasm_func_t* system_impl_func = {};
-	wasm_memory_t*     system_impl_memory = {};
-	wasm_store_t*      store = {};
-};
-
 // Utility to load wasm file which automatically cleans up upon destruction
 struct wasm_file_binary {
 	wasm_byte_vec_t binary = {};
@@ -66,9 +59,10 @@ struct wasm_file_binary {
 	}
 };
 
-std::shared_mutex                                        modules_mutex;
-std::map<ecsact_system_like_id, wasm_system_module_info> modules;
-ecsactsi_wasm_trap_handler                               trap_handler;
+std::shared_mutex modules_mutex;
+std::map<ecsact_system_like_id, ecsact_internal_wasm_system_module_info>
+													 modules;
+ecsactsi_wasm_trap_handler trap_handler;
 
 using allowed_guest_imports_t =
 	std::unordered_map<std::string, std::function<wasm_func_t*(wasm_store_t*)>>;
@@ -286,11 +280,14 @@ wasm_engine_t* engine() {
 }
 
 void ecsactsi_wasm_system_impl(ecsact_system_execution_context* ctx) {
-	std::shared_lock lk(modules_mutex);
-	auto             system_id = ecsact_system_execution_context_id(ctx);
-	auto&            info = modules.at(system_id);
+	auto lk = std::shared_lock(modules_mutex);
+	auto system_id = ecsact_system_execution_context_id(ctx);
+	auto info = get_ecsact_internal_module_info(system_id);
 
-	set_wasm_ecsact_system_execution_context_memory(ctx, info.system_impl_memory);
+	set_wasm_ecsact_system_execution_context_memory(
+		ctx,
+		info->system_impl_memory
+	);
 
 	wasm_val_t as[1] = {{}};
 	as[0].kind = WASM_I32;
@@ -298,7 +295,7 @@ void ecsactsi_wasm_system_impl(ecsact_system_execution_context* ctx) {
 
 	wasm_val_vec_t args = WASM_ARRAY_VEC(as);
 	wasm_val_vec_t results = WASM_EMPTY_VEC;
-	wasm_trap_t*   trap = wasm_func_call(info.system_impl_func, &args, &results);
+	wasm_trap_t*   trap = wasm_func_call(info->system_impl_func, &args, &results);
 
 	if(trap_handler != nullptr && trap != nullptr) {
 		wasm_message_t trap_msg;
@@ -307,9 +304,31 @@ void ecsactsi_wasm_system_impl(ecsact_system_execution_context* ctx) {
 		trap_handler(system_id, trap_msg_str.c_str());
 	}
 
+	if(info->parent) {
+		set_wasm_ecsact_system_execution_context_memory(
+			const_cast<ecsact_system_execution_context*>(info->parent),
+			nullptr
+		);
+	}
+
+	auto other_ll = info->other_contexts;
+	while(other_ll) {
+		set_wasm_ecsact_system_execution_context_memory(other_ll->ctx, nullptr);
+		auto next = other_ll->next;
+		delete other_ll;
+		other_ll = next;
+	}
+
 	set_wasm_ecsact_system_execution_context_memory(ctx, nullptr);
 }
 } // namespace
+
+ecsact_internal_wasm_system_module_info* get_ecsact_internal_module_info(
+	ecsact_system_like_id sys_id
+) {
+	assert(modules.contains(sys_id));
+	return &modules.at(sys_id);
+}
 
 ecsactsi_wasm_error ecsactsi_wasm_load(
 	char*                  wasm_data,
@@ -327,7 +346,7 @@ ecsactsi_wasm_error ecsactsi_wasm_load(
 
 	for(int index = 0; systems_count > index; ++index) {
 		auto  system_id = system_ids[index];
-		auto& pending_info = pending_modules[system_id];
+		auto& pending_info = pending_modules[system_id] = {};
 		pending_info.store = wasm_store_new(engine());
 
 		// There needs to be one module and one store per system for thread safety

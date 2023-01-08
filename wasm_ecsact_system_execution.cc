@@ -186,9 +186,18 @@ wasm_trap_t* wasm_ecsact_system_execution_context_parent(
 	const wasm_val_vec_t* args,
 	wasm_val_vec_t*       results
 ) {
-	auto parent =
-		ecsact_system_execution_context_parent(get_execution_context(args->data[0])
+	auto ctx = get_execution_context(args->data[0]);
+	auto system_id = ecsact_system_execution_context_id(ctx);
+	auto info = get_ecsact_internal_module_info(system_id);
+
+	auto parent = info->parent;
+	if(!info->parent) {
+		parent = ecsact_system_execution_context_parent(ctx);
+		set_wasm_ecsact_system_execution_context_memory(
+			const_cast<ecsact_system_execution_context*>(parent),
+			info->system_impl_memory
 		);
+	}
 
 	results->data[0].kind = WASM_I32;
 	results->data[0].of.i32 = ecsactsi_wasm::as_guest_pointer(
@@ -217,10 +226,25 @@ wasm_trap_t* wasm_ecsact_system_execution_context_other(
 	const wasm_val_vec_t* args,
 	wasm_val_vec_t*       results
 ) {
+	auto ctx = get_execution_context(args->data[0]);
+	auto system_id = ecsact_system_execution_context_id(ctx);
+	auto info = get_ecsact_internal_module_info(system_id);
+
 	auto other = ecsact_system_execution_context_other(
-		get_execution_context(args->data[0]),
+		ctx,
 		ecsact_id_from_wasm_i32<ecsact_entity_id>(args->data[1])
 	);
+
+	set_wasm_ecsact_system_execution_context_memory(
+		other,
+		info->system_impl_memory
+	);
+
+	auto prev = info->other_contexts;
+	info->other_contexts = new ecsact_internal_execution_context_linked_list{
+		.ctx = other,
+		.next = prev,
+	};
 
 	results->data[0].kind = WASM_I32;
 	results->data[0].of.i32 = ecsactsi_wasm::as_guest_pointer(other);
