@@ -319,6 +319,9 @@ void ecsactsi_wasm_system_impl(ecsact_system_execution_context* ctx) {
 		other_ll = next;
 	}
 
+	info->other_contexts = nullptr;
+	info->parent = nullptr;
+
 	set_wasm_ecsact_system_execution_context_memory(ctx, nullptr);
 }
 } // namespace
