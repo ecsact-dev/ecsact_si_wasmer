@@ -186,9 +186,18 @@ wasm_trap_t* wasm_ecsact_system_execution_context_parent(
 	const wasm_val_vec_t* args,
 	wasm_val_vec_t*       results
 ) {
-	auto parent =
-		ecsact_system_execution_context_parent(get_execution_context(args->data[0])
+	auto ctx = get_execution_context(args->data[0]);
+	auto system_id = ecsact_system_execution_context_id(ctx);
+	auto info = get_ecsact_internal_module_info(system_id);
+
+	auto parent = info->parent;
+	if(!info->parent) {
+		parent = ecsact_system_execution_context_parent(ctx);
+		set_wasm_ecsact_system_execution_context_memory(
+			const_cast<ecsact_system_execution_context*>(parent),
+			info->system_impl_memory
 		);
+	}
 
 	results->data[0].kind = WASM_I32;
 	results->data[0].of.i32 = ecsactsi_wasm::as_guest_pointer(

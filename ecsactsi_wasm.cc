@@ -304,6 +304,13 @@ void ecsactsi_wasm_system_impl(ecsact_system_execution_context* ctx) {
 		trap_handler(system_id, trap_msg_str.c_str());
 	}
 
+	if(info->parent) {
+		set_wasm_ecsact_system_execution_context_memory(
+			const_cast<ecsact_system_execution_context*>(info->parent),
+			nullptr
+		);
+	}
+
 	auto other_ll = info->other_contexts;
 	while(other_ll) {
 		set_wasm_ecsact_system_execution_context_memory(other_ll->ctx, nullptr);

@@ -20,6 +20,7 @@ struct ecsact_internal_wasm_system_module_info {
 	const wasm_func_t*                             system_impl_func;
 	wasm_memory_t*                                 system_impl_memory;
 	wasm_store_t*                                  store;
+	const ecsact_system_execution_context*         parent;
 	ecsact_internal_execution_context_linked_list* other_contexts;
 };
 
