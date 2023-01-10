@@ -279,6 +279,19 @@ wasm_engine_t* engine() {
 	return engine;
 }
 
+void unload_system_module(
+	ecsact_system_like_id                    sys_id,
+	ecsact_internal_wasm_system_module_info& info
+) {
+	wasm_module_delete(info.system_module);
+	wasm_instance_delete(info.instance);
+	wasm_func_delete(info.system_impl_func);
+	wasm_memory_delete(info.system_impl_memory);
+	wasm_store_delete(info.store);
+
+	info = {};
+}
+
 void ecsactsi_wasm_system_impl(ecsact_system_execution_context* ctx) {
 	auto lk = std::shared_lock(modules_mutex);
 	auto system_id = ecsact_system_execution_context_id(ctx);
@@ -459,7 +472,7 @@ ecsactsi_wasm_error ecsactsi_wasm_load(
 		std::unique_lock lk(modules_mutex);
 		for(auto&& [system_id, pending_info] : pending_modules) {
 			if(modules.contains(system_id)) {
-				// TODO(zaucy): Cleanup existing module info
+				unload_system_module(system_id, modules.at(system_id));
 			}
 
 			modules[system_id] = std::move(pending_info);
@@ -502,4 +515,28 @@ ecsactsi_wasm_error ecsactsi_wasm_load_file(
 void ecsactsi_wasm_set_trap_handler(ecsactsi_wasm_trap_handler handler) {
 	std::shared_lock lk(modules_mutex);
 	trap_handler = handler;
+}
+
+void ecsactsi_wasm_unload(
+	int                    systems_count,
+	ecsact_system_like_id* system_ids
+) {
+	std::unique_lock lk(modules_mutex);
+	for(int i = 0; systems_count > i; ++i) {
+		auto system_id = system_ids[i];
+		auto module_itr = modules.find(system_id);
+		if(module_itr != modules.end()) {
+			unload_system_module(system_id, module_itr->second);
+			modules.erase(module_itr);
+		}
+	}
+}
+
+void ecsactsi_wasm_reset() {
+	std::unique_lock lk(modules_mutex);
+	for(auto&& [sys_id, m] : modules) {
+		unload_system_module(sys_id, m);
+	}
+	modules.clear();
+	trap_handler = nullptr;
 }

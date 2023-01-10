@@ -125,6 +125,24 @@ ECSACTSI_WASM_API_FN(ecsactsi_wasm_error, ecsactsi_wasm_load)
 );
 
 /**
+ * Unload 1 or more systems. If a system is not already loaded this is a noop.
+ * @param systems_count number of systems impls to unload
+ * @param system_ids array of system IDs to unload. Sequential list length of
+ *        @p systems_count.
+ */
+ECSACTSI_WASM_API_FN(void, ecsactsi_wasm_unload)
+( //
+	int                    systems_count,
+	ecsact_system_like_id* system_ids
+);
+
+/**
+ * Reset state. Effectively called `ecsactsi_wasm_unload` for each system
+ * implementation and clears the trap handler.
+ */
+ECSACTSI_WASM_API_FN(void, ecsactsi_wasm_reset)();
+
+/**
  * @param system_id System ID associated with the impl that triggered the trap
  * @param trap_message The trap message contents. Null-terminated string.
  */
