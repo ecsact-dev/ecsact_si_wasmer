@@ -283,6 +283,7 @@ void unload_system_module(
 	ecsact_system_like_id                    sys_id,
 	ecsact_internal_wasm_system_module_info& info
 ) {
+	ecsact_set_system_execution_impl(sys_id, nullptr);
 	wasm_module_delete(info.system_module);
 	wasm_instance_delete(info.instance);
 	wasm_func_delete(info.system_impl_func);
