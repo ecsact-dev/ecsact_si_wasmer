@@ -17,6 +17,7 @@
 
 #include "wasm_ecsact_system_execution.h"
 #include "wasm_ecsact_pointer_map.hh"
+#include "ecsactsi_wasi.h"
 
 using namespace std::string_literals;
 
@@ -30,6 +31,21 @@ static inline wasm_functype_t* wasm_functype_new_4_0(
 	wasm_valtype_vec_t params, results;
 	wasm_valtype_vec_new(&params, 4, ps);
 	wasm_valtype_vec_new_empty(&results);
+	return wasm_functype_new(&params, &results);
+}
+
+static inline wasm_functype_t* wasm_functype_new_4_1(
+	wasm_valtype_t* p1,
+	wasm_valtype_t* p2,
+	wasm_valtype_t* p3,
+	wasm_valtype_t* p4,
+	wasm_valtype_t* r
+) {
+	wasm_valtype_t*    rs[1] = {r};
+	wasm_valtype_t*    ps[4] = {p1, p2, p3, p4};
+	wasm_valtype_vec_t params, results;
+	wasm_valtype_vec_new(&params, 4, ps);
+	wasm_valtype_vec_new(&results, 1, rs);
 	return wasm_functype_new(&params, &results);
 }
 
@@ -272,7 +288,118 @@ const allowed_guest_imports_t allowed_guest_imports{
 
 			return fn;
 		},
-	}};
+	},
+	{
+		"proc_exit",
+		[](wasm_store_t* store) -> wasm_func_t* {
+			wasm_functype_t* fn_type =
+				wasm_functype_new_1_0(wasm_valtype_new(WASM_I32) // exit_code
+				);
+			wasm_func_t* fn = wasm_func_new(store, fn_type, &ecsactsi_wasi_proc_exit);
+
+			wasm_functype_delete(fn_type);
+
+			return fn;
+		},
+	},
+	{
+		"fd_seek",
+		[](wasm_store_t* store) -> wasm_func_t* {
+			wasm_functype_t* fn_type = wasm_functype_new_4_1(
+				wasm_valtype_new_i32(), // fd
+				wasm_valtype_new_i64(), // offset
+				wasm_valtype_new_i32(), // whence
+				wasm_valtype_new_i32(), // retptr0
+				wasm_valtype_new_i32() // error code (return)
+			);
+			wasm_func_t* fn = wasm_func_new(store, fn_type, &ecsactsi_wasi_fd_seek);
+
+			wasm_functype_delete(fn_type);
+
+			return fn;
+		},
+	},
+	{
+		"fd_write",
+		[](wasm_store_t* store) -> wasm_func_t* {
+			wasm_functype_t* fn_type = wasm_functype_new_4_1(
+				wasm_valtype_new_i32(), // fd
+				wasm_valtype_new_i32(), // iovs
+				wasm_valtype_new_i64(), // iovs_len
+				wasm_valtype_new_i32(), // retptr0
+				wasm_valtype_new_i32() // error code (return)
+			);
+			wasm_func_t* fn = wasm_func_new(store, fn_type, &ecsactsi_wasi_fd_write);
+
+			wasm_functype_delete(fn_type);
+
+			return fn;
+		},
+	},
+	{
+		"fd_read",
+		[](wasm_store_t* store) -> wasm_func_t* {
+			wasm_functype_t* fn_type = wasm_functype_new_4_1(
+				wasm_valtype_new_i32(), // fd
+				wasm_valtype_new_i32(), // iovs
+				wasm_valtype_new_i64(), // iovs_len
+				wasm_valtype_new_i32(), // retptr0
+				wasm_valtype_new_i32() // error code (return)
+			);
+			wasm_func_t* fn = wasm_func_new(store, fn_type, &ecsactsi_wasi_fd_read);
+
+			wasm_functype_delete(fn_type);
+
+			return fn;
+		},
+	},
+	{
+		"fd_close",
+		[](wasm_store_t* store) -> wasm_func_t* {
+			wasm_functype_t* fn_type = wasm_functype_new_1_1(
+				wasm_valtype_new_i32(), // fd
+				wasm_valtype_new_i32() // error code (return)
+			);
+			wasm_func_t* fn = wasm_func_new(store, fn_type, &ecsactsi_wasi_fd_close);
+
+			wasm_functype_delete(fn_type);
+
+			return fn;
+		},
+	},
+	{
+		"environ_sizes_get",
+		[](wasm_store_t* store) -> wasm_func_t* {
+			wasm_functype_t* fn_type = wasm_functype_new_2_1(
+				wasm_valtype_new_i32(), // retptr0
+				wasm_valtype_new_i32(), // retptr1
+				wasm_valtype_new_i32() // error code (return)
+			);
+			wasm_func_t* fn =
+				wasm_func_new(store, fn_type, &ecsactsi_wasi_environ_sizes_get);
+
+			wasm_functype_delete(fn_type);
+
+			return fn;
+		},
+	},
+	{
+		"environ_get",
+		[](wasm_store_t* store) -> wasm_func_t* {
+			wasm_functype_t* fn_type = wasm_functype_new_2_1(
+				wasm_valtype_new_i32(), // environ
+				wasm_valtype_new_i32(), // environ_buf
+				wasm_valtype_new_i32() // error code (return)
+			);
+			wasm_func_t* fn =
+				wasm_func_new(store, fn_type, &ecsactsi_wasi_environ_get);
+
+			wasm_functype_delete(fn_type);
+
+			return fn;
+		},
+	},
+};
 
 wasm_engine_t* engine() {
 	static wasm_engine_t* engine = wasm_engine_new();
