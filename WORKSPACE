@@ -142,9 +142,9 @@ hedron_compile_commands_setup()
 
 http_archive(
     name = "emsdk",
-    sha256 = "28bba9c179854b0f7e548a7adf87173e8cbe098ddfdbe25fa9f5a5875faa0a1a",
-    strip_prefix = "emsdk-589dd6a639ff428852cf998607cf226c5ce12efb/bazel",
-    url = "https://github.com/zaucy/emsdk/archive/589dd6a639ff428852cf998607cf226c5ce12efb.zip",
+    sha256 = "2e9958d05cbb31e4464de23938884db9562c83a3ffc0b0b67ebc29c7f951f384",
+    strip_prefix = "emsdk-64337f3e2615a821e7f4f533d876217a85489f53/bazel",
+    url = "https://github.com/zaucy/emsdk/archive/64337f3e2615a821e7f4f533d876217a85489f53.zip",
 )
 
 load("@emsdk//:deps.bzl", emsdk_deps = "deps")
