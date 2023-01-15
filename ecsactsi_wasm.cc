@@ -9,14 +9,17 @@
 #include <shared_mutex>
 #include <cassert>
 #include <wasm.h>
+#include <wasmer.h>
 #include <cstdlib>
 #include <cstdio>
 #include <functional>
+#include <iostream>
 #include "ecsact/runtime/dynamic.h"
 #include "ecsact/runtime/meta.h"
 
 #include "wasm_ecsact_system_execution.h"
 #include "wasm_ecsact_pointer_map.hh"
+#include "wasm_ecsact_memory.hh"
 #include "ecsactsi_wasi.h"
 
 using namespace std::string_literals;
@@ -325,7 +328,7 @@ const allowed_guest_imports_t allowed_guest_imports{
 			wasm_functype_t* fn_type = wasm_functype_new_4_1(
 				wasm_valtype_new_i32(), // fd
 				wasm_valtype_new_i32(), // iovs
-				wasm_valtype_new_i64(), // iovs_len
+				wasm_valtype_new_i32(), // iovs_len
 				wasm_valtype_new_i32(), // retptr0
 				wasm_valtype_new_i32() // error code (return)
 			);
@@ -342,7 +345,7 @@ const allowed_guest_imports_t allowed_guest_imports{
 			wasm_functype_t* fn_type = wasm_functype_new_4_1(
 				wasm_valtype_new_i32(), // fd
 				wasm_valtype_new_i32(), // iovs
-				wasm_valtype_new_i64(), // iovs_len
+				wasm_valtype_new_i32(), // iovs_len
 				wasm_valtype_new_i32(), // retptr0
 				wasm_valtype_new_i32() // error code (return)
 			);
@@ -401,6 +404,18 @@ const allowed_guest_imports_t allowed_guest_imports{
 	},
 };
 
+static thread_local std::string last_error_message;
+
+static void set_wasmer_last_error_message() {
+	last_error_message.resize(wasmer_last_error_length());
+	if(!last_error_message.empty()) {
+		wasmer_last_error_message(
+			last_error_message.data(),
+			static_cast<int>(last_error_message.size())
+		);
+	}
+}
+
 wasm_engine_t* engine() {
 	static wasm_engine_t* engine = wasm_engine_new();
 	return engine;
@@ -436,7 +451,12 @@ void ecsactsi_wasm_system_impl(ecsact_system_execution_context* ctx) {
 
 	wasm_val_vec_t args = WASM_ARRAY_VEC(as);
 	wasm_val_vec_t results = WASM_EMPTY_VEC;
-	wasm_trap_t*   trap = wasm_func_call(info->system_impl_func, &args, &results);
+
+	ecsactsi_wasm::detail::set_current_wasm_memory(info->system_impl_memory);
+
+	wasm_trap_t* trap = wasm_func_call(info->system_impl_func, &args, &results);
+
+	ecsactsi_wasm::detail::set_current_wasm_memory(nullptr);
 
 	if(trap_handler != nullptr && trap != nullptr) {
 		wasm_message_t trap_msg;
@@ -466,6 +486,26 @@ void ecsactsi_wasm_system_impl(ecsact_system_execution_context* ctx) {
 	set_wasm_ecsact_system_execution_context_memory(ctx, nullptr);
 }
 } // namespace
+
+void ecsactsi_wasm_last_error_message(
+	char*   out_message,
+	int32_t message_max_length
+) {
+	std::copy_n(
+		last_error_message.begin(),
+		std::min(
+			message_max_length,
+			static_cast<int32_t>(last_error_message.size())
+		),
+		out_message
+	);
+
+	last_error_message = "";
+}
+
+int32_t ecsactsi_wasm_last_error_message_length() {
+	return static_cast<int32_t>(last_error_message.size());
+}
 
 ecsact_internal_wasm_system_module_info* get_ecsact_internal_module_info(
 	ecsact_system_like_id sys_id
@@ -497,6 +537,7 @@ ecsactsi_wasm_error ecsactsi_wasm_load(
 		pending_info.system_module = wasm_module_new(pending_info.store, &binary);
 
 		if(!pending_info.system_module) {
+			set_wasmer_last_error_message();
 			return ECSACTSI_WASM_ERR_COMPILE_FAIL;
 		}
 
@@ -550,10 +591,15 @@ ecsactsi_wasm_error ecsactsi_wasm_load(
 			std::string import_name_str(import_name->data, import_name->size);
 
 			if(!allowed_guest_imports.contains(import_name_str)) {
+				last_error_message = "'" + import_name_str +
+					"' is not an allowed guest import. Please see "
+					"https://ecsact.dev/docs/system-impl-wasm";
 				return ECSACTSI_WASM_ERR_GUEST_IMPORT_UNKNOWN;
 			}
 
 			if(import_type_kind != WASM_EXTERN_FUNC) {
+				last_error_message = "'" + import_name_str +
+					"' is the wrong import kind. Expected WASM_EXTERN_FUNC.";
 				return ECSACTSI_WASM_ERR_GUEST_IMPORT_INVALID;
 			}
 
@@ -578,6 +624,7 @@ ecsactsi_wasm_error ecsactsi_wasm_load(
 		);
 
 		if(!pending_info.instance) {
+			set_wasmer_last_error_message();
 			return ECSACTSI_WASM_ERR_INSTANTIATE_FAIL;
 		}
 

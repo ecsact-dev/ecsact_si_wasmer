@@ -92,6 +92,14 @@ typedef enum ecsactsi_wasm_error {
 	ECSACTSI_WASM_ERR_GUEST_IMPORT_INVALID,
 } ecsactsi_wasm_error;
 
+ECSACTSI_WASM_API_FN(void, ecsactsi_wasm_last_error_message)
+( //
+	char*   out_message,
+	int32_t out_message_max_length
+);
+
+ECSACTSI_WASM_API_FN(int32_t, ecsactsi_wasm_last_error_message_length)();
+
 /**
  * Load WASM file at path `wasm_file_path` and call
  * `ecsact_set_system_execution_impl` for the specified `system_ids` matching

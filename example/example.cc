@@ -16,7 +16,13 @@ namespace fs = std::filesystem;
 void print_load_error(ecsactsi_wasm_error err, const std::string& wasm_path) {
 	std::cerr //
 		<< "[ERROR] loading wasm file " << wasm_path
-		<< " failed: " << magic_enum::enum_name(err) << "\n\n";
+		<< " failed: " << magic_enum::enum_name(err) << "\n";
+
+	auto err_msg_len = ecsactsi_wasm_last_error_message_length();
+	auto err_msg = std::string{};
+	err_msg.resize(err_msg_len);
+	ecsactsi_wasm_last_error_message(err_msg.data(), err_msg_len);
+	std::cerr << err_msg << "\n";
 }
 
 std::string system_name(ecsact_system_like_id sys_id) {
@@ -80,6 +86,7 @@ void trap_handler(ecsact_system_like_id system_id, const char* trap_message) {
 	msg += "\n";
 
 	std::cerr << msg;
+	std::cerr.flush();
 }
 
 int main(int argc, char* argv[]) {

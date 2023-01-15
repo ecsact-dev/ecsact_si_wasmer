@@ -18,7 +18,6 @@ cc_binary(
     ],
     copts = copts,
     features = [
-        "wasm_standalone",
         "wasm_no_entry",
         "-wasm_warnings_as_errors",
         "-wasm_error_on_undefined_symbols",
@@ -52,6 +51,7 @@ wasm_cc_binary(
         for system_name in _system_names
     ],
     outputs = ["system_impls.wasm"],
+    standalone = True,
 )
 
 cc_binary(

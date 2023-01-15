@@ -16,6 +16,8 @@ filegroup(
         "ecsactsi_wasm.cc",
         "ecsactsi_wasi.cc",
         "ecsactsi_wasi.h",
+        "wasm_ecsact_memory.cc",
+        "wasm_ecsact_memory.hh",
         "wasm_ecsact_pointer_map.cc",
         "wasm_ecsact_pointer_map.hh",
         "wasm_ecsact_system_execution.cc",
