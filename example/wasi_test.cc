@@ -103,15 +103,11 @@ int main(int argc, char* argv[]) {
 	test_registry.add_component(test_entity, wasi_test::DummyCompnent{});
 
 	ecsactsi_wasm_set_trap_handler(&trap_handler);
+	load_wasm_files(wasm_file_paths);
 
 	for(int i = 0; 10 > i; ++i) {
 		std::cout << "\n==== EXECUTION (" << i << ") ====\n";
-
-		load_wasm_files(wasm_file_paths);
 		ecsact_execute_systems(test_registry.id(), 1, nullptr, nullptr);
-
-		std::cout << "[POST-EXECUTE]: Entity Count="
-							<< ecsact_count_entities(test_registry.id()) << "\n";
 	}
 
 	std::cout << "\n (( Done ))\n";

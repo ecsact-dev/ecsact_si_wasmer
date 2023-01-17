@@ -1,9 +1,15 @@
-#include "ecsactsi_wasi.h"
+#include "ecsactsi_wasi.hh"
 
 #include <cstdio>
+#include <map>
 #include <string_view>
 
 #include "wasm_ecsact_memory.hh"
+#include "ecsactsi_logger.hh"
+
+constexpr int32_t WASI_STDIN_FD = 0;
+constexpr int32_t WASI_STDOUT_FD = 1;
+constexpr int32_t WASI_STDERR_FD = 2;
 
 wasm_trap_t* ecsactsi_wasi_proc_exit(
 	const wasm_val_vec_t* args,
@@ -73,7 +79,7 @@ wasm_trap_t* ecsactsi_wasi_fd_read(
 	wasm_val_vec_t*       results
 ) {
 	results->data[0].kind = WASM_I32;
-	results->data[0].of.i32 = 0;
+	results->data[0].of.i32 = 1;
 
 	return nullptr;
 }
@@ -132,22 +138,66 @@ wasm_trap_t* ecsactsi_wasi_fd_fdstat_get(
 	const wasm_val_vec_t* args,
 	wasm_val_vec_t*       results
 ) {
+	const auto default_fdstats = std::map<int32_t, ecsactsi_wasi_fdstat_t>{
+		{
+			WASI_STDIN_FD,
+			ecsactsi_wasi_fdstat_t{},
+		},
+		{
+			WASI_STDOUT_FD,
+			ecsactsi_wasi_fdstat_t{
+				.fs_filetype = ecsactsi_wasi_filetype::character_device,
+				.fs_flags = {},
+				.fs_rights_base = ecsactsi_wasi_rights::fd_datasync |
+					ecsactsi_wasi_rights::fd_sync | ecsactsi_wasi_rights::fd_write |
+					ecsactsi_wasi_rights::fd_advise |
+					ecsactsi_wasi_rights::fd_filestat_get |
+					ecsactsi_wasi_rights::poll_fd_readwrite,
+				.fs_rights_inheriting = {},
+			},
+		},
+		{
+			WASI_STDERR_FD,
+			ecsactsi_wasi_fdstat_t{
+				.fs_filetype = ecsactsi_wasi_filetype::character_device,
+				.fs_flags = {},
+				.fs_rights_base = ecsactsi_wasi_rights::fd_datasync |
+					ecsactsi_wasi_rights::fd_sync | ecsactsi_wasi_rights::fd_write |
+					ecsactsi_wasi_rights::fd_advise |
+					ecsactsi_wasi_rights::fd_filestat_get |
+					ecsactsi_wasi_rights::poll_fd_readwrite,
+				.fs_rights_inheriting = {},
+			},
+		},
+	};
+
 	auto mem = ecsactsi_wasm::current_wasm_memory_rw();
+
 	assert(args->data[0].kind == WASM_I32);
 	auto fd = args->data[0].of.i32;
+
 	assert(args->data[1].kind == WASM_I32);
 	auto ret = ecsactsi_wasm::wasm_memory_cast<ecsactsi_wasi_fdstat_t>(
 		mem,
 		args->data[1].of.i32
 	);
 
-	ret->fs_filetype = 0;
-	ret->fs_flags = 0;
-	ret->fs_rights_base = 0;
-	ret->fs_rights_inheriting = 0;
+	if(default_fdstats.contains(fd)) {
+		*ret = default_fdstats.at(fd);
+	} else {
+		ret->fs_filetype = {};
+		ret->fs_flags = {};
+		ret->fs_rights_base = {};
+		ret->fs_rights_inheriting = {};
+	}
 
-	results->data[0].kind = WASM_I32;
-	results->data[0].of.i32 = 0;
+	if(ret->fs_filetype != ecsactsi_wasi_filetype::unknown) {
+		results->data[0].kind = WASM_I32;
+		results->data[0].of.i32 = 0;
+	} else {
+		results->data[0].kind = WASM_I32;
+		results->data[0].of.i32 = 1;
+	}
 
 	return nullptr;
 }

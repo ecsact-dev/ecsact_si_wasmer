@@ -146,6 +146,9 @@ ecsact_entt_runtime(
         "//:sources",
     ],
     copts = copts,
+    data = [
+        ":{}__system_impl.wasm".format(wasi_test),
+    ],
     defines = ["ECSACTSI_WASM_API="],
     deps = [
         ":wasi_test_runtime",

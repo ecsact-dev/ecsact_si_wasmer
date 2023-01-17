@@ -20,7 +20,8 @@
 #include "wasm_ecsact_system_execution.h"
 #include "wasm_ecsact_pointer_map.hh"
 #include "wasm_ecsact_memory.hh"
-#include "ecsactsi_wasi.h"
+#include "ecsactsi_wasi.hh"
+#include "ecsactsi_logger.hh"
 
 using namespace std::string_literals;
 
@@ -490,7 +491,22 @@ void ecsactsi_wasm_system_impl(ecsact_system_execution_context* ctx) {
 	if(trap_handler != nullptr && trap != nullptr) {
 		wasm_message_t trap_msg;
 		wasm_trap_message(trap, &trap_msg);
-		std::string trap_msg_str{trap_msg.data, trap_msg.size};
+		auto trap_msg_str = std::string{trap_msg.data, trap_msg.size - 1};
+		auto origin = wasm_trap_origin(trap);
+
+		if(origin != nullptr) {
+			auto frame_inst = wasm_frame_instance(origin);
+			auto module_offset = wasm_frame_module_offset(origin);
+			auto fn_index = wasm_frame_func_index(origin);
+			auto fn_offset = wasm_frame_func_offset(origin);
+
+			trap_msg_str += " (func_index=" + std::to_string(fn_index) + ", ";
+			trap_msg_str += "func_offset=" + std::to_string(fn_offset) + ")";
+			wasm_frame_delete(origin);
+		} else {
+			trap_msg_str += " (unknown trap origin)";
+		}
+
 		trap_handler(system_id, trap_msg_str.c_str());
 	}
 
@@ -543,6 +559,16 @@ ecsact_internal_wasm_system_module_info* get_ecsact_internal_module_info(
 	return &modules.at(sys_id);
 }
 
+void ecsactsi_wasm_initialize_module(
+	ecsact_internal_wasm_system_module_info& info,
+	wasm_func_t*                             init_fn
+) {
+	wasm_val_vec_t args = WASM_EMPTY_VEC;
+	wasm_val_vec_t results = WASM_EMPTY_VEC;
+
+	wasm_func_call(init_fn, &args, &results);
+}
+
 ecsactsi_wasm_error ecsactsi_wasm_load(
 	char*                  wasm_data,
 	int                    wasm_data_size,
@@ -576,6 +602,7 @@ ecsactsi_wasm_error ecsactsi_wasm_load(
 		wasm_module_exports(pending_info.system_module, &exports);
 		int  system_impl_export_memory_index = -1;
 		int  system_impl_export_function_index = -1;
+		int  module_initialize_function_index = -1;
 		bool found_all_exports = false;
 
 		for(size_t expi = 0; exports.size > expi; ++expi) {
@@ -595,10 +622,13 @@ ecsactsi_wasm_error ecsactsi_wasm_load(
 				}
 
 				system_impl_export_function_index = expi;
+			} else if(export_name_str == "_initialize") {
+				module_initialize_function_index = expi;
 			}
 
 			found_all_exports = system_impl_export_memory_index != -1 &&
-				system_impl_export_function_index != -1;
+				system_impl_export_function_index != -1 &&
+				module_initialize_function_index != -1;
 
 			if(found_all_exports) {
 				break;
@@ -681,6 +711,18 @@ ecsactsi_wasm_error ecsactsi_wasm_load(
 			auto mem_extern = inst_exports.data[system_impl_export_memory_index];
 			pending_info.system_impl_memory = wasm_extern_as_memory(mem_extern);
 		}
+
+		if(module_initialize_function_index != -1) {
+			ecsactsi_wasm::detail::set_current_wasm_memory(
+				pending_info.system_impl_memory
+			);
+			auto init_fn = inst_exports.data[module_initialize_function_index];
+			ecsactsi_wasm_initialize_module(
+				pending_info,
+				wasm_extern_as_func(init_fn)
+			);
+			ecsactsi_wasm::detail::set_current_wasm_memory(nullptr);
+		}
 	}
 
 	{
@@ -754,4 +796,20 @@ void ecsactsi_wasm_reset() {
 	}
 	modules.clear();
 	trap_handler = nullptr;
+}
+
+void ecsactsi_wasm_consume_logs(
+	ecsactsi_wasm_log_consumer consumer,
+	void*                      consumer_user_data
+) {
+	auto t = ecsactsi_wasm::detail::start_transaction();
+	for(auto& entry : ecsactsi_wasm::detail::get_log_lines(t)) {
+		consumer(
+			entry.log_level,
+			entry.message.c_str(),
+			static_cast<int32_t>(entry.message.size()),
+			consumer_user_data
+		);
+	}
+	ecsactsi_wasm::detail::clear_log_lines(t);
 }

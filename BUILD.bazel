@@ -13,9 +13,11 @@ filegroup(
 filegroup(
     name = "sources",
     srcs = [
-        "ecsactsi_wasm.cc",
+        "ecsactsi_logger.cc",
+        "ecsactsi_logger.hh",
         "ecsactsi_wasi.cc",
-        "ecsactsi_wasi.h",
+        "ecsactsi_wasi.hh",
+        "ecsactsi_wasm.cc",
         "wasm_ecsact_memory.cc",
         "wasm_ecsact_memory.hh",
         "wasm_ecsact_pointer_map.cc",
@@ -47,7 +49,14 @@ refresh_compile_commands(
     targets = {
         "//:ecsactsi_wasm": "",
         "//example:runtime": "",
+        "//example:wasi_test_runtime": "",
         "//example:system_impls": "",
         "//example:wasmer_example": "",
+        "//example:iostream__system_impl": "",
+        "//example:iostream__wasi": "",
+        "//example:printf__system_impl": "",
+        "//example:printf__wasi": "",
+        "//example:puts__system_impl": "",
+        "//example:puts__wasi": "",
     },
 )

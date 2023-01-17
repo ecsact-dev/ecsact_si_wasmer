@@ -1,5 +1,17 @@
 {
 	"version": "0.2.0",
+	"inputs": [
+		{
+			"id": "wasi_test",
+			"type": "pickString",
+			"options": [
+				"iostream",
+				"printf",
+				"puts"
+			],
+			"description": "Which WASI test to run?"
+		}
+	],
 	"configurations": [
 		{
 			"name": "//example:wasmer_example",
@@ -11,11 +23,28 @@
 				"program": "${workspaceFolder}/bazel-bin/example/wasmer_example.exe"
 			},
 			"args": [
-				// "${workspaceFolder}/bazel-bin/example/system_impls.wasm"
-				"C:/Users/zekew/projects/zaucy/test/test.wasm"
+				"${workspaceFolder}/bazel-bin/example/system_impls.wasm"
 			],
 			"cwd": "${workspaceFolder}",
 			"preLaunchTask": "build //example:wasmer_example",
+			"sourceFileMap": {
+				"E:/.cache/bazel/output_base/execroot/ecsactsi_wasm": "${workspaceFolder}"
+			}
+		},
+		{
+			"name": "WASI Test",
+			"type": "cppdbg",
+			"request": "launch",
+			"program": "${workspaceFolder}/bazel-bin/example/${input:wasi_test}__wasi_test",
+			"windows": {
+				"type": "cppvsdbg",
+				"program": "${workspaceFolder}/bazel-bin/example/${input:wasi_test}__wasi.exe"
+			},
+			"args": [
+				"${workspaceFolder}/bazel-bin/example/${input:wasi_test}__system_impl.wasm"
+			],
+			"cwd": "${workspaceFolder}",
+			"preLaunchTask": "build //example/...",
 			"sourceFileMap": {
 				"E:/.cache/bazel/output_base/execroot/ecsactsi_wasm": "${workspaceFolder}"
 			}
