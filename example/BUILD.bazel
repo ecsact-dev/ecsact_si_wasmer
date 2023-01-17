@@ -89,3 +89,85 @@ cc_test(
         ":wasmer_example",
     ],
 )
+
+###############################################
+# WASI TESTS                                  #
+###############################################
+
+# keep sorted
+_WASI_TESTS = [
+    "iostream",
+    "printf",
+    "puts",
+]
+
+ecsact_entt_runtime(
+    name = "wasi_test_runtime",
+    srcs = ["wasi_test.ecsact"],
+    ECSACT_ENTT_RUNTIME_PACKAGE = "::wasi_test::package",
+    ECSACT_ENTT_RUNTIME_USER_HEADER = "wasi_test.ecsact.meta.hh",
+    system_impls = ["dynamic"],
+)
+
+[cc_binary(
+    name = "{}__system_impl".format(wasi_test),
+    srcs = ["wasi_test_{}.cc".format(wasi_test)],
+    copts = copts,
+    features = [
+        "wasm_no_entry",
+        "-wasm_warnings_as_errors",
+        "-wasm_error_on_undefined_symbols",
+        "-exceptions",
+    ],
+    linkshared = True,
+    tags = ["manual"],
+    deps = [
+        ":wasi_test_runtime__public_cc",
+        "@ecsact_lang_cpp//:execution_context",
+        "@ecsact_lang_cpp//:support",
+        "@ecsact_runtime//:common",
+        "@ecsact_runtime//:dynamic",
+    ],
+) for wasi_test in _WASI_TESTS]
+
+[wasm_cc_binary(
+    name = "{}__system_impl_wasm".format(wasi_test),
+    backend = "llvm",
+    cc_target = ":{}__system_impl".format(wasi_test),
+    exported_functions = ["_wasi_test__WasiTestSystem"],
+    outputs = ["{}__system_impl.wasm".format(wasi_test)],
+    standalone = True,
+) for wasi_test in _WASI_TESTS]
+
+[cc_binary(
+    name = "{}__wasi".format(wasi_test),
+    srcs = [
+        "wasi_test.cc",
+        "//:sources",
+    ],
+    copts = copts,
+    defines = ["ECSACTSI_WASM_API="],
+    deps = [
+        ":wasi_test_runtime",
+        "//:ecsactsi_wasm",
+        "@ecsact_runtime//:core",
+        "@ecsact_runtime//:dynamic",
+        "@ecsact_runtime//:meta",
+        "@magic_enum",
+        "@wasmer//:wasmer-c-api",
+    ],
+) for wasi_test in _WASI_TESTS]
+
+[cc_test(
+    name = "{}__wasi_test".format(wasi_test),
+    srcs = ["test.cc"],
+    args = [
+        "--exe=$(location :{}__wasi)".format(wasi_test),
+        "$(location :{}__system_impl.wasm)".format(wasi_test),
+    ],
+    copts = copts,
+    data = [
+        ":{}__system_impl.wasm".format(wasi_test),
+        ":{}__wasi".format(wasi_test),
+    ],
+) for wasi_test in _WASI_TESTS]
