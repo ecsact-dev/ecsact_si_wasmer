@@ -9,15 +9,42 @@
  */
 typedef struct ecsactsi_wasi_ciovec_t {
 	/**
-	 * The address of the buffer to be written.
+	 * The guest pointer of the buffer to be written.
 	 */
-	const uint8_t* buf;
+	int32_t buf;
 
 	/**
 	 * The length of the buffer to be written.
 	 */
-	size_t buf_len;
+	int32_t buf_len;
 } ecsactsi_wasi_ciovec_t;
+
+typedef struct ecsactsi_wasi_fdstat_t {
+	/**
+	 * File type.
+	 */
+	uint8_t fs_filetype;
+
+	/**
+	 * File descriptor flags.
+	 */
+	uint16_t fs_flags;
+
+	/**
+	 * Rights that apply to this file descriptor.
+	 */
+	uint64_t fs_rights_base;
+
+	/**
+	 * Maximum set of rights that may be installed on new file descriptors that
+	 * are created through this file descriptor, e.g., through `path_open`.
+	 */
+	uint64_t fs_rights_inheriting;
+
+} ecsactsi_wasi_fdstat_t;
+
+static_assert(sizeof(ecsactsi_wasi_fdstat_t) == 24);
+static_assert(sizeof(ecsactsi_wasi_ciovec_t) == 8);
 
 /**
  * Ecsact system implementation exited prematurely. Unlike normal usage of this
@@ -87,6 +114,11 @@ wasm_trap_t* ecsactsi_wasi_environ_sizes_get(
 // uint16_t ecsactsi_wasi_environ_get(uint8_t** environ, uint8_t* environ_buf);
 
 wasm_trap_t* ecsactsi_wasi_environ_get(
+	const wasm_val_vec_t* args,
+	wasm_val_vec_t*       results
+);
+
+wasm_trap_t* ecsactsi_wasi_fd_fdstat_get(
 	const wasm_val_vec_t* args,
 	wasm_val_vec_t*       results
 );

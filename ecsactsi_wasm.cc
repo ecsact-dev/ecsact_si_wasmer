@@ -78,15 +78,20 @@ struct wasm_file_binary {
 	}
 };
 
-std::shared_mutex modules_mutex;
-std::map<ecsact_system_like_id, ecsact_internal_wasm_system_module_info>
-													 modules;
-ecsactsi_wasm_trap_handler trap_handler;
+auto modules_mutex = std::shared_mutex{};
+auto modules =
+	std::map<ecsact_system_like_id, ecsact_internal_wasm_system_module_info>{};
+auto trap_handler = ecsactsi_wasm_trap_handler{};
 
-using allowed_guest_imports_t =
-	std::unordered_map<std::string, std::function<wasm_func_t*(wasm_store_t*)>>;
+using allowed_guest_imports_t = std::unordered_map<
+	std::string, // Function name
+	std::function<wasm_func_t*(wasm_store_t*)>>;
 
-const allowed_guest_imports_t allowed_guest_imports{
+using allowed_guest_modules_t = std::unordered_map<
+	std::string, // Module name
+	allowed_guest_imports_t>;
+
+const auto guest_env_module_imports = allowed_guest_imports_t{
 	{
 		"ecsact_system_execution_context_action",
 		[](wasm_store_t* store) -> wasm_func_t* {
@@ -100,7 +105,7 @@ const allowed_guest_imports_t allowed_guest_imports{
 				&wasm_ecsact_system_execution_context_action
 			);
 
-			wasm_functype_delete(fn_type);
+			// wasm_functype_delete(fn_type);
 
 			return fn;
 		},
@@ -118,7 +123,7 @@ const allowed_guest_imports_t allowed_guest_imports{
 				&wasm_ecsact_system_execution_context_parent
 			);
 
-			wasm_functype_delete(fn_type);
+			// wasm_functype_delete(fn_type);
 
 			return fn;
 		},
@@ -137,7 +142,7 @@ const allowed_guest_imports_t allowed_guest_imports{
 				&wasm_ecsact_system_execution_context_same
 			);
 
-			wasm_functype_delete(fn_type);
+			// wasm_functype_delete(fn_type);
 
 			return fn;
 		},
@@ -156,7 +161,7 @@ const allowed_guest_imports_t allowed_guest_imports{
 				&wasm_ecsact_system_execution_context_get
 			);
 
-			wasm_functype_delete(fn_type);
+			// wasm_functype_delete(fn_type);
 
 			return fn;
 		},
@@ -175,7 +180,7 @@ const allowed_guest_imports_t allowed_guest_imports{
 				&wasm_ecsact_system_execution_context_update
 			);
 
-			wasm_functype_delete(fn_type);
+			// wasm_functype_delete(fn_type);
 
 			return fn;
 		},
@@ -193,7 +198,7 @@ const allowed_guest_imports_t allowed_guest_imports{
 				&wasm_ecsact_system_execution_context_has
 			);
 
-			wasm_functype_delete(fn_type);
+			// wasm_functype_delete(fn_type);
 
 			return fn;
 		},
@@ -213,7 +218,7 @@ const allowed_guest_imports_t allowed_guest_imports{
 				&wasm_ecsact_system_execution_context_generate
 			);
 
-			wasm_functype_delete(fn_type);
+			// wasm_functype_delete(fn_type);
 
 			return fn;
 		},
@@ -232,7 +237,7 @@ const allowed_guest_imports_t allowed_guest_imports{
 				&wasm_ecsact_system_execution_context_add
 			);
 
-			wasm_functype_delete(fn_type);
+			// wasm_functype_delete(fn_type);
 
 			return fn;
 		},
@@ -250,7 +255,7 @@ const allowed_guest_imports_t allowed_guest_imports{
 				&wasm_ecsact_system_execution_context_remove
 			);
 
-			wasm_functype_delete(fn_type);
+			// wasm_functype_delete(fn_type);
 
 			return fn;
 		},
@@ -269,7 +274,7 @@ const allowed_guest_imports_t allowed_guest_imports{
 				&wasm_ecsact_system_execution_context_other
 			);
 
-			wasm_functype_delete(fn_type);
+			// wasm_functype_delete(fn_type);
 
 			return fn;
 		},
@@ -287,11 +292,14 @@ const allowed_guest_imports_t allowed_guest_imports{
 				&wasm_ecsact_system_execution_context_entity
 			);
 
-			wasm_functype_delete(fn_type);
+			// wasm_functype_delete(fn_type);
 
 			return fn;
 		},
 	},
+};
+
+const auto guest_wasi_module_imports = allowed_guest_imports_t{
 	{
 		"proc_exit",
 		[](wasm_store_t* store) -> wasm_func_t* {
@@ -300,7 +308,7 @@ const allowed_guest_imports_t allowed_guest_imports{
 				);
 			wasm_func_t* fn = wasm_func_new(store, fn_type, &ecsactsi_wasi_proc_exit);
 
-			wasm_functype_delete(fn_type);
+			// wasm_functype_delete(fn_type);
 
 			return fn;
 		},
@@ -317,7 +325,7 @@ const allowed_guest_imports_t allowed_guest_imports{
 			);
 			wasm_func_t* fn = wasm_func_new(store, fn_type, &ecsactsi_wasi_fd_seek);
 
-			wasm_functype_delete(fn_type);
+			// wasm_functype_delete(fn_type);
 
 			return fn;
 		},
@@ -334,7 +342,7 @@ const allowed_guest_imports_t allowed_guest_imports{
 			);
 			wasm_func_t* fn = wasm_func_new(store, fn_type, &ecsactsi_wasi_fd_write);
 
-			wasm_functype_delete(fn_type);
+			// wasm_functype_delete(fn_type);
 
 			return fn;
 		},
@@ -351,7 +359,7 @@ const allowed_guest_imports_t allowed_guest_imports{
 			);
 			wasm_func_t* fn = wasm_func_new(store, fn_type, &ecsactsi_wasi_fd_read);
 
-			wasm_functype_delete(fn_type);
+			// wasm_functype_delete(fn_type);
 
 			return fn;
 		},
@@ -365,7 +373,7 @@ const allowed_guest_imports_t allowed_guest_imports{
 			);
 			wasm_func_t* fn = wasm_func_new(store, fn_type, &ecsactsi_wasi_fd_close);
 
-			wasm_functype_delete(fn_type);
+			// wasm_functype_delete(fn_type);
 
 			return fn;
 		},
@@ -381,7 +389,7 @@ const allowed_guest_imports_t allowed_guest_imports{
 			wasm_func_t* fn =
 				wasm_func_new(store, fn_type, &ecsactsi_wasi_environ_sizes_get);
 
-			wasm_functype_delete(fn_type);
+			// wasm_functype_delete(fn_type);
 
 			return fn;
 		},
@@ -397,11 +405,32 @@ const allowed_guest_imports_t allowed_guest_imports{
 			wasm_func_t* fn =
 				wasm_func_new(store, fn_type, &ecsactsi_wasi_environ_get);
 
-			wasm_functype_delete(fn_type);
+			// wasm_functype_delete(fn_type);
 
 			return fn;
 		},
 	},
+	{
+		"fd_fdstat_get",
+		[](wasm_store_t* store) -> wasm_func_t* {
+			wasm_functype_t* fn_type = wasm_functype_new_2_1(
+				wasm_valtype_new_i32(), // fd
+				wasm_valtype_new_i32(), // retptr0
+				wasm_valtype_new_i32() // error code (return)
+			);
+			wasm_func_t* fn =
+				wasm_func_new(store, fn_type, &ecsactsi_wasi_fd_fdstat_get);
+
+			// wasm_functype_delete(fn_type);
+
+			return fn;
+		},
+	},
+};
+
+const auto allowed_guest_modules = allowed_guest_modules_t{
+	{"env", guest_env_module_imports},
+	{"wasi_snapshot_preview1", guest_wasi_module_imports},
 };
 
 static thread_local std::string last_error_message;
@@ -583,15 +612,26 @@ ecsactsi_wasm_error ecsactsi_wasm_load(
 		std::vector<wasm_extern_t*> externs;
 		externs.reserve(std::min(static_cast<size_t>(8), imports.size));
 		for(size_t impi = 0; imports.size > impi; ++impi) {
+			auto import_module = wasm_importtype_module(imports.data[impi]);
 			auto import_name = wasm_importtype_name(imports.data[impi]);
 			auto import_type = wasm_importtype_type(imports.data[impi]);
 			auto import_type_kind =
 				static_cast<wasm_externkind_enum>(wasm_externtype_kind(import_type));
 
-			std::string import_name_str(import_name->data, import_name->size);
+			auto import_name_str = std::string(import_name->data, import_name->size);
+			auto module_name_str =
+				std::string(import_module->data, import_module->size);
 
-			if(!allowed_guest_imports.contains(import_name_str)) {
-				last_error_message = "'" + import_name_str +
+			if(!allowed_guest_modules.contains(module_name_str)) {
+				last_error_message =
+					"'" + module_name_str + "' is not an allowed guest import module";
+				return ECSACTSI_WASM_ERR_GUEST_IMPORT_UNKNOWN;
+			}
+
+			auto allowed_imports = allowed_guest_modules.at(module_name_str);
+
+			if(!allowed_imports.contains(import_name_str)) {
+				last_error_message = "'" + module_name_str + "'.'" + import_name_str +
 					"' is not an allowed guest import. Please see "
 					"https://ecsact.dev/docs/system-impl-wasm";
 				return ECSACTSI_WASM_ERR_GUEST_IMPORT_UNKNOWN;
@@ -604,7 +644,7 @@ ecsactsi_wasm_error ecsactsi_wasm_load(
 			}
 
 			auto guest_import_fn =
-				allowed_guest_imports.at(import_name_str)(pending_info.store);
+				allowed_imports.at(import_name_str)(pending_info.store);
 			externs.push_back(wasm_func_as_extern(guest_import_fn));
 
 			// TODO(zaucy): Determine if we need to delete function here or later

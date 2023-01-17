@@ -50,7 +50,10 @@ wasm_cc_binary(
         "_example__%s" % system_name
         for system_name in _system_names
     ],
-    outputs = ["system_impls.wasm"],
+    outputs = [
+        "system_impls.wasm",
+        "system_impls.debug.wasm",
+    ],
     standalone = True,
 )
 

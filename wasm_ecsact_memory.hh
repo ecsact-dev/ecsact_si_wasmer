@@ -2,6 +2,7 @@
 
 #include <wasm.h>
 #include <stdint.h>
+#include <cassert>
 
 namespace ecsactsi_wasm {
 

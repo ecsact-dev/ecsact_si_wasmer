@@ -89,38 +89,7 @@ void trap_handler(ecsact_system_like_id system_id, const char* trap_message) {
 	std::cerr.flush();
 }
 
-int main(int argc, char* argv[]) {
-	std::vector<std::string> wasm_file_paths;
-
-	for(int i = 1; argc > i; ++i) {
-		std::string arg(argv[i]);
-
-		if(arg.starts_with('-')) {
-			std::cerr << "[ERROR] Unknown arg: " << arg << "\n";
-			return 1;
-		} else {
-			wasm_file_paths.push_back(arg);
-		}
-	}
-
-	if(wasm_file_paths.empty()) {
-		std::cerr << "[ERROR] Nothing to do.\n";
-		return 1;
-	}
-
-	for(auto& wasm_path : wasm_file_paths) {
-		if(!fs::exists(wasm_path)) {
-			std::cerr << "[ERROR] " << wasm_path << " does not exist\n";
-			return 1;
-		}
-	}
-
-	ecsact::core::registry test_registry("Test Registry");
-
-	auto test_entity = test_registry.create_entity();
-	test_registry.add_component(test_entity, example::Spawner{});
-	test_registry.add_component(test_entity, example::ExampleComponent{});
-
+auto load_wasm_files(const std::vector<std::string>& wasm_file_paths) {
 	for(auto& wasm_path : wasm_file_paths) {
 		std::vector<ecsact_system_like_id> system_ids{
 			ecsact_id_cast<ecsact_system_like_id>(example::ExampleSystem::id),
@@ -149,11 +118,50 @@ int main(int argc, char* argv[]) {
 
 		if(err != ECSACTSI_WASM_OK) {
 			print_load_error(err, wasm_path);
-			return 2;
+			return std::exit(2);
 		}
 
 		std::cout << "Loaded " << wasm_path << " successfully!\n";
 	}
+}
+
+auto parse_args(int argc, char* argv[]) -> std::vector<std::string> {
+	auto wasm_file_paths = std::vector<std::string>{};
+
+	for(int i = 1; argc > i; ++i) {
+		std::string arg(argv[i]);
+
+		if(arg.starts_with('-')) {
+			std::cerr << "[ERROR] Unknown arg: " << arg << "\n";
+			std::exit(1);
+		} else {
+			wasm_file_paths.push_back(arg);
+		}
+	}
+
+	if(wasm_file_paths.empty()) {
+		std::cerr << "[ERROR] Nothing to do.\n";
+		std::exit(1);
+	}
+
+	for(auto& wasm_path : wasm_file_paths) {
+		if(!fs::exists(wasm_path)) {
+			std::cerr << "[ERROR] " << wasm_path << " does not exist\n";
+			std::exit(1);
+		}
+	}
+
+	return wasm_file_paths;
+}
+
+int main(int argc, char* argv[]) {
+	auto wasm_file_paths = parse_args(argc, argv);
+
+	ecsact::core::registry test_registry("Test Registry");
+
+	auto test_entity = test_registry.create_entity();
+	test_registry.add_component(test_entity, example::Spawner{});
+	test_registry.add_component(test_entity, example::ExampleComponent{});
 
 	ecsactsi_wasm_set_trap_handler(&trap_handler);
 
@@ -169,6 +177,7 @@ int main(int argc, char* argv[]) {
 			.remove_callback_user_data = nullptr,
 		};
 
+		load_wasm_files(wasm_file_paths);
 		ecsact_execute_systems(test_registry.id(), 1, nullptr, &ev_collector);
 
 		std::cout << "[POST-EXECUTE]: Entity Count="

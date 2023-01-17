@@ -11,7 +11,8 @@
 				"program": "${workspaceFolder}/bazel-bin/example/wasmer_example.exe"
 			},
 			"args": [
-				"${workspaceFolder}/bazel-bin/example/system_impls.wasm"
+				// "${workspaceFolder}/bazel-bin/example/system_impls.wasm"
+				"C:/Users/zekew/projects/zaucy/test/test.wasm"
 			],
 			"cwd": "${workspaceFolder}",
 			"preLaunchTask": "build //example:wasmer_example",
