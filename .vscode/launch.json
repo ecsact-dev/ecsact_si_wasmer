@@ -7,7 +7,8 @@
 			"options": [
 				"iostream",
 				"printf",
-				"puts"
+				"puts",
+				"read_file"
 			],
 			"description": "Which WASI test to run?"
 		}
@@ -42,6 +43,23 @@
 			},
 			"args": [
 				"${workspaceFolder}/bazel-bin/example/${input:wasi_test}__system_impl.wasm"
+			],
+			"cwd": "${workspaceFolder}",
+			"preLaunchTask": "build //example/...",
+			"sourceFileMap": {
+				"E:/.cache/bazel/output_base/execroot/ecsactsi_wasm": "${workspaceFolder}"
+			}
+		},
+		{
+			"name": "//ecsactsi_wasm_tester:ecsactsi_wasm_tester",
+			"type": "cppdbg",
+			"request": "launch",
+			"program": "${workspaceFolder}/bazel-bin/ecsactsi_wasm_tester/ecsactsi_wasm_tester",
+			"windows": {
+				"type": "cppvsdbg",
+				"program": "${workspaceFolder}/bazel-bin/ecsactsi_wasm_tester/ecsactsi_wasm_tester.exe"
+			},
+			"args": [
 			],
 			"cwd": "${workspaceFolder}",
 			"preLaunchTask": "build //example/...",

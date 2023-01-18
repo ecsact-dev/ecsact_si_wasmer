@@ -3,6 +3,8 @@ load("//bazel:copts.bzl", "copts")
 load("@emsdk//emscripten_toolchain:wasm_rules.bzl", "wasm_cc_binary")
 load("@ecsact_rt_entt//runtime:index.bzl", "ecsact_entt_runtime")
 
+package(default_visibility = ["//:__subpackages__"])
+
 ecsact_entt_runtime(
     name = "runtime",
     srcs = ["example.ecsact"],
@@ -99,6 +101,7 @@ _WASI_TESTS = [
     "iostream",
     "printf",
     "puts",
+    "read_file",
 ]
 
 ecsact_entt_runtime(
@@ -148,6 +151,7 @@ ecsact_entt_runtime(
     copts = copts,
     data = [
         ":{}__system_impl.wasm".format(wasi_test),
+        "wasi_test_file.txt",
     ],
     defines = ["ECSACTSI_WASM_API="],
     deps = [
@@ -172,5 +176,6 @@ ecsact_entt_runtime(
     data = [
         ":{}__system_impl.wasm".format(wasi_test),
         ":{}__wasi".format(wasi_test),
+        "wasi_test_file.txt",
     ],
 ) for wasi_test in _WASI_TESTS]

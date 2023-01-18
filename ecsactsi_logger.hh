@@ -14,8 +14,8 @@ struct log_line_entry {
 };
 
 class log_transaction {
-	std::unique_lock<std::mutex> _lk;
-	log_transaction(std::mutex& m);
+	std::unique_lock<std::recursive_mutex> _lk;
+	log_transaction(std::recursive_mutex& m);
 	friend auto start_transaction() -> log_transaction;
 
 public:

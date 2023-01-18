@@ -1,11 +1,11 @@
 #include "ecsactsi_wasm.h"
 #include "ecsactsi_logger.hh"
 
-static auto _logger_mutex = std::mutex{};
+static auto _logger_mutex = std::recursive_mutex{};
 static auto _logger_entries =
 	std::vector<ecsactsi_wasm::detail::log_line_entry>{};
 
-ecsactsi_wasm::detail::log_transaction::log_transaction(std::mutex& m)
+ecsactsi_wasm::detail::log_transaction::log_transaction(std::recursive_mutex& m)
 	: _lk(m) {
 }
 

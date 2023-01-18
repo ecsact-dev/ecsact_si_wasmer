@@ -196,4 +196,15 @@ ECSACTSI_WASM_API_FN(void, ecsactsi_wasm_consume_logs)
 	void*                      consumer_user_data
 );
 
+/**
+ * Expose a file on the host for read access during initialization.
+ */
+ECSACTSI_WASM_API_FN(int32_t, ecsactsi_wasm_allow_file_read_access)
+( //
+	const char* real_file_path,
+	int32_t     real_file_path_length,
+	const char* virtual_file_path,
+	int32_t     virtual_file_path_length
+);
+
 #endif // ECSACTSI_WASM_H

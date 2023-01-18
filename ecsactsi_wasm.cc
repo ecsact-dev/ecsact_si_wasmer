@@ -495,8 +495,6 @@ void ecsactsi_wasm_system_impl(ecsact_system_execution_context* ctx) {
 		auto origin = wasm_trap_origin(trap);
 
 		if(origin != nullptr) {
-			auto frame_inst = wasm_frame_instance(origin);
-			auto module_offset = wasm_frame_module_offset(origin);
 			auto fn_index = wasm_frame_func_index(origin);
 			auto fn_offset = wasm_frame_func_offset(origin);
 
@@ -561,12 +559,34 @@ ecsact_internal_wasm_system_module_info* get_ecsact_internal_module_info(
 
 void ecsactsi_wasm_initialize_module(
 	ecsact_internal_wasm_system_module_info& info,
-	wasm_func_t*                             init_fn
+	std::vector<wasm_func_t*>                init_fns
 ) {
 	wasm_val_vec_t args = WASM_EMPTY_VEC;
 	wasm_val_vec_t results = WASM_EMPTY_VEC;
 
-	wasm_func_call(init_fn, &args, &results);
+	for(auto init_fn : init_fns) {
+		auto trap = wasm_func_call(init_fn, &args, &results);
+
+		if(trap_handler != nullptr && trap != nullptr) {
+			wasm_message_t trap_msg;
+			wasm_trap_message(trap, &trap_msg);
+			auto trap_msg_str = std::string{trap_msg.data, trap_msg.size - 1};
+			auto origin = wasm_trap_origin(trap);
+
+			if(origin != nullptr) {
+				auto fn_index = wasm_frame_func_index(origin);
+				auto fn_offset = wasm_frame_func_offset(origin);
+
+				trap_msg_str += " (func_index=" + std::to_string(fn_index) + ", ";
+				trap_msg_str += "func_offset=" + std::to_string(fn_offset) + ")";
+				wasm_frame_delete(origin);
+			} else {
+				trap_msg_str += " (unknown trap origin)";
+			}
+
+			trap_handler((ecsact_system_like_id)-1, trap_msg_str.c_str());
+		}
+	}
 }
 
 ecsactsi_wasm_error ecsactsi_wasm_load(
@@ -624,14 +644,6 @@ ecsactsi_wasm_error ecsactsi_wasm_load(
 				system_impl_export_function_index = expi;
 			} else if(export_name_str == "_initialize") {
 				module_initialize_function_index = expi;
-			}
-
-			found_all_exports = system_impl_export_memory_index != -1 &&
-				system_impl_export_function_index != -1 &&
-				module_initialize_function_index != -1;
-
-			if(found_all_exports) {
-				break;
 			}
 		}
 
@@ -712,17 +724,18 @@ ecsactsi_wasm_error ecsactsi_wasm_load(
 			pending_info.system_impl_memory = wasm_extern_as_memory(mem_extern);
 		}
 
+		auto init_fns = std::vector<wasm_func_t*>{};
+
 		if(module_initialize_function_index != -1) {
-			ecsactsi_wasm::detail::set_current_wasm_memory(
-				pending_info.system_impl_memory
-			);
 			auto init_fn = inst_exports.data[module_initialize_function_index];
-			ecsactsi_wasm_initialize_module(
-				pending_info,
-				wasm_extern_as_func(init_fn)
-			);
-			ecsactsi_wasm::detail::set_current_wasm_memory(nullptr);
+			init_fns.push_back(wasm_extern_as_func(init_fn));
 		}
+
+		ecsactsi_wasm::detail::set_current_wasm_memory(
+			pending_info.system_impl_memory
+		);
+		ecsactsi_wasm_initialize_module(pending_info, init_fns);
+		ecsactsi_wasm::detail::set_current_wasm_memory(nullptr);
 	}
 
 	{

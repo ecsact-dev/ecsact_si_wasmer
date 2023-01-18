@@ -14,8 +14,6 @@ void example::ExampleSystem::impl(context& ctx) {
 	auto comp = ctx.get<example::ExampleComponent>();
 	comp.num += 1;
 	ctx.update(comp);
-	// std::cout << "Entity ID (" << std::to_string((int)ctx.entity()) << ")\n";
-	std::printf("hello, world!!!!\n");
 }
 
 void example__Generator(ecsact_system_execution_context* c_ctx) {
