@@ -96,8 +96,10 @@ auto main(int argc, char* argv[]) -> int {
 			auto trap = wasm_func_call(info.system_impl_func, &args, &result);
 			if(trap) {
 				std::cerr //
-					<< "[Wasm Trap During Execution]: "
-					<< ecsactsi_wasm::detail::trap_message(trap) << "\n";
+					<< "[Wasm Trap During Execution (" << static_cast<int32_t>(system_id)
+					<< ")]: " << ecsactsi_wasm::detail::trap_message(trap) << "\n";
+
+				wasm_trap_delete(trap);
 			}
 
 			ecsactsi_wasm::detail::set_current_wasm_memory(nullptr);

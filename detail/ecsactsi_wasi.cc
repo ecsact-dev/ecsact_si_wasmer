@@ -54,7 +54,7 @@ wasm_trap_t* ecsactsi_wasi_fd_write(
 
 	auto f = fd == 1 ? stdout : stderr;
 
-	*out_write_amount = 0;
+	auto write_amount = size_t{};
 
 	for(int i = 0; iovec_len > i; ++i) {
 		auto io = iovec[i];
@@ -62,11 +62,13 @@ wasm_trap_t* ecsactsi_wasi_fd_write(
 		if(io.buf_len > 0) {
 			auto buf = ecsactsi_wasm::wasm_memory_cast<const char>(mem, io.buf);
 			auto str = std::string_view(buf, io.buf_len);
-			*out_write_amount += io.buf_len;
+			write_amount += io.buf_len;
 
 			std::fprintf(f, "%.*s", static_cast<int>(str.size()), str.data());
 		}
 	}
+
+	*out_write_amount = write_amount;
 
 	results->data[0].kind = WASM_I32;
 	results->data[0].of.i32 = 0;
