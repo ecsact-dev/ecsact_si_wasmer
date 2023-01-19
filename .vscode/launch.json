@@ -54,12 +54,15 @@
 			"name": "//ecsactsi_wasm_tester:wasi_test",
 			"type": "cppdbg",
 			"request": "launch",
-			"program": "${workspaceFolder}/bazel-bin/ecsactsi_wasm_tester/wasi_test",
+			"program": "${workspaceFolder}/bazel-bin/ecsactsi_wasm_tester/ecsactsi_wasm_tester",
 			"windows": {
 				"type": "cppvsdbg",
-				"program": "${workspaceFolder}/bazel-bin/ecsactsi_wasm_tester/wasi_test.exe"
+				"program": "${workspaceFolder}/bazel-bin/ecsactsi_wasm_tester/ecsactsi_wasm_tester.exe"
 			},
-			"args": [],
+			"args": [
+				"${workspaceFolder}/bazel-bin/example/read_file__system_impl.wasm",
+				"wasi_test__WasiTestSystem"
+			],
 			"cwd": "${workspaceFolder}",
 			"preLaunchTask": "build //ecsactsi_wasm_tester:wasi_test",
 			"sourceFileMap": {
