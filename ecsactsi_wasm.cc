@@ -427,9 +427,6 @@ const auto guest_wasi_module_imports = allowed_guest_imports_t{
 			return fn;
 		},
 	},
-	{
-		"
-	},
 };
 
 const auto allowed_guest_modules = allowed_guest_modules_t{
