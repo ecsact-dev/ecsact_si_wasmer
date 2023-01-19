@@ -19,6 +19,8 @@ filegroup(
         "detail/ecsactsi_wasi.cc",
         "detail/ecsactsi_wasi.hh",
         "detail/ecsactsi_wasm.cc",
+        "detail/ecsactsi_wasm_internal.cc",
+        "detail/ecsactsi_wasm_internal.hh",
         "detail/guest_imports.hh",
         "detail/guest_imports/env.hh",
         "detail/guest_imports/wasi_snapshot_preview1.hh",

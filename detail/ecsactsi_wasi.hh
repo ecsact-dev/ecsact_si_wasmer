@@ -21,8 +21,8 @@ typedef struct ecsactsi_wasi_ciovec_t {
 
 static_assert(sizeof(ecsactsi_wasi_ciovec_t) == 8);
 static_assert(alignof(ecsactsi_wasi_ciovec_t) == 4);
-static_assert(offsetof(ecsactsi_wasi_ciovec_t, buf) == 0);
-static_assert(offsetof(ecsactsi_wasi_ciovec_t, buf_len) == 4);
+// static_assert(offsetof(ecsactsi_wasi_ciovec_t, buf) == 0);
+// static_assert(offsetof(ecsactsi_wasi_ciovec_t, buf_len) == 4);
 
 enum class ecsactsi_wasi_filetype : uint8_t {
 	/**

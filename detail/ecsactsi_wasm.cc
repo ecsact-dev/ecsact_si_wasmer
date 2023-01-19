@@ -3,6 +3,7 @@
 #include <map>
 #include <unordered_map>
 #include <mutex>
+#include <variant>
 #include <vector>
 #include <string>
 #include <string_view>
@@ -22,12 +23,12 @@
 #include "wasm_ecsact_memory.hh"
 #include "ecsactsi_wasi.hh"
 #include "ecsactsi_logger.hh"
-
-#include "detail/wasm_file_binary.hh"
-#include "detail/wasm_util.hh"
-#include "detail/guest_imports.hh"
-#include "detail/guest_imports/env.hh"
-#include "detail/guest_imports/wasi_snapshot_preview1.hh"
+#include "wasm_file_binary.hh"
+#include "wasm_util.hh"
+#include "guest_imports.hh"
+#include "guest_imports/env.hh"
+#include "guest_imports/wasi_snapshot_preview1.hh"
+#include "ecsactsi_wasm_internal.hh"
 
 using namespace std::string_literals;
 using ecsactsi_wasm::detail::allowed_guest_modules_t;
@@ -42,28 +43,6 @@ auto modules_mutex = std::shared_mutex{};
 auto modules =
 	std::map<ecsact_system_like_id, ecsact_internal_wasm_system_module_info>{};
 auto trap_handler = ecsactsi_wasm_trap_handler{};
-
-const auto allowed_guest_modules = allowed_guest_modules_t{
-	{"env", guest_env_module_imports},
-	{"wasi_snapshot_preview1", guest_wasi_module_imports},
-};
-
-static thread_local std::string last_error_message;
-
-static void set_wasmer_last_error_message() {
-	last_error_message.resize(wasmer_last_error_length());
-	if(!last_error_message.empty()) {
-		wasmer_last_error_message(
-			last_error_message.data(),
-			static_cast<int>(last_error_message.size())
-		);
-	}
-}
-
-wasm_engine_t* engine() {
-	static wasm_engine_t* engine = wasm_engine_new();
-	return engine;
-}
 
 void unload_system_module(
 	ecsact_system_like_id                    sys_id,
@@ -148,6 +127,7 @@ void ecsactsi_wasm_last_error_message(
 	char*   out_message,
 	int32_t message_max_length
 ) {
+	auto& last_error_message = ecsactsi_wasm::detail::get_last_error_message();
 	std::copy_n(
 		last_error_message.begin(),
 		std::min(
@@ -156,12 +136,12 @@ void ecsactsi_wasm_last_error_message(
 		),
 		out_message
 	);
-
-	last_error_message = "";
 }
 
 int32_t ecsactsi_wasm_last_error_message_length() {
-	return static_cast<int32_t>(last_error_message.size());
+	return static_cast<int32_t>(
+		ecsactsi_wasm::detail::get_last_error_message().size()
+	);
 }
 
 ecsact_internal_wasm_system_module_info* get_ecsact_internal_module_info(
@@ -171,38 +151,6 @@ ecsact_internal_wasm_system_module_info* get_ecsact_internal_module_info(
 	return &modules.at(sys_id);
 }
 
-void ecsactsi_wasm_initialize_module(
-	ecsact_internal_wasm_system_module_info& info,
-	std::vector<wasm_func_t*>                init_fns
-) {
-	wasm_val_vec_t args = WASM_EMPTY_VEC;
-	wasm_val_vec_t results = WASM_EMPTY_VEC;
-
-	for(auto init_fn : init_fns) {
-		auto trap = wasm_func_call(init_fn, &args, &results);
-
-		if(trap_handler != nullptr && trap != nullptr) {
-			wasm_message_t trap_msg;
-			wasm_trap_message(trap, &trap_msg);
-			auto trap_msg_str = std::string{trap_msg.data, trap_msg.size - 1};
-			auto origin = wasm_trap_origin(trap);
-
-			if(origin != nullptr) {
-				auto fn_index = wasm_frame_func_index(origin);
-				auto fn_offset = wasm_frame_func_offset(origin);
-
-				trap_msg_str += " (func_index=" + std::to_string(fn_index) + ", ";
-				trap_msg_str += "func_offset=" + std::to_string(fn_offset) + ")";
-				wasm_frame_delete(origin);
-			} else {
-				trap_msg_str += " (unknown trap origin)";
-			}
-
-			trap_handler((ecsact_system_like_id)-1, trap_msg_str.c_str());
-		}
-	}
-}
-
 ecsactsi_wasm_error ecsactsi_wasm_load(
 	char*                  wasm_data,
 	int                    wasm_data_size,
@@ -210,159 +158,39 @@ ecsactsi_wasm_error ecsactsi_wasm_load(
 	ecsact_system_like_id* system_ids,
 	const char**           wasm_exports
 ) {
-	wasm_byte_vec_t binary{
-		.size = static_cast<size_t>(wasm_data_size),
-		.data = wasm_data,
-	};
+	auto load_result = ecsactsi_wasm::detail::load_modules(
+		wasm_data,
+		wasm_data_size,
+		systems_count,
+		system_ids,
+		wasm_exports
+	);
 
-	decltype(modules) pending_modules;
+	if(std::holds_alternative<ecsactsi_wasm_error>(load_result)) {
+		return std::get<ecsactsi_wasm_error>(load_result);
+	}
 
-	for(int index = 0; systems_count > index; ++index) {
-		auto  system_id = system_ids[index];
-		auto& pending_info = pending_modules[system_id] = {};
-		pending_info.store = wasm_store_new(engine());
+	auto& pending_modules = std::get<1>(load_result);
 
-		// There needs to be one module and one store per system for thread safety
-		pending_info.system_module = wasm_module_new(pending_info.store, &binary);
-
-		if(!pending_info.system_module) {
-			set_wasmer_last_error_message();
-			return ECSACTSI_WASM_ERR_COMPILE_FAIL;
-		}
-
-		wasm_importtype_vec_t imports;
-		wasm_exporttype_vec_t exports;
-		wasm_module_imports(pending_info.system_module, &imports);
-		wasm_module_exports(pending_info.system_module, &exports);
-		int  system_impl_export_memory_index = -1;
-		int  system_impl_export_function_index = -1;
-		int  module_initialize_function_index = -1;
-		bool found_all_exports = false;
-
-		for(size_t expi = 0; exports.size > expi; ++expi) {
-			auto export_name = wasm_exporttype_name(exports.data[expi]);
-			auto export_type = wasm_exporttype_type(exports.data[expi]);
-			auto export_type_kind =
-				static_cast<wasm_externkind_enum>(wasm_externtype_kind(export_type));
-
-			if(export_type_kind == WASM_EXTERN_MEMORY) {
-				system_impl_export_memory_index = expi;
-			}
-
-			std::string_view export_name_str(export_name->data, export_name->size);
-			if(export_name_str == std::string_view(wasm_exports[index])) {
-				if(export_type_kind != WASM_EXTERN_FUNC) {
-					return ECSACTSI_WASM_ERR_EXPORT_INVALID;
-				}
-
-				system_impl_export_function_index = expi;
-			} else if(export_name_str == "_initialize") {
-				module_initialize_function_index = expi;
-			}
-		}
-
-		if(system_impl_export_function_index == -1) {
-			return ECSACTSI_WASM_ERR_EXPORT_NOT_FOUND;
-		}
-
-		std::vector<wasm_extern_t*> externs;
-		externs.reserve(std::min(static_cast<size_t>(8), imports.size));
-		for(size_t impi = 0; imports.size > impi; ++impi) {
-			auto import_module = wasm_importtype_module(imports.data[impi]);
-			auto import_name = wasm_importtype_name(imports.data[impi]);
-			auto import_type = wasm_importtype_type(imports.data[impi]);
-			auto import_type_kind =
-				static_cast<wasm_externkind_enum>(wasm_externtype_kind(import_type));
-
-			auto import_name_str = std::string(import_name->data, import_name->size);
-			auto module_name_str =
-				std::string(import_module->data, import_module->size);
-
-			if(!allowed_guest_modules.contains(module_name_str)) {
-				last_error_message =
-					"'" + module_name_str + "' is not an allowed guest import module";
-				return ECSACTSI_WASM_ERR_GUEST_IMPORT_UNKNOWN;
-			}
-
-			auto allowed_imports = allowed_guest_modules.at(module_name_str);
-
-			if(!allowed_imports.contains(import_name_str)) {
-				last_error_message = "'" + module_name_str + "'.'" + import_name_str +
-					"' is not an allowed guest import. Please see "
-					"https://ecsact.dev/docs/system-impl-wasm";
-				return ECSACTSI_WASM_ERR_GUEST_IMPORT_UNKNOWN;
-			}
-
-			if(import_type_kind != WASM_EXTERN_FUNC) {
-				last_error_message = "'" + import_name_str +
-					"' is the wrong import kind. Expected WASM_EXTERN_FUNC.";
-				return ECSACTSI_WASM_ERR_GUEST_IMPORT_INVALID;
-			}
-
-			auto guest_import_fn =
-				allowed_imports.at(import_name_str)(pending_info.store);
-			externs.push_back(wasm_func_as_extern(guest_import_fn));
-
-			// TODO(zaucy): Determine if we need to delete function here or later
-			// wasm_func_delete(guest_import_fn);
-		}
-
-		wasm_extern_vec_t instance_externs{
-			.size = externs.size(),
-			.data = externs.data(),
-		};
-
-		pending_info.instance = wasm_instance_new(
-			pending_info.store,
-			pending_info.system_module,
-			&instance_externs,
-			nullptr
-		);
-
-		if(!pending_info.instance) {
-			set_wasmer_last_error_message();
+	for(auto&& [system_id, pending_info] : pending_modules) {
+		auto trap = ecsactsi_wasm::detail::init_module(pending_info);
+		if(trap && trap_handler) {
+			auto trap_msg = ecsactsi_wasm::detail::trap_message(trap);
+			trap_handler(static_cast<ecsact_system_like_id>(-1), trap_msg.c_str());
 			return ECSACTSI_WASM_ERR_INSTANTIATE_FAIL;
 		}
-
-		wasm_extern_vec_t inst_exports;
-		wasm_instance_exports(pending_info.instance, &inst_exports);
-
-		{
-			auto fn_extern = inst_exports.data[system_impl_export_function_index];
-			pending_info.system_impl_func = wasm_extern_as_func(fn_extern);
-		}
-
-		if(system_impl_export_memory_index != -1) {
-			assert(inst_exports.size > system_impl_export_memory_index);
-			auto mem_extern = inst_exports.data[system_impl_export_memory_index];
-			pending_info.system_impl_memory = wasm_extern_as_memory(mem_extern);
-		}
-
-		auto init_fns = std::vector<wasm_func_t*>{};
-
-		if(module_initialize_function_index != -1) {
-			auto init_fn = inst_exports.data[module_initialize_function_index];
-			init_fns.push_back(wasm_extern_as_func(init_fn));
-		}
-
-		ecsactsi_wasm::detail::set_current_wasm_memory(
-			pending_info.system_impl_memory
-		);
-		ecsactsi_wasm_initialize_module(pending_info, init_fns);
-		ecsactsi_wasm::detail::set_current_wasm_memory(nullptr);
 	}
 
-	{
-		std::unique_lock lk(modules_mutex);
-		for(auto&& [system_id, pending_info] : pending_modules) {
-			if(modules.contains(system_id)) {
-				unload_system_module(system_id, modules.at(system_id));
-			}
-
-			modules[system_id] = std::move(pending_info);
-			ecsact_set_system_execution_impl(system_id, &ecsactsi_wasm_system_impl);
+	std::unique_lock lk(modules_mutex);
+	for(auto&& [system_id, pending_info] : pending_modules) {
+		if(modules.contains(system_id)) {
+			unload_system_module(system_id, modules.at(system_id));
 		}
+
+		modules[system_id] = std::move(pending_info);
+		ecsact_set_system_execution_impl(system_id, &ecsactsi_wasm_system_impl);
 	}
+	lk.unlock();
 
 	return ECSACTSI_WASM_OK;
 }

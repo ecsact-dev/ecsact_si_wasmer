@@ -1,7 +1,8 @@
 #pragma once
 
 #include "../guest_imports.hh"
-#include "../wasm_ecsact_system_execution.h"
+#include "../wasm_util.hh"
+#include "../ecsactsi_wasi.hh"
 
 namespace ecsactsi_wasm::detail {
 const auto guest_wasi_module_imports = allowed_guest_imports_t{

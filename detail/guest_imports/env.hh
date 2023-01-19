@@ -1,7 +1,8 @@
 #pragma once
 
 #include "../guest_imports.hh"
-#include "../ecsactsi_wasi.hh"
+#include "../wasm_util.hh"
+#include "../wasm_ecsact_system_execution.h"
 
 namespace ecsactsi_wasm::detail {
 
