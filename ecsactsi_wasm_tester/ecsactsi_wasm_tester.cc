@@ -45,6 +45,13 @@ auto main(int argc, char* argv[]) -> int {
 
 	if(load_err != ECSACTSI_WASM_OK) {
 		std::cerr << "Load Error: " << magic_enum::enum_name(load_err) << "\n";
+		auto msg_len = ecsactsi_wasm_last_error_message_length();
+		if(msg_len > 0) {
+			auto msg = std::string(' ', msg_len);
+			ecsactsi_wasm_last_error_message(msg.data(), msg_len);
+			std::cerr << "Load Error Message: " << msg << "\n";
+		}
+
 		return 1;
 	}
 

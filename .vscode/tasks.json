@@ -19,5 +19,13 @@
 			"problemMatcher": [],
 			"group": "build"
 		},
+		{
+			"label": "build //ecsactsi_wasm_tester:wasi_test",
+			"command": "bazel build //ecsactsi_wasm_tester:wasi_test",
+			"type": "shell",
+			"args": [],
+			"problemMatcher": [],
+			"group": "build"
+		}
 	]
 }
