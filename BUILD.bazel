@@ -12,18 +12,24 @@ filegroup(
 
 filegroup(
     name = "sources",
+    # keep sorted
     srcs = [
-        "ecsactsi_logger.cc",
-        "ecsactsi_logger.hh",
-        "ecsactsi_wasi.cc",
-        "ecsactsi_wasi.hh",
-        "ecsactsi_wasm.cc",
-        "wasm_ecsact_memory.cc",
-        "wasm_ecsact_memory.hh",
-        "wasm_ecsact_pointer_map.cc",
-        "wasm_ecsact_pointer_map.hh",
-        "wasm_ecsact_system_execution.cc",
-        "wasm_ecsact_system_execution.h",
+        "detail/ecsactsi_logger.cc",
+        "detail/ecsactsi_logger.hh",
+        "detail/ecsactsi_wasi.cc",
+        "detail/ecsactsi_wasi.hh",
+        "detail/ecsactsi_wasm.cc",
+        "detail/guest_imports.hh",
+        "detail/guest_imports/env.hh",
+        "detail/guest_imports/wasi_snapshot_preview1.hh",
+        "detail/wasm_ecsact_memory.cc",
+        "detail/wasm_ecsact_memory.hh",
+        "detail/wasm_ecsact_pointer_map.cc",
+        "detail/wasm_ecsact_pointer_map.hh",
+        "detail/wasm_ecsact_system_execution.cc",
+        "detail/wasm_ecsact_system_execution.h",
+        "detail/wasm_file_binary.hh",
+        "detail/wasm_util.hh",
     ],
 )
 
