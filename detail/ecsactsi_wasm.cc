@@ -29,14 +29,11 @@
 #include "guest_imports/env.hh"
 #include "guest_imports/wasi_snapshot_preview1.hh"
 #include "ecsactsi_wasm_internal.hh"
+#include "ecsactsi_wasi_fs.hh"
 
 using namespace std::string_literals;
 using ecsactsi_wasm::detail::allowed_guest_modules_t;
-using ecsactsi_wasm::detail::guest_env_module_imports;
-using ecsactsi_wasm::detail::guest_wasi_module_imports;
 using ecsactsi_wasm::detail::wasm_file_binary;
-using ecsactsi_wasm::detail::wasm_functype_new_4_0;
-using ecsactsi_wasm::detail::wasm_functype_new_4_1;
 
 namespace {
 auto modules_mutex = std::shared_mutex{};
@@ -267,4 +264,22 @@ void ecsactsi_wasm_consume_logs(
 		);
 	}
 	ecsactsi_wasm::detail::clear_log_lines(t);
+}
+
+int32_t ecsactsi_wasm_allow_file_read_access(
+	const char* real_file_path,
+	int32_t     real_file_path_length,
+	const char* virtual_file_path,
+	int32_t     virtual_file_path_length
+) {
+	return ecsactsi_wasi::detail::fs::allow_file_read_access(
+		std::string_view{
+			real_file_path,
+			static_cast<size_t>(real_file_path_length),
+		},
+		std::string_view{
+			virtual_file_path,
+			static_cast<size_t>(virtual_file_path_length),
+		}
+	);
 }

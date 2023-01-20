@@ -7,15 +7,13 @@
 static const auto example_text = []() -> std::string {
 	std::cout << "Initialzing static string\n";
 
-	// auto f = std::ifstream{"example.txt"};
-	// auto content = std::string{};
-	// f >> content;
-	// f.close();
-	// return content;
-	return "Example CONTENT!";
+	auto f = std::ifstream{"example.txt"};
+	auto content = std::string{};
+	f >> content;
+	f.close();
+	return content;
 }();
 
 void wasi_test__WasiTestSystem(ecsact_system_execution_context*) {
-	// std::cout << "Content from file: " << example_text << "\n";
-	std::printf("Content From File: %s\n", example_text.c_str());
+	std::cout << "Content from file: " << example_text << "\n";
 }

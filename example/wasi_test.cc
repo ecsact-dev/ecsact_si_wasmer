@@ -94,6 +94,21 @@ auto parse_args(int argc, char* argv[]) -> std::vector<std::string> {
 	return wasm_file_paths;
 }
 
+auto load_test_virtual_files() -> void {
+	auto real_path = std::string{
+		"C:/Users/zekew/projects/ecsact-dev/ecsact_si_wasm/example/"
+		"wasi_test_file.txt"};
+	auto virtual_path = std::string{"example.txt"};
+
+	std::cout << "Mapping " << real_path << " -> " << virtual_path << "\n";
+	ecsactsi_wasm_allow_file_read_access(
+		real_path.c_str(),
+		static_cast<int32_t>(real_path.size()),
+		virtual_path.c_str(),
+		static_cast<int32_t>(virtual_path.size())
+	);
+}
+
 int main(int argc, char* argv[]) {
 	auto wasm_file_paths = parse_args(argc, argv);
 
@@ -103,6 +118,7 @@ int main(int argc, char* argv[]) {
 	test_registry.add_component(test_entity, wasi_test::DummyCompnent{});
 
 	ecsactsi_wasm_set_trap_handler(&trap_handler);
+	load_test_virtual_files();
 	load_wasm_files(wasm_file_paths);
 
 	for(int i = 0; 10 > i; ++i) {

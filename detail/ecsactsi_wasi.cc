@@ -4,6 +4,7 @@
 #include <map>
 #include <string_view>
 
+#include "ecsactsi_wasi_fs.hh"
 #include "wasm_ecsact_memory.hh"
 #include "ecsactsi_logger.hh"
 
@@ -49,29 +50,30 @@ wasm_trap_t* ecsactsi_wasi_fd_write(
 	auto out_write_amount =
 		ecsactsi_wasm::wasm_memory_cast<size_t>(mem, args->data[3].of.i32);
 
-	// Only supporting stdout and stderr for now
-	assert(fd == 1 || fd == 2);
+	if(fd == WASI_STDERR_FD || fd == WASI_STDOUT_FD) {
+		auto f = fd == WASI_STDOUT_FD ? stdout : stderr;
+		auto write_amount = size_t{};
 
-	auto f = fd == 1 ? stdout : stderr;
+		for(int i = 0; iovec_len > i; ++i) {
+			auto io = iovec[i];
 
-	auto write_amount = size_t{};
+			if(io.buf_len > 0) {
+				auto buf = ecsactsi_wasm::wasm_memory_cast<const char>(mem, io.buf);
+				auto str = std::string_view(buf, io.buf_len);
+				write_amount += io.buf_len;
 
-	for(int i = 0; iovec_len > i; ++i) {
-		auto io = iovec[i];
-
-		if(io.buf_len > 0) {
-			auto buf = ecsactsi_wasm::wasm_memory_cast<const char>(mem, io.buf);
-			auto str = std::string_view(buf, io.buf_len);
-			write_amount += io.buf_len;
-
-			std::fprintf(f, "%.*s", static_cast<int>(str.size()), str.data());
+				// TODO(zaucy): Direct to log api, not directly to stdout/stderr
+				std::fprintf(f, "%.*s", static_cast<int>(str.size()), str.data());
+			}
 		}
+
+		*out_write_amount = write_amount;
+
+		results->data[0].kind = WASM_I32;
+		results->data[0].of.i32 = 0;
+	} else {
+		// todo!()
 	}
-
-	*out_write_amount = write_amount;
-
-	results->data[0].kind = WASM_I32;
-	results->data[0].of.i32 = 0;
 
 	return nullptr;
 }
@@ -80,8 +82,39 @@ wasm_trap_t* ecsactsi_wasi_fd_read(
 	const wasm_val_vec_t* args,
 	wasm_val_vec_t*       results
 ) {
+	auto mem = ecsactsi_wasm::current_wasm_memory_rw();
+	assert(args->data[0].kind == WASM_I32);
+	auto fd = args->data[0].of.i32;
+
+	assert(args->data[1].kind == WASM_I32);
+	auto iovec = ecsactsi_wasm::wasm_memory_cast<ecsactsi_wasi_ciovec_t>(
+		mem,
+		args->data[1].of.i32
+	);
+
+	assert(args->data[2].kind == WASM_I32);
+	auto iovec_len = args->data[2].of.i32;
+
+	assert(args->data[3].kind == WASM_I32);
+	auto out_read_amount =
+		ecsactsi_wasm::wasm_memory_cast<size_t>(mem, args->data[3].of.i32);
+
+	auto f = ecsactsi_wasi::detail::fs::ensure_open(fd);
+	auto read_amount = size_t{};
+
+	for(int i = 0; iovec_len > i; ++i) {
+		auto io = iovec[i];
+
+		if(io.buf_len > 0) {
+			auto buf = ecsactsi_wasm::wasm_memory_cast<char>(mem, io.buf);
+			read_amount += std::fread(buf, 1, io.buf_len, f);
+		}
+	}
+
+	*out_read_amount = read_amount;
+
 	results->data[0].kind = WASM_I32;
-	results->data[0].of.i32 = 1;
+	results->data[0].of.i32 = 0;
 
 	return nullptr;
 }
@@ -90,8 +123,17 @@ wasm_trap_t* ecsactsi_wasi_fd_close(
 	const wasm_val_vec_t* args,
 	wasm_val_vec_t*       results
 ) {
-	results->data[0].kind = WASM_I32;
-	results->data[0].of.i32 = 0;
+	assert(args->data[0].kind == WASM_I32);
+	auto fd = args->data[0].of.i32;
+
+	if(fd != WASI_STDOUT_FD && fd != WASI_STDERR_FD && fd != WASI_STDIN_FD) {
+		ecsactsi_wasi::detail::fs::close(fd);
+		results->data[0].kind = WASM_I32;
+		results->data[0].of.i32 = 0;
+	} else {
+		results->data[0].kind = WASM_I32;
+		results->data[0].of.i32 = 1;
+	}
 
 	return nullptr;
 }
