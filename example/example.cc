@@ -154,7 +154,31 @@ auto parse_args(int argc, char* argv[]) -> std::vector<std::string> {
 	return wasm_file_paths;
 }
 
+auto forward_logs_consumer(
+	ecsactsi_wasm_log_level log_level,
+	const char*             message,
+	int32_t                 message_length,
+	void*                   user_data
+) -> void {
+	using namespace std::string_view_literals;
+	auto message_view = std::string_view(message, message_length);
+
+	auto out_iostream = std::ref(std::cout);
+	if(log_level == ECSACTSI_WASM_LOG_LEVEL_ERROR) {
+		out_iostream = std::ref(std::cerr);
+	}
+
+	out_iostream.get() //
+		<< "["
+		<< magic_enum::enum_name(log_level).substr(
+				 "ECSACTSI_WASM_LOG_LEVEL_"sv.size()
+			 )
+		<< "] " << message_view << "\n";
+}
+
 int main(int argc, char* argv[]) {
+	std::ios_base::sync_with_stdio(false);
+
 	auto wasm_file_paths = parse_args(argc, argv);
 
 	ecsact::core::registry test_registry("Test Registry");
@@ -165,6 +189,7 @@ int main(int argc, char* argv[]) {
 
 	ecsactsi_wasm_set_trap_handler(&trap_handler);
 	load_wasm_files(wasm_file_paths);
+	ecsactsi_wasm_consume_logs(forward_logs_consumer, nullptr);
 
 	for(int i = 0; 10 > i; ++i) {
 		std::cout << "\n==== EXECUTION (" << i << ") ====\n";
@@ -179,6 +204,7 @@ int main(int argc, char* argv[]) {
 		};
 
 		ecsact_execute_systems(test_registry.id(), 1, nullptr, &ev_collector);
+		ecsactsi_wasm_consume_logs(forward_logs_consumer, nullptr);
 
 		std::cout << "[POST-EXECUTE]: Entity Count="
 							<< ecsact_count_entities(test_registry.id()) << "\n";

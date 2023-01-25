@@ -25,6 +25,7 @@ cc_binary(
         "//:sources",
     ],
     copts = copts,
+    features = ["-pic"],
     defines = [
         "ECSACTSI_WASM_API=",
         "ECSACT_CORE_API=",

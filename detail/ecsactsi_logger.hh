@@ -33,4 +33,12 @@ auto get_log_lines(const log_transaction& transaction)
 
 auto clear_log_lines(const log_transaction& transaction) -> void;
 
+// Safely push string from stdio to a queue that will be consumed later in
+// proper log lines.
+auto push_stdio_str(ecsactsi_wasm_log_level level, std::string_view str)
+	-> void;
+
+auto consume_stdio_str_as_log_lines(const log_transaction& transaction)
+	-> std::vector<log_line_entry>;
+
 } // namespace ecsactsi_wasm::detail

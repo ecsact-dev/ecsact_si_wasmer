@@ -51,8 +51,10 @@ wasm_trap_t* ecsactsi_wasi_fd_write(
 		ecsactsi_wasm::wasm_memory_cast<size_t>(mem, args->data[3].of.i32);
 
 	if(fd == WASI_STDERR_FD || fd == WASI_STDOUT_FD) {
-		auto f = fd == WASI_STDOUT_FD ? stdout : stderr;
 		auto write_amount = size_t{};
+		auto log_level = fd == WASI_STDOUT_FD //
+			? ECSACTSI_WASM_LOG_LEVEL_INFO
+			: ECSACTSI_WASM_LOG_LEVEL_ERROR;
 
 		for(int i = 0; iovec_len > i; ++i) {
 			auto io = iovec[i];
@@ -61,9 +63,7 @@ wasm_trap_t* ecsactsi_wasi_fd_write(
 				auto buf = ecsactsi_wasm::wasm_memory_cast<const char>(mem, io.buf);
 				auto str = std::string_view(buf, io.buf_len);
 				write_amount += io.buf_len;
-
-				// TODO(zaucy): Direct to log api, not directly to stdout/stderr
-				std::fprintf(f, "%.*s", static_cast<int>(str.size()), str.data());
+				ecsactsi_wasm::detail::push_stdio_str(log_level, str);
 			}
 		}
 
@@ -72,7 +72,8 @@ wasm_trap_t* ecsactsi_wasi_fd_write(
 		results->data[0].kind = WASM_I32;
 		results->data[0].of.i32 = 0;
 	} else {
-		// todo!()
+		results->data[0].kind = WASM_I32;
+		results->data[0].of.i32 = 1;
 	}
 
 	return nullptr;
@@ -144,9 +145,9 @@ wasm_trap_t* ecsactsi_wasi_environ_sizes_get(
 ) {
 	auto mem = ecsactsi_wasm::current_wasm_memory_rw();
 	auto retptr0 =
-		ecsactsi_wasm::wasm_memory_cast<size_t>(mem, args->data[3].of.i32);
+		ecsactsi_wasm::wasm_memory_cast<size_t>(mem, args->data[0].of.i32);
 	auto retptr1 =
-		ecsactsi_wasm::wasm_memory_cast<size_t>(mem, args->data[3].of.i32);
+		ecsactsi_wasm::wasm_memory_cast<size_t>(mem, args->data[1].of.i32);
 
 	*retptr0 = 0;
 	*retptr1 = 0;
@@ -229,10 +230,7 @@ wasm_trap_t* ecsactsi_wasi_fd_fdstat_get(
 	if(default_fdstats.contains(fd)) {
 		*ret = default_fdstats.at(fd);
 	} else {
-		ret->fs_filetype = {};
-		ret->fs_flags = {};
-		ret->fs_rights_base = {};
-		ret->fs_rights_inheriting = {};
+		*ret = ecsactsi_wasi::detail::fs::fdstat(fd);
 	}
 
 	if(ret->fs_filetype != ecsactsi_wasi_filetype::unknown) {

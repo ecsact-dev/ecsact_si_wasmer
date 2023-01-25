@@ -343,60 +343,30 @@ wasm_trap_t* ecsactsi_wasi_proc_exit(
 	wasm_val_vec_t*       results
 );
 
-// TODO
-// uint16_t ecsactsi_wasi_fd_seek(
-// 	int32_t   fd,
-// 	int64_t   offset,
-// 	uint8_t   whence,
-// 	uint64_t* retptr0
-// );
 wasm_trap_t* ecsactsi_wasi_fd_seek(
 	const wasm_val_vec_t* args,
 	wasm_val_vec_t*       results
 );
 
-// TODO
-// uint16_t ecsactsi_wasi_fd_write(
-// 	int32_t                       fd,
-// 	const ecsactsi_wasi_ciovec_t* iovs,
-// 	size_t                        iovs_len,
-// 	size_t*                       retptr0
-// );
 wasm_trap_t* ecsactsi_wasi_fd_write(
 	const wasm_val_vec_t* args,
 	wasm_val_vec_t*       results
 );
-
-// TODO
-// uint16_t ecsactsi_wasi_fd_read(
-// 	int32_t                 fd,
-// 	ecsactsi_wasi_ciovec_t* iovs,
-// 	size_t                  iovs_len,
-// 	size_t*                 retptr0
-// );
 
 wasm_trap_t* ecsactsi_wasi_fd_read(
 	const wasm_val_vec_t* args,
 	wasm_val_vec_t*       results
 );
 
-// TODO
-// uint16_t ecsactsi_wasi_fd_close(int32_t fd);
-
 wasm_trap_t* ecsactsi_wasi_fd_close(
 	const wasm_val_vec_t* args,
 	wasm_val_vec_t*       results
 );
 
-// TODO
-// uint16_t ecsactsi_wasi_environ_sizes_get(size_t* retptr0, size_t* retptr1);
 wasm_trap_t* ecsactsi_wasi_environ_sizes_get(
 	const wasm_val_vec_t* args,
 	wasm_val_vec_t*       results
 );
-
-// TODO
-// uint16_t ecsactsi_wasi_environ_get(uint8_t** environ, uint8_t* environ_buf);
 
 wasm_trap_t* ecsactsi_wasi_environ_get(
 	const wasm_val_vec_t* args,

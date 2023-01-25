@@ -254,8 +254,13 @@ void ecsactsi_wasm_consume_logs(
 	ecsactsi_wasm_log_consumer consumer,
 	void*                      consumer_user_data
 ) {
-	auto t = ecsactsi_wasm::detail::start_transaction();
-	for(auto& entry : ecsactsi_wasm::detail::get_log_lines(t)) {
+	using ecsactsi_wasm::detail::clear_log_lines;
+	using ecsactsi_wasm::detail::consume_stdio_str_as_log_lines;
+	using ecsactsi_wasm::detail::get_log_lines;
+	using ecsactsi_wasm::detail::start_transaction;
+
+	auto t = start_transaction();
+	for(auto& entry : get_log_lines(t)) {
 		consumer(
 			entry.log_level,
 			entry.message.c_str(),
@@ -263,7 +268,17 @@ void ecsactsi_wasm_consume_logs(
 			consumer_user_data
 		);
 	}
-	ecsactsi_wasm::detail::clear_log_lines(t);
+
+	for(auto& entry : consume_stdio_str_as_log_lines(t)) {
+		consumer(
+			entry.log_level,
+			entry.message.c_str(),
+			static_cast<int32_t>(entry.message.size()),
+			consumer_user_data
+		);
+	}
+
+	clear_log_lines(t);
 }
 
 int32_t ecsactsi_wasm_allow_file_read_access(
