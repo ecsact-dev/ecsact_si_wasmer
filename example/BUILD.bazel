@@ -101,7 +101,9 @@ _WASI_TESTS = [
     "iostream",
     "printf",
     "puts",
-    "read_file",
+    # Reading files not supported (yet)
+    # https://github.com/ecsact-dev/ecsact_si_wasm/issues/30
+    # "read_file",
 ]
 
 ecsact_entt_runtime(

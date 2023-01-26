@@ -7,10 +7,10 @@ native_test(
     src = ":ecsactsi_wasm_tester",
     out = "ecsactsi_wasm_tester_wasi_test",
     data = [
-        "//example:read_file__system_impl_wasm",
+        "//example:iostream__system_impl_wasm",
     ],
     args = [
-        "$(location //example:read_file__system_impl_wasm)",
+        "$(location //example:iostream__system_impl_wasm)",
         "wasi_test__WasiTestSystem",
     ],
 )
