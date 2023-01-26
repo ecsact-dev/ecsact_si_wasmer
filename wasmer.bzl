@@ -87,7 +87,7 @@ def _wasmer_platform(os):
 
 def _wasmer_download_url(os, version):
     wasmer_platform = _wasmer_platform(os)
-    return "https://github.com/wasmerio/wasmer/releases/download/{}/wasmer-{}.tar.gz".format(version, wasmer_platform)
+    return "https://github.com/wasmerio/wasmer/releases/download/v{}/wasmer-{}.tar.gz".format(version, wasmer_platform)
 
 def _wasmer_repo(rctx):
     using_system_wasmer = False
@@ -135,6 +135,6 @@ def _wasmer_repo(rctx):
 wasmer_repo = repository_rule(
     implementation = _wasmer_repo,
     attrs = {
-        "wasmer_version": attr.string(),
+        "wasmer_version": attr.string(mandatory = True),
     },
 )
