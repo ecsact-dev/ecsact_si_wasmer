@@ -1,6 +1,7 @@
 #include "ecsactsi_wasm.h"
 #include "ecsactsi_logger.hh"
 
+#include <mutex>
 #include <map>
 #include <string>
 #include <string_view>
@@ -58,14 +59,14 @@ auto ecsactsi_wasm::detail::push_stdio_str(
 auto ecsactsi_wasm::detail::
 	consume_stdio_str_as_log_lines(const log_transaction&)
 		-> std::vector<log_line_entry> {
-	using std::views::split;
+	using std::ranges::views::lazy_split;
 	using namespace std::string_view_literals;
 
 	auto result = std::vector<log_line_entry>{};
 
 	for(auto&& [log_level, str] : _stdio_strings) {
-		for(const auto& line : str | split("\n"sv)) {
-			auto message = std::string(line.begin(), line.end());
+		for(const auto& line : str | lazy_split("\n"sv)) {
+			auto message = std::string(line.get());
 			if(message.empty()) {
 				continue;
 			}

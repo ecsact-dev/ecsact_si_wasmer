@@ -3,6 +3,7 @@
 #include <map>
 #include <cstdio>
 #include <optional>
+#include <string>
 
 struct virtual_file_info {
 	std::string virtual_path;
