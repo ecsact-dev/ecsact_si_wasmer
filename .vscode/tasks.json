@@ -12,12 +12,20 @@
 			"problemMatcher": []
 		},
 		{
-			"label": "build //example:wasmer_example",
-			"command": "bazel build //example:wasmer_example //example:system_impls_wasm",
+			"label": "build //example/...",
+			"command": "bazel build //example/...",
 			"type": "shell",
 			"args": [],
 			"problemMatcher": [],
 			"group": "build"
 		},
+		{
+			"label": "build //ecsactsi_wasm_tester:wasi_test",
+			"command": "bazel build //ecsactsi_wasm_tester:wasi_test",
+			"type": "shell",
+			"args": [],
+			"problemMatcher": [],
+			"group": "build"
+		}
 	]
 }

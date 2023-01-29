@@ -56,6 +56,15 @@ cc_library(
 )
 """
 
+def _wasmer_version(rctx, wasmer, using_system_wasmer = False):
+    env = {}
+    if not using_system_wasmer:
+        env["WASMER_DIR"] = str(rctx.path("."))
+    result = rctx.execute([wasmer, "--version"], environment = env)
+    if result.return_code != 0:
+        fail("wasmer config failed (exit code={}): {}".format(result.return_code, result.stderr))
+    return result.stdout.strip()
+
 def _wasmer_config(rctx, wasmer, args, using_system_wasmer = False):
     env = {}
     if not using_system_wasmer:
@@ -78,7 +87,7 @@ def _wasmer_platform(os):
 
 def _wasmer_download_url(os, version):
     wasmer_platform = _wasmer_platform(os)
-    return "https://github.com/wasmerio/wasmer/releases/download/{}/wasmer-{}.tar.gz".format(version, wasmer_platform)
+    return "https://github.com/wasmerio/wasmer/releases/download/v{}/wasmer-{}.tar.gz".format(version, wasmer_platform)
 
 def _wasmer_repo(rctx):
     using_system_wasmer = False
@@ -100,7 +109,7 @@ def _wasmer_repo(rctx):
         if not wasmer:
             fail("Cannot find 'wasmer' in PATH")
 
-    version = _wasmer_config(rctx, wasmer, ["--version"], using_system_wasmer = using_system_wasmer)
+    version = _wasmer_version(rctx, wasmer, using_system_wasmer = using_system_wasmer)
     if rctx.attr.wasmer_version:
         if not version.endswith(rctx.attr.wasmer_version):
             fail("Expected wasmer version {}, but got {}".format(rctx.attr.wasmer_version, version))
@@ -126,6 +135,6 @@ def _wasmer_repo(rctx):
 wasmer_repo = repository_rule(
     implementation = _wasmer_repo,
     attrs = {
-        "wasmer_version": attr.string(),
+        "wasmer_version": attr.string(mandatory = True),
     },
 )

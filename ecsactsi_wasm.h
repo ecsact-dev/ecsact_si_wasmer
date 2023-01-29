@@ -92,6 +92,14 @@ typedef enum ecsactsi_wasm_error {
 	ECSACTSI_WASM_ERR_GUEST_IMPORT_INVALID,
 } ecsactsi_wasm_error;
 
+ECSACTSI_WASM_API_FN(void, ecsactsi_wasm_last_error_message)
+( //
+	char*   out_message,
+	int32_t out_message_max_length
+);
+
+ECSACTSI_WASM_API_FN(int32_t, ecsactsi_wasm_last_error_message_length)();
+
 /**
  * Load WASM file at path `wasm_file_path` and call
  * `ecsact_set_system_execution_impl` for the specified `system_ids` matching
@@ -162,6 +170,41 @@ typedef void (*ecsactsi_wasm_trap_handler)( //
 ECSACTSI_WASM_API_FN(void, ecsactsi_wasm_set_trap_handler)
 ( //
 	ecsactsi_wasm_trap_handler handler
+);
+
+typedef enum ecsactsi_wasm_log_level {
+	ECSACTSI_WASM_LOG_LEVEL_INFO = 0,
+	ECSACTSI_WASM_LOG_LEVEL_WARNING = 1,
+	ECSACTSI_WASM_LOG_LEVEL_ERROR = 2,
+} ecsactsi_wasm_log_level;
+
+typedef void (*ecsactsi_wasm_log_consumer)( //
+	ecsactsi_wasm_log_level log_level,
+	const char*             message,
+	int32_t                 message_length,
+	void*                   user_data
+);
+
+/**
+ * Invokes @p consumer for 1 or more lines that have been printed to stdout or
+ * stderr between the last `ecsactsi_wasm_consume_logs` call until there are no
+ * more lines left to consume.
+ */
+ECSACTSI_WASM_API_FN(void, ecsactsi_wasm_consume_logs)
+( //
+	ecsactsi_wasm_log_consumer consumer,
+	void*                      consumer_user_data
+);
+
+/**
+ * Expose a file on the host for read access during initialization.
+ */
+ECSACTSI_WASM_API_FN(int32_t, ecsactsi_wasm_allow_file_read_access)
+( //
+	const char* real_file_path,
+	int32_t     real_file_path_length,
+	const char* virtual_file_path,
+	int32_t     virtual_file_path_length
 );
 
 #endif // ECSACTSI_WASM_H
