@@ -5,7 +5,6 @@
 #include <map>
 #include <string>
 #include <string_view>
-#include <ranges>
 
 static auto _logger_mutex = std::recursive_mutex{};
 static auto _logger_entries =
@@ -59,14 +58,20 @@ auto ecsactsi_wasm::detail::push_stdio_str(
 auto ecsactsi_wasm::detail::
 	consume_stdio_str_as_log_lines(const log_transaction&)
 		-> std::vector<log_line_entry> {
-	using std::ranges::views::lazy_split;
 	using namespace std::string_view_literals;
 
 	auto result = std::vector<log_line_entry>{};
 
 	for(auto&& [log_level, str] : _stdio_strings) {
-		for(const auto& line : str | lazy_split("\n"sv)) {
-			auto message = std::string(line.get());
+		if(str.empty()) {
+			continue;
+		}
+
+		auto idx = 0;
+		while(idx != std::string::npos) {
+			auto next_idx = str.find('\n', idx + 1);
+			auto message = str.substr(idx + 1, next_idx);
+			idx = next_idx;
 			if(message.empty()) {
 				continue;
 			}
