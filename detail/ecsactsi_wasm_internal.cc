@@ -19,6 +19,7 @@ auto ecsactsi_wasm::detail::get_last_error_message() -> const std::string& {
 
 auto ecsactsi_wasm::detail::set_last_error_message(const std::string& str)
 	-> void {
+	assert(!str.empty());
 	_last_error_message = str;
 }
 
@@ -64,6 +65,8 @@ auto ecsactsi_wasm::detail::load_modules(
 	ecsact_system_like_id* system_ids,
 	const char**           wasm_exports
 ) -> load_modules_result_t {
+	using namespace std::string_literals;
+
 	const auto allowed_guest_modules = allowed_guest_modules_t{
 		{"env", guest_env_module_imports},
 		{"wasi_snapshot_preview1", guest_wasi_module_imports},
@@ -118,6 +121,21 @@ auto ecsactsi_wasm::detail::load_modules(
 		}
 
 		if(system_impl_export_function_index == -1) {
+			auto err_msg = "Failed to find "s + std::string(wasm_exports[index]) +
+				"in available exports: "s;
+			for(size_t expi = 0; exports.size > expi; ++expi) {
+				auto export_name = wasm_exporttype_name(exports.data[expi]);
+				auto export_name_str =
+					std::string(export_name->data, export_name->size);
+				err_msg += export_name_str + ", "s;
+			}
+
+			if(exports.size > 0) {
+				// trim ", " off end
+				err_msg = err_msg.substr(0, err_msg.size() - 2);
+			}
+
+			ecsactsi_wasm::detail::set_last_error_message(err_msg);
 			return ECSACTSI_WASM_ERR_EXPORT_NOT_FOUND;
 		}
 
