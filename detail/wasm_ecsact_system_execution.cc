@@ -4,11 +4,14 @@
 #include <iostream>
 #include <unordered_map>
 #include <vector>
+#include <mutex>
 #include "ecsact/runtime/dynamic.h"
 
 #include "wasm_ecsact_pointer_map.hh"
 
 namespace {
+
+std::mutex exec_ctx_m;
 
 std::unordered_map<ecsact_system_execution_context*, wasm_memory_t*> mem_map;
 
@@ -64,6 +67,7 @@ wasm_trap_t* wasm_ecsact_system_execution_context_action(
 	const wasm_val_vec_t* args,
 	wasm_val_vec_t*       results
 ) {
+	auto lk = std::scoped_lock{exec_ctx_m};
 	auto ctx = get_execution_context(args->data[0]);
 	auto memory = mem_map.at(ctx);
 
@@ -79,6 +83,7 @@ wasm_trap_t* wasm_ecsact_system_execution_context_add(
 	const wasm_val_vec_t* args,
 	wasm_val_vec_t*       results
 ) {
+	auto lk = std::scoped_lock{exec_ctx_m};
 	auto ctx = get_execution_context(args->data[0]);
 	auto memory = mem_map.at(ctx);
 
@@ -95,6 +100,7 @@ wasm_trap_t* wasm_ecsact_system_execution_context_remove(
 	const wasm_val_vec_t* args,
 	wasm_val_vec_t*       results
 ) {
+	auto lk = std::scoped_lock{exec_ctx_m};
 	ecsact_system_execution_context_remove(
 		get_execution_context(args->data[0]),
 		ecsact_id_from_wasm_i32<ecsact_component_like_id>(args->data[1])
@@ -106,6 +112,7 @@ wasm_trap_t* wasm_ecsact_system_execution_context_get(
 	const wasm_val_vec_t* args,
 	wasm_val_vec_t*       results
 ) {
+	auto lk = std::scoped_lock{exec_ctx_m};
 	auto ctx = get_execution_context(args->data[0]);
 	auto memory = mem_map.at(ctx);
 
@@ -122,6 +129,7 @@ wasm_trap_t* wasm_ecsact_system_execution_context_update(
 	const wasm_val_vec_t* args,
 	wasm_val_vec_t*       results
 ) {
+	auto lk = std::scoped_lock{exec_ctx_m};
 	auto ctx = get_execution_context(args->data[0]);
 	auto memory = mem_map.at(ctx);
 
@@ -138,6 +146,7 @@ wasm_trap_t* wasm_ecsact_system_execution_context_has(
 	const wasm_val_vec_t* args,
 	wasm_val_vec_t*       results
 ) {
+	auto lk = std::scoped_lock{exec_ctx_m};
 	bool has_component = ecsact_system_execution_context_has(
 		get_execution_context(args->data[0]),
 		ecsact_id_from_wasm_i32<ecsact_component_like_id>(args->data[1])
@@ -153,6 +162,7 @@ wasm_trap_t* wasm_ecsact_system_execution_context_generate(
 	const wasm_val_vec_t* args,
 	wasm_val_vec_t*       results
 ) {
+	auto lk = std::scoped_lock{exec_ctx_m};
 	auto ctx = get_execution_context(args->data[0]);
 	auto memory = mem_map.at(ctx);
 	auto components_count = args->data[1].of.i32;
@@ -186,6 +196,7 @@ wasm_trap_t* wasm_ecsact_system_execution_context_parent(
 	const wasm_val_vec_t* args,
 	wasm_val_vec_t*       results
 ) {
+	auto lk = std::scoped_lock{exec_ctx_m};
 	auto ctx = get_execution_context(args->data[0]);
 	auto system_id = ecsact_system_execution_context_id(ctx);
 	auto info = get_ecsact_internal_module_info(system_id);
@@ -211,6 +222,7 @@ wasm_trap_t* wasm_ecsact_system_execution_context_same(
 	const wasm_val_vec_t* args,
 	wasm_val_vec_t*       results
 ) {
+	auto lk = std::scoped_lock{exec_ctx_m};
 	bool same = ecsact_system_execution_context_same(
 		get_execution_context(args->data[0]),
 		get_execution_context(args->data[1])
@@ -226,6 +238,7 @@ wasm_trap_t* wasm_ecsact_system_execution_context_other(
 	const wasm_val_vec_t* args,
 	wasm_val_vec_t*       results
 ) {
+	auto lk = std::scoped_lock{exec_ctx_m};
 	auto ctx = get_execution_context(args->data[0]);
 	auto system_id = ecsact_system_execution_context_id(ctx);
 	auto info = get_ecsact_internal_module_info(system_id);
@@ -256,6 +269,7 @@ wasm_trap_t* wasm_ecsact_system_execution_context_entity(
 	const wasm_val_vec_t* args,
 	wasm_val_vec_t*       results
 ) {
+	auto lk = std::scoped_lock{exec_ctx_m};
 	auto entity =
 		ecsact_system_execution_context_entity(get_execution_context(args->data[0])
 		);
