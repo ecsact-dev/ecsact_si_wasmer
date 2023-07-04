@@ -34,8 +34,4 @@ wasm_memory_t* current_wasm_memory_rw();
  */
 const wasm_memory_t* current_wasm_memory_ro();
 
-namespace detail {
-void set_current_wasm_memory(wasm_memory_t*);
-}
-
 } // namespace ecsactsi_wasm

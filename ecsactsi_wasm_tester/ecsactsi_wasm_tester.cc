@@ -11,6 +11,7 @@
 #include "detail/ecsactsi_wasm_internal.hh"
 #include "detail/wasm_file_binary.hh"
 #include "detail/wasm_ecsact_memory.hh"
+#include "detail/ecsactsi_wasm_mem_stack.hh"
 
 namespace fs = std::filesystem;
 
@@ -84,14 +85,19 @@ auto main(int argc, char* argv[]) -> int {
 	for(int n = 0; 3 > n; ++n) {
 		std::cout << "Test Execution Output (" << n << ")\n";
 		for(auto&& [system_id, info] : modules) {
-			ecsactsi_wasm::detail::set_current_wasm_memory(info.system_impl_memory);
-
 			auto           args = wasm_val_vec_t{};
 			wasm_val_vec_t result = WASM_EMPTY_VEC;
 
 			wasm_val_vec_new_uninitialized(&args, 1);
 			args.data[0].kind = WASM_I32;
 			args.data[0].of.i32 = 0;
+
+			auto call_mem = std::array<std::byte, 4096>{};
+			ecsactsi_wasm::detail::set_call_mem_data(
+				call_mem.data(),
+				call_mem.size()
+			);
+			ecsactsi_wasm::detail::call_mem_alloc(info.system_impl_memory);
 
 			auto trap = wasm_func_call(info.system_impl_func, &args, &result);
 			if(trap) {
@@ -102,7 +108,7 @@ auto main(int argc, char* argv[]) -> int {
 				wasm_trap_delete(trap);
 			}
 
-			ecsactsi_wasm::detail::set_current_wasm_memory(nullptr);
+			ecsactsi_wasm::detail::set_call_mem_data(nullptr, 0);
 
 			wasm_val_vec_delete(&result);
 		}

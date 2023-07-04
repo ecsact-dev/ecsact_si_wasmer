@@ -15,11 +15,13 @@
 #include <cstdio>
 #include <functional>
 #include <iostream>
+#include <array>
+#include <cstddef>
 #include "ecsact/runtime/dynamic.h"
 #include "ecsact/runtime/meta.h"
 
+#include "ecsactsi_wasm_mem_stack.hh"
 #include "wasm_ecsact_system_execution.h"
-#include "wasm_ecsact_pointer_map.hh"
 #include "wasm_ecsact_memory.hh"
 #include "ecsactsi_wasi.hh"
 #include "ecsactsi_logger.hh"
@@ -60,23 +62,22 @@ void ecsactsi_wasm_system_impl(ecsact_system_execution_context* ctx) {
 	auto system_id = ecsact_system_execution_context_id(ctx);
 	auto info = get_ecsact_internal_module_info(system_id);
 
-	set_wasm_ecsact_system_execution_context_memory(
-		ctx,
-		info->system_impl_memory
-	);
+	auto call_mem = std::array<std::byte, 4096>{};
+	ecsactsi_wasm::detail::set_call_mem_data(call_mem.data(), call_mem.size());
+
+	ecsactsi_wasm::detail::call_mem_alloc(info->system_impl_memory);
+	ecsactsi_wasm::detail::call_mem_alloc(info->system_impl_memory);
 
 	wasm_val_t as[1] = {{}};
 	as[0].kind = WASM_I32;
-	as[0].of.i32 = ecsactsi_wasm::as_guest_pointer(ctx);
+	as[0].of.i32 = ecsactsi_wasm::detail::call_mem_alloc(ctx);
 
 	wasm_val_vec_t args = WASM_ARRAY_VEC(as);
 	wasm_val_vec_t results = WASM_EMPTY_VEC;
 
-	ecsactsi_wasm::detail::set_current_wasm_memory(info->system_impl_memory);
-
 	wasm_trap_t* trap = wasm_func_call(info->system_impl_func, &args, &results);
 
-	ecsactsi_wasm::detail::set_current_wasm_memory(nullptr);
+	ecsactsi_wasm::detail::set_call_mem_data(nullptr, 0);
 
 	if(trap_handler != nullptr && trap != nullptr) {
 		wasm_message_t trap_msg;
@@ -98,25 +99,7 @@ void ecsactsi_wasm_system_impl(ecsact_system_execution_context* ctx) {
 		trap_handler(system_id, trap_msg_str.c_str());
 	}
 
-	if(info->parent) {
-		set_wasm_ecsact_system_execution_context_memory(
-			const_cast<ecsact_system_execution_context*>(info->parent),
-			nullptr
-		);
-	}
-
-	auto other_ll = info->other_contexts;
-	while(other_ll) {
-		set_wasm_ecsact_system_execution_context_memory(other_ll->ctx, nullptr);
-		auto next = other_ll->next;
-		delete other_ll;
-		other_ll = next;
-	}
-
-	info->other_contexts = nullptr;
 	info->parent = nullptr;
-
-	set_wasm_ecsact_system_execution_context_memory(ctx, nullptr);
 }
 } // namespace
 

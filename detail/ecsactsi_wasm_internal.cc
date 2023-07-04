@@ -3,9 +3,12 @@
 #include <vector>
 #include <string>
 #include <string_view>
+#include <array>
+#include <cstddef>
 #include <wasm.h>
 #include <wasmer.h>
 
+#include "ecsactsi_wasm_mem_stack.hh"
 #include "wasm_ecsact_memory.hh"
 #include "guest_imports.hh"
 #include "guest_imports/wasi_snapshot_preview1.hh"
@@ -247,9 +250,17 @@ auto ecsactsi_wasm::detail::init_module(
 			wasm_val_vec_t args = WASM_EMPTY_VEC;
 			wasm_val_vec_t result = WASM_EMPTY_VEC;
 
-			set_current_wasm_memory(info.system_impl_memory);
+			auto call_mem = std::array<std::byte, 4096>{};
+			ecsactsi_wasm::detail::set_call_mem_data(
+				call_mem.data(),
+				call_mem.size()
+			);
+
+			ecsactsi_wasm::detail::call_mem_alloc(info.system_impl_memory);
 			auto trap = wasm_func_call(init_fn, &args, &result);
-			set_current_wasm_memory(nullptr);
+
+			ecsactsi_wasm::detail::set_call_mem_data(nullptr, 0);
+
 			return trap;
 		}
 	}

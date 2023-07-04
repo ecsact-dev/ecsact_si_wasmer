@@ -15,19 +15,13 @@ struct ecsact_internal_execution_context_linked_list {
 };
 
 struct ecsact_internal_wasm_system_module_info {
-	wasm_module_t*                                 system_module;
-	wasm_instance_t*                               instance;
-	wasm_func_t*                                   system_impl_func;
-	wasm_memory_t*                                 system_impl_memory;
-	wasm_store_t*                                  store;
-	const ecsact_system_execution_context*         parent;
-	ecsact_internal_execution_context_linked_list* other_contexts;
+	wasm_module_t*                         system_module;
+	wasm_instance_t*                       instance;
+	wasm_func_t*                           system_impl_func;
+	wasm_memory_t*                         system_impl_memory;
+	wasm_store_t*                          store;
+	const ecsact_system_execution_context* parent;
 };
-
-void set_wasm_ecsact_system_execution_context_memory(
-	ecsact_system_execution_context* ctx,
-	wasm_memory_t*                   memory
-);
 
 ecsact_internal_wasm_system_module_info* get_ecsact_internal_module_info(
 	ecsact_system_like_id sys_id

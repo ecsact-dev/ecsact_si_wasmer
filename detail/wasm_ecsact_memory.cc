@@ -1,19 +1,23 @@
 #include "wasm_ecsact_memory.hh"
+#include "ecsactsi_wasm_mem_stack.hh"
 
 #include <cassert>
 
-static thread_local wasm_memory_t* _current_wasm_mem = nullptr;
+namespace {
+auto get_curr_mem() -> wasm_memory_t* {
+	// offset 0 is always the current wasm memory
+	return ecsactsi_wasm::detail::call_mem_read<wasm_memory_t*>(0);
+}
+} // namespace
 
 wasm_memory_t* ecsactsi_wasm::current_wasm_memory_rw() {
-	assert(_current_wasm_mem != nullptr);
-	return _current_wasm_mem;
+	auto mem = get_curr_mem();
+	assert(mem != nullptr);
+	return mem;
 }
 
 const wasm_memory_t* ecsactsi_wasm::current_wasm_memory_ro() {
-	assert(_current_wasm_mem != nullptr);
-	return _current_wasm_mem;
-}
-
-void ecsactsi_wasm::detail::set_current_wasm_memory(wasm_memory_t* mem) {
-	_current_wasm_mem = mem;
+	auto mem = get_curr_mem();
+	assert(mem != nullptr);
+	return mem;
 }
