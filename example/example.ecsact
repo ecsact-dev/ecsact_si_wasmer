@@ -42,3 +42,18 @@ system RemovesSystem {
 system ExampleSystem {
 	readwrite ExampleComponent;
 }
+
+component ExampleParallelComponent {
+	i32 num_para;
+}
+
+system ExampleParallelSystem(parallel) {
+	readwrite ExampleParallelComponent;
+}
+
+system ExampleParallelSystemParent {
+	readwrite ExampleParallelComponent;
+	system ExampleParallelSystemNested(parallel) {
+		readwrite ExampleParallelComponent;
+	}
+}

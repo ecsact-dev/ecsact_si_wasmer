@@ -56,3 +56,14 @@ void example__RemovesSystem(ecsact_system_execution_context* c_ctx) {
 void example::RemovesSystem::impl(context& ctx) {
 	ctx.remove<example::ExampleComponent>();
 }
+
+void example__ExampleParallelSystem(ecsact_system_execution_context* c_ctx) {
+	example::ExampleParallelSystem::context ctx{ecsact::execution_context{c_ctx}};
+	example::ExampleParallelSystem::impl(ctx);
+}
+
+void example::ExampleParallelSystem::impl(context& ctx) {
+	auto comp = ctx.get<example::ExampleParallelComponent>();
+	comp.num_para += 1;
+	ctx.update(comp);
+}

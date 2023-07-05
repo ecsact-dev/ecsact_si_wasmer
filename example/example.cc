@@ -60,6 +60,9 @@ std::string component_name(ecsact_component_id comp_id) {
 	if(comp_id == example::ExampleComponent::id) {
 		return "example.ExampleComponent";
 	}
+	if(comp_id == example::ExampleParallelComponent::id) {
+		return "example.ExampleParallelComponent";
+	}
 
 	return "UNKNOWN COMPONENT";
 }
@@ -93,6 +96,7 @@ auto load_wasm_files(const std::vector<std::string>& wasm_file_paths) {
 	for(auto& wasm_path : wasm_file_paths) {
 		std::vector<ecsact_system_like_id> system_ids{
 			ecsact_id_cast<ecsact_system_like_id>(example::ExampleSystem::id),
+			ecsact_id_cast<ecsact_system_like_id>(example::ExampleParallelSystem::id),
 			ecsact_id_cast<ecsact_system_like_id>(example::Generator::id),
 			ecsact_id_cast<ecsact_system_like_id>(example::AddsSystem::id),
 			ecsact_id_cast<ecsact_system_like_id>(example::CheckShouldRemove::id),
@@ -101,6 +105,7 @@ auto load_wasm_files(const std::vector<std::string>& wasm_file_paths) {
 
 		std::vector<const char*> wasm_exports{
 			"example__ExampleSystem",
+			"example__ExampleParallelSystem",
 			"example__Generator",
 			"example__AddsSystem",
 			"example__CheckShouldRemove",
@@ -191,6 +196,14 @@ int main(int argc, char* argv[]) {
 	load_wasm_files(wasm_file_paths);
 	ecsactsi_wasm_consume_logs(forward_logs_consumer, nullptr);
 
+	for(auto i = 0; 200 > i; ++i) {
+		auto para_entity = test_registry.create_entity();
+		test_registry.add_component(
+			para_entity,
+			example::ExampleParallelComponent{}
+		);
+	}
+
 	for(int i = 0; 10 > i; ++i) {
 		std::cout << "\n==== EXECUTION (" << i << ") ====\n";
 
@@ -206,8 +219,9 @@ int main(int argc, char* argv[]) {
 		ecsact_execute_systems(test_registry.id(), 1, nullptr, &ev_collector);
 		ecsactsi_wasm_consume_logs(forward_logs_consumer, nullptr);
 
-		std::cout << "[POST-EXECUTE]: Entity Count="
-							<< ecsact_count_entities(test_registry.id()) << "\n";
+		std::cout //
+			<< "[POST-EXECUTE]: Entity Count="
+			<< ecsact_count_entities(test_registry.id()) << "\n";
 	}
 
 	std::cout << "\n (( Done ))\n";
