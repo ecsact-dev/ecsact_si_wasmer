@@ -97,6 +97,12 @@ auto load_wasm_files(const std::vector<std::string>& wasm_file_paths) {
 		std::vector<ecsact_system_like_id> system_ids{
 			ecsact_id_cast<ecsact_system_like_id>(example::ExampleSystem::id),
 			ecsact_id_cast<ecsact_system_like_id>(example::ExampleParallelSystem::id),
+			ecsact_id_cast<ecsact_system_like_id>(
+				example::ExampleParallelSystemParent::id
+			),
+			ecsact_id_cast<ecsact_system_like_id>(
+				example::ExampleParallelSystemParent::ExampleParallelSystemNested::id
+			),
 			ecsact_id_cast<ecsact_system_like_id>(example::Generator::id),
 			ecsact_id_cast<ecsact_system_like_id>(example::AddsSystem::id),
 			ecsact_id_cast<ecsact_system_like_id>(example::CheckShouldRemove::id),
@@ -106,6 +112,8 @@ auto load_wasm_files(const std::vector<std::string>& wasm_file_paths) {
 		std::vector<const char*> wasm_exports{
 			"example__ExampleSystem",
 			"example__ExampleParallelSystem",
+			"example__ExampleParallelSystemParent",
+			"example__ExampleParallelSystemParent__ExampleParallelSystemNested",
 			"example__Generator",
 			"example__AddsSystem",
 			"example__CheckShouldRemove",

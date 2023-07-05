@@ -67,3 +67,22 @@ void example::ExampleParallelSystem::impl(context& ctx) {
 	comp.num_para += 1;
 	ctx.update(comp);
 }
+
+void example__ExampleParallelSystemParent(ecsact_system_execution_context*) {
+}
+
+void example__ExampleParallelSystemParent__ExampleParallelSystemNested(
+	ecsact_system_execution_context* c_ctx
+) {
+	example::ExampleParallelSystemParent::ExampleParallelSystemNested::context
+		ctx{ecsact::execution_context{c_ctx}};
+	example::ExampleParallelSystemParent::ExampleParallelSystemNested::impl(ctx);
+}
+
+void example::ExampleParallelSystemParent::ExampleParallelSystemNested::impl(
+	context& ctx
+) {
+	auto comp = ctx.get<example::ExampleParallelComponent>();
+	comp.num_para += 1;
+	ctx.update(comp);
+}
