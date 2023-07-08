@@ -12,6 +12,7 @@ http_file(
 
 http_file(
     name = "ecsact_cli_linux",
+    sha256 = "b87b1e2169dfebe9777b89736d5ddac7a9ab84bc10aec9c28231eb52567a4626",
     url = "https://github.com/ecsact-dev/ecsact_cli/releases/download/0.1.1/ecsact_0.1.1_linux_x64",
     executable = True,
     downloaded_file_path = "ecsact",
@@ -47,9 +48,9 @@ http_archive(
 
 http_archive(
     name = "com_github_skypjack_entt",
-    sha256 = "f7031545130bfc06f5fe6b2f8c87dcbd4c1254fab86657e2788b70dfeea57965",
-    strip_prefix = "entt-3.10.1",
-    url = "https://github.com/skypjack/entt/archive/refs/tags/v3.10.1.tar.gz",
+    sha256 = "0ac010f232d3089200c5e545bcbd6480cf68b705de6930d8ff7cdb0a29f5b47b",
+    strip_prefix = "entt-3.11.1",
+    url = "https://github.com/skypjack/entt/archive/refs/tags/v3.11.1.tar.gz",
 )
 
 http_archive(

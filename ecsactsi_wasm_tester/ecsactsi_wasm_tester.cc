@@ -98,6 +98,7 @@ auto main(int argc, char* argv[]) -> int {
 				call_mem.size()
 			);
 			ecsactsi_wasm::detail::call_mem_alloc(info.system_impl_memory);
+			ecsactsi_wasm::detail::call_mem_alloc(info.system_impl_memory);
 
 			auto trap = wasm_func_call(info.system_impl_func, &args, &result);
 			if(trap) {

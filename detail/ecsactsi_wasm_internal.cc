@@ -257,8 +257,8 @@ auto ecsactsi_wasm::detail::init_module(
 			);
 
 			ecsactsi_wasm::detail::call_mem_alloc(info.system_impl_memory);
+			ecsactsi_wasm::detail::call_mem_alloc(info.system_impl_memory);
 			auto trap = wasm_func_call(init_fn, &args, &result);
-
 			ecsactsi_wasm::detail::set_call_mem_data(nullptr, 0);
 
 			return trap;
