@@ -1,6 +1,7 @@
 load("@rules_cc//cc:defs.bzl", "cc_library")
 load("@hedron_compile_commands//:refresh_compile_commands.bzl", "refresh_compile_commands")
 load("@rules_ecsact//ecsact:toolchain.bzl", "ecsact_toolchain")
+load("//bazel:copts.bzl", "copts")
 
 package(default_visibility = ["//visibility:public"])
 
@@ -39,6 +40,22 @@ filegroup(
 )
 
 cc_library(
+    name = "minst",
+    visibility = ["//:__subpackages__"],
+    copts = copts,
+    hdrs = [
+        "ecsact/wasm/detail/minst/minst.hh",
+    ],
+    srcs = [
+        "ecsact/wasm/detail/minst/minst.cc",
+    ],
+    deps = [
+        "@ecsact_runtime//:common",
+        "@wasmer//:wasmer-c-api",
+    ],
+)
+
+cc_library(
     name = "ecsactsi_wasm",
     hdrs = ["ecsactsi_wasm.h"],
     deps = [
@@ -63,7 +80,8 @@ refresh_compile_commands(
         # "//example:runtime": "",
         # "//example:wasi_test_runtime": "",
         # "//example:system_impls": "",
-        "//example:wasmer_example": "",
+        # "//example:wasmer_example": "",
+        "//tests:minst_test": "",
         # "//example:iostream__system_impl": "",
         # "//example:iostream__wasi": "",
         # "//example:printf__system_impl": "",

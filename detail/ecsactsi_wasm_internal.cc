@@ -100,8 +100,9 @@ auto ecsactsi_wasm::detail::load_modules(
 		wasm_exporttype_vec_t exports;
 		wasm_module_imports(pending_info.system_module, &imports);
 		wasm_module_exports(pending_info.system_module, &exports);
-		int system_impl_export_memory_index = -1;
-		int system_impl_export_function_index = -1;
+		int  system_impl_export_memory_index = -1;
+		int  system_impl_export_function_index = -1;
+		auto system_impl_export_function_name = std::string_view{};
 
 		for(size_t expi = 0; exports.size > expi; ++expi) {
 			auto export_name = wasm_exporttype_name(exports.data[expi]);
@@ -120,6 +121,7 @@ auto ecsactsi_wasm::detail::load_modules(
 				}
 
 				system_impl_export_function_index = expi;
+				system_impl_export_function_name = export_name_str;
 			}
 		}
 
@@ -212,6 +214,7 @@ auto ecsactsi_wasm::detail::load_modules(
 		{
 			auto fn_extern = inst_exports.data[system_impl_export_function_index];
 			pending_info.system_impl_func = wasm_extern_as_func(fn_extern);
+			pending_info.system_impl_func_name = system_impl_export_function_name;
 		}
 
 		if(system_impl_export_memory_index != -1) {
@@ -241,8 +244,11 @@ auto ecsactsi_wasm::detail::init_module(
 			continue;
 		}
 
-		auto             export_name = wasm_exporttype_name(exports.data[i]);
-		std::string_view export_name_str(export_name->data, export_name->size);
+		auto export_name = wasm_exporttype_name(exports.data[i]);
+		auto export_name_str = std::string_view{
+			export_name->data,
+			export_name->size,
+		};
 		if(export_name_str == "_initialize") {
 			auto init_fn_export = inst_exports.data[i];
 			auto init_fn = wasm_extern_as_func(init_fn_export);

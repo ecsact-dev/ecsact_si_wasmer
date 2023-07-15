@@ -6,6 +6,7 @@
 #ifndef WASM_ECSACT_SYSTEM_EXECUTION__H
 #define WASM_ECSACT_SYSTEM_EXECUTION__H
 
+#include <string>
 #include <wasm.h>
 #include "ecsact/runtime/common.h"
 
@@ -18,6 +19,7 @@ struct ecsact_internal_wasm_system_module_info {
 	wasm_module_t*                         system_module;
 	wasm_instance_t*                       instance;
 	wasm_func_t*                           system_impl_func;
+	std::string                            system_impl_func_name;
 	wasm_memory_t*                         system_impl_memory;
 	wasm_store_t*                          store;
 	const ecsact_system_execution_context* parent;

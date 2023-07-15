@@ -142,7 +142,7 @@ load("//:wasmer.bzl", "wasmer_repo")
 
 wasmer_repo(
     name = "wasmer",
-    wasmer_version = "3.1.1",
+    wasmer_version = "3.3.0",
 )
 
 http_archive(

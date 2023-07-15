@@ -44,6 +44,9 @@ cc_library(
         "-DEFAULTLIB:Advapi32",
         "-DEFAULTLIB:Userenv",
         "-DEFAULTLIB:Bcrypt",
+        "-DEFAULTLIB:ntdll",
+        "-DEFAULTLIB:Shell32",
+        "-DEFAULTLIB:Ole32",
     ],
     hdrs = [
         "include/wasm.h",

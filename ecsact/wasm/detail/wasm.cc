@@ -76,7 +76,9 @@ void ecsactsi_wasm_system_impl(ecsact_system_execution_context* ctx) {
 	args.data[0].kind = WASM_I32;
 	args.data[0].of.i32 = ecsactsi_wasm::detail::call_mem_alloc(ctx);
 
-	debug_trace_method(info->system_impl_func_name.c_str());
+	auto state = system_impl_invocation_state::thread_claim();
+
+	debug_trace_method(state.func_name().c_str());
 	wasm_trap_t* trap = wasm_func_call(info->system_impl_func, &args, &result);
 	wasm_val_vec_delete(&args);
 

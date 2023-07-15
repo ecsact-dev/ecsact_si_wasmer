@@ -8,6 +8,8 @@
 
 #include "detail/ecsactsi_wasm_mem_stack.hh"
 
+using ecsactsi_wasm::detail::debug_trace_method;
+
 namespace {
 
 auto get_execution_context( //
@@ -17,6 +19,14 @@ auto get_execution_context( //
 	return ecsactsi_wasm::detail::call_mem_read<ecsact_system_execution_context*>(
 		val.of.i32
 	);
+}
+
+auto get_const_execution_context( //
+	const wasm_val_t& val
+) -> const ecsact_system_execution_context* {
+	assert(val.kind == WASM_I32);
+	return ecsactsi_wasm::detail::call_mem_read<
+		const ecsact_system_execution_context*>(val.of.i32);
 }
 
 auto get_execution_context_memory( //
@@ -64,6 +74,8 @@ wasm_trap_t* wasm_ecsact_system_execution_context_action(
 	const wasm_val_vec_t* args,
 	wasm_val_vec_t*       results
 ) {
+	debug_trace_method("ecsact_system_execution_context_action");
+
 	auto ctx = get_execution_context(args->data[0]);
 	auto memory = get_execution_context_memory(args->data[0]);
 
@@ -79,6 +91,8 @@ wasm_trap_t* wasm_ecsact_system_execution_context_add(
 	const wasm_val_vec_t* args,
 	wasm_val_vec_t*       results
 ) {
+	debug_trace_method("ecsact_system_execution_context_add");
+
 	auto ctx = get_execution_context(args->data[0]);
 	auto memory = get_execution_context_memory(args->data[0]);
 
@@ -95,6 +109,8 @@ wasm_trap_t* wasm_ecsact_system_execution_context_remove(
 	const wasm_val_vec_t* args,
 	wasm_val_vec_t*       results
 ) {
+	debug_trace_method("ecsact_system_execution_context_remove");
+
 	ecsact_system_execution_context_remove(
 		get_execution_context(args->data[0]),
 		ecsact_id_from_wasm_i32<ecsact_component_like_id>(args->data[1])
@@ -106,6 +122,8 @@ wasm_trap_t* wasm_ecsact_system_execution_context_get(
 	const wasm_val_vec_t* args,
 	wasm_val_vec_t*       results
 ) {
+	debug_trace_method("ecsact_system_execution_context_get");
+
 	auto ctx = get_execution_context(args->data[0]);
 	auto memory = get_execution_context_memory(args->data[0]);
 
@@ -122,6 +140,8 @@ wasm_trap_t* wasm_ecsact_system_execution_context_update(
 	const wasm_val_vec_t* args,
 	wasm_val_vec_t*       results
 ) {
+	debug_trace_method("ecsact_system_execution_context_update");
+
 	auto ctx = get_execution_context(args->data[0]);
 	auto memory = get_execution_context_memory(args->data[0]);
 
@@ -138,6 +158,8 @@ wasm_trap_t* wasm_ecsact_system_execution_context_has(
 	const wasm_val_vec_t* args,
 	wasm_val_vec_t*       results
 ) {
+	debug_trace_method("ecsact_system_execution_context_has");
+
 	bool has_component = ecsact_system_execution_context_has(
 		get_execution_context(args->data[0]),
 		ecsact_id_from_wasm_i32<ecsact_component_like_id>(args->data[1])
@@ -153,6 +175,8 @@ wasm_trap_t* wasm_ecsact_system_execution_context_generate(
 	const wasm_val_vec_t* args,
 	wasm_val_vec_t*       results
 ) {
+	debug_trace_method("ecsact_system_execution_context_generate");
+
 	auto ctx = get_execution_context(args->data[0]);
 	auto memory = get_execution_context_memory(args->data[0]);
 	auto components_count = args->data[1].of.i32;
@@ -186,6 +210,8 @@ wasm_trap_t* wasm_ecsact_system_execution_context_parent(
 	const wasm_val_vec_t* args,
 	wasm_val_vec_t*       results
 ) {
+	debug_trace_method("ecsact_system_execution_context_parent");
+
 	auto ctx = get_execution_context(args->data[0]);
 	auto system_id = ecsact_system_execution_context_id(ctx);
 	auto info = get_ecsact_internal_module_info(system_id);
@@ -194,7 +220,9 @@ wasm_trap_t* wasm_ecsact_system_execution_context_parent(
 	auto parent = ecsact_system_execution_context_parent(ctx);
 
 	results->data[0].kind = WASM_I32;
-	results->data[0].of.i32 = ecsactsi_wasm::detail::call_mem_alloc(parent);
+	results->data[0].of.i32 = ecsactsi_wasm::detail::call_mem_alloc(
+		const_cast<ecsact_system_execution_context*>(parent)
+	);
 
 	return nullptr;
 }
@@ -203,6 +231,8 @@ wasm_trap_t* wasm_ecsact_system_execution_context_same(
 	const wasm_val_vec_t* args,
 	wasm_val_vec_t*       results
 ) {
+	debug_trace_method("ecsact_system_execution_context_same");
+
 	bool same = ecsact_system_execution_context_same(
 		get_execution_context(args->data[0]),
 		get_execution_context(args->data[1])
@@ -218,6 +248,8 @@ wasm_trap_t* wasm_ecsact_system_execution_context_other(
 	const wasm_val_vec_t* args,
 	wasm_val_vec_t*       results
 ) {
+	debug_trace_method("ecsact_system_execution_context_other");
+
 	auto ctx = get_execution_context(args->data[0]);
 	auto system_id = ecsact_system_execution_context_id(ctx);
 	auto info = get_ecsact_internal_module_info(system_id);
@@ -238,6 +270,8 @@ wasm_trap_t* wasm_ecsact_system_execution_context_entity(
 	const wasm_val_vec_t* args,
 	wasm_val_vec_t*       results
 ) {
+	debug_trace_method("ecsact_system_execution_context_entity");
+
 	auto entity = ecsact_system_execution_context_entity( //
 		get_execution_context(args->data[0])
 	);
