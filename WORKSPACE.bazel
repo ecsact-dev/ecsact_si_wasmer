@@ -39,9 +39,9 @@ http_archive(
 
 http_archive(
     name = "com_github_skypjack_entt",
-    sha256 = "f7031545130bfc06f5fe6b2f8c87dcbd4c1254fab86657e2788b70dfeea57965",
-    strip_prefix = "entt-3.10.1",
-    url = "https://github.com/skypjack/entt/archive/refs/tags/v3.10.1.tar.gz",
+    sha256 = "3f3e43988218daecc0530ccaf45e960f7f7416e1fcf2c69799160c18b6a2fee3",
+    strip_prefix = "entt-3.12.2",
+    url = "https://github.com/skypjack/entt/archive/refs/tags/v3.12.2.tar.gz",
 )
 
 http_archive(
