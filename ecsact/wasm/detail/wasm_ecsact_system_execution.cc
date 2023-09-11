@@ -1,14 +1,14 @@
-#include "wasm_ecsact_system_execution.h"
+#include "ecsact/wasm/detail/wasm_ecsact_system_execution.h"
 
 #include <cassert>
 #include <iostream>
 #include <unordered_map>
 #include <vector>
 #include "ecsact/runtime/dynamic.h"
+#include "ecsact/wasm/detail/mem_stack.hh"
 
-#include "detail/ecsactsi_wasm_mem_stack.hh"
-
-using ecsactsi_wasm::detail::debug_trace_method;
+using ecsact::wasm::detail::call_mem_alloc;
+using ecsact::wasm::detail::debug_trace_method;
 
 namespace {
 
@@ -16,7 +16,7 @@ auto get_execution_context( //
 	const wasm_val_t& val
 ) -> ecsact_system_execution_context* {
 	assert(val.kind == WASM_I32);
-	return ecsactsi_wasm::detail::call_mem_read<ecsact_system_execution_context*>(
+	return ecsact::wasm::detail::call_mem_read<ecsact_system_execution_context*>(
 		val.of.i32
 	);
 }
@@ -25,7 +25,7 @@ auto get_const_execution_context( //
 	const wasm_val_t& val
 ) -> const ecsact_system_execution_context* {
 	assert(val.kind == WASM_I32);
-	return ecsactsi_wasm::detail::call_mem_read<
+	return ecsact::wasm::detail::call_mem_read<
 		const ecsact_system_execution_context*>(val.of.i32);
 }
 
@@ -34,7 +34,7 @@ auto get_execution_context_memory( //
 ) -> wasm_memory_t* {
 	assert(val.kind == WASM_I32);
 	// wasm memory is always allocated right before the execution context
-	return ecsactsi_wasm::detail::call_mem_read<wasm_memory_t*>(
+	return ecsact::wasm::detail::call_mem_read<wasm_memory_t*>(
 		val.of.i32 -
 		sizeof(ecsact_system_execution_context*) // NOLINT(bugprone-sizeof-expression)
 	);
@@ -213,14 +213,14 @@ wasm_trap_t* wasm_ecsact_system_execution_context_parent(
 	debug_trace_method("ecsact_system_execution_context_parent");
 
 	auto ctx = get_execution_context(args->data[0]);
+	auto mem = get_execution_context_memory(args->data[0]);
 	auto system_id = ecsact_system_execution_context_id(ctx);
-	auto info = get_ecsact_internal_module_info(system_id);
 
-	ecsactsi_wasm::detail::call_mem_alloc(info->system_impl_memory);
+	call_mem_alloc(mem);
 	auto parent = ecsact_system_execution_context_parent(ctx);
 
 	results->data[0].kind = WASM_I32;
-	results->data[0].of.i32 = ecsactsi_wasm::detail::call_mem_alloc(
+	results->data[0].of.i32 = ecsact::wasm::detail::call_mem_alloc(
 		const_cast<ecsact_system_execution_context*>(parent)
 	);
 
@@ -251,17 +251,17 @@ wasm_trap_t* wasm_ecsact_system_execution_context_other(
 	debug_trace_method("ecsact_system_execution_context_other");
 
 	auto ctx = get_execution_context(args->data[0]);
+	auto mem = get_execution_context_memory(args->data[0]);
 	auto system_id = ecsact_system_execution_context_id(ctx);
-	auto info = get_ecsact_internal_module_info(system_id);
 
 	auto other = ecsact_system_execution_context_other(
 		ctx,
 		ecsact_id_from_wasm_i32<ecsact_entity_id>(args->data[1])
 	);
 
-	ecsactsi_wasm::detail::call_mem_alloc(info->system_impl_memory);
+	call_mem_alloc(mem);
 	results->data[0].kind = WASM_I32;
-	results->data[0].of.i32 = ecsactsi_wasm::detail::call_mem_alloc(other);
+	results->data[0].of.i32 = call_mem_alloc(other);
 
 	return nullptr;
 }

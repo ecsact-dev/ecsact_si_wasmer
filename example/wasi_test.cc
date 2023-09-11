@@ -7,7 +7,7 @@
 #include "magic_enum.hpp"
 #include "ecsact/runtime/core.h"
 #include "ecsact/runtime/core.hh"
-#include "ecsactsi_wasm.h"
+#include "ecsact/wasm.h"
 
 #include "wasi_test.ecsact.hh"
 

@@ -5,8 +5,8 @@
 #include "docopt.h"
 #include <iostream>
 #include "magic_enum.hpp"
+#include "ecsact/wasm.h"
 
-#include "ecsactsi_wasm.h"
 #include "mock_set_system_impl.hh"
 #include "detail/ecsactsi_wasm_internal.hh"
 #include "detail/wasm_file_binary.hh"
@@ -15,9 +15,7 @@
 
 namespace fs = std::filesystem;
 
-constexpr auto USAGE = R"(
-Test Ecsact system implementation with mock ecsact_system_execution_context_*
-methods.
+constexpr auto USAGE = R"docopt(Test Ecsact system implementation with mock ecsact_system_execution_context_* methods.
 
 Usage:
 	ecsactsi_wasm_tester <wasm_file> <system_impl_fn_name>
@@ -29,7 +27,7 @@ Options:
 	<system_impl_fn_name>
 		Export name of <wasm_file> for wasm function that implements an Ecsact
 		system implementation function. https://ecsact.dev/docs/system-impl-wasm
-)";
+)docopt";
 
 auto main(int argc, char* argv[]) -> int {
 	using ecsactsi_wasm::detail::wasm_file_binary;

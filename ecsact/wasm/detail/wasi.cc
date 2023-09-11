@@ -1,12 +1,15 @@
-#include "ecsactsi_wasi.hh"
+#include "ecsact/wasm/detail/wasi.hh"
 
 #include <cstdio>
 #include <map>
 #include <string_view>
+#include "ecsact/wasm/detail/wasi_fs.hh"
+#include "ecsact/wasm/detail/logger.hh"
+#include "ecsact/wasm/detail/mem_stack.hh"
+#include "ecsact/wasm/detail/util.hh"
 
-#include "ecsactsi_wasi_fs.hh"
-#include "wasm_ecsact_memory.hh"
-#include "ecsactsi_logger.hh"
+using ecsact::wasm::detail::call_mem_read;
+using ecsact::wasm::detail::wasm_memory_cast;
 
 constexpr int32_t WASI_STDIN_FD = 0;
 constexpr int32_t WASI_STDOUT_FD = 1;
@@ -33,22 +36,19 @@ wasm_trap_t* ecsactsi_wasi_fd_write(
 	const wasm_val_vec_t* args,
 	wasm_val_vec_t*       results
 ) {
-	auto mem = ecsactsi_wasm::current_wasm_memory_rw();
+	auto mem = call_mem_read<wasm_memory_t*>(0);
 	assert(args->data[0].kind == WASM_I32);
 	auto fd = args->data[0].of.i32;
 
 	assert(args->data[1].kind == WASM_I32);
-	auto iovec = ecsactsi_wasm::wasm_memory_cast<ecsactsi_wasi_ciovec_t>(
-		mem,
-		args->data[1].of.i32
-	);
+	auto iovec =
+		wasm_memory_cast<ecsactsi_wasi_ciovec_t>(mem, args->data[1].of.i32);
 
 	assert(args->data[2].kind == WASM_I32);
 	auto iovec_len = args->data[2].of.i32;
 
 	assert(args->data[3].kind == WASM_I32);
-	auto out_write_amount =
-		ecsactsi_wasm::wasm_memory_cast<size_t>(mem, args->data[3].of.i32);
+	auto out_write_amount = wasm_memory_cast<size_t>(mem, args->data[3].of.i32);
 
 	if(fd == WASI_STDERR_FD || fd == WASI_STDOUT_FD) {
 		auto write_amount = size_t{};
@@ -60,10 +60,10 @@ wasm_trap_t* ecsactsi_wasi_fd_write(
 			auto io = iovec[i];
 
 			if(io.buf_len > 0) {
-				auto buf = ecsactsi_wasm::wasm_memory_cast<const char>(mem, io.buf);
+				auto buf = wasm_memory_cast<const char>(mem, io.buf);
 				auto str = std::string_view(buf, io.buf_len);
 				write_amount += io.buf_len;
-				ecsactsi_wasm::detail::push_stdio_str(log_level, str);
+				ecsact::wasm::detail::push_stdio_str(log_level, str);
 			}
 		}
 
@@ -83,31 +83,28 @@ wasm_trap_t* ecsactsi_wasi_fd_read(
 	const wasm_val_vec_t* args,
 	wasm_val_vec_t*       results
 ) {
-	auto mem = ecsactsi_wasm::current_wasm_memory_rw();
+	auto mem = call_mem_read<wasm_memory_t*>(0);
 	assert(args->data[0].kind == WASM_I32);
 	auto fd = args->data[0].of.i32;
 
 	assert(args->data[1].kind == WASM_I32);
-	auto iovec = ecsactsi_wasm::wasm_memory_cast<ecsactsi_wasi_ciovec_t>(
-		mem,
-		args->data[1].of.i32
-	);
+	auto iovec =
+		wasm_memory_cast<ecsactsi_wasi_ciovec_t>(mem, args->data[1].of.i32);
 
 	assert(args->data[2].kind == WASM_I32);
 	auto iovec_len = args->data[2].of.i32;
 
 	assert(args->data[3].kind == WASM_I32);
-	auto out_read_amount =
-		ecsactsi_wasm::wasm_memory_cast<size_t>(mem, args->data[3].of.i32);
+	auto out_read_amount = wasm_memory_cast<size_t>(mem, args->data[3].of.i32);
 
-	auto f = ecsactsi_wasi::detail::fs::ensure_open(fd);
+	auto f = ecsact::wasm::detail::wasi::fs::ensure_open(fd);
 	auto read_amount = size_t{};
 
 	for(int i = 0; iovec_len > i; ++i) {
 		auto io = iovec[i];
 
 		if(io.buf_len > 0) {
-			auto buf = ecsactsi_wasm::wasm_memory_cast<char>(mem, io.buf);
+			auto buf = wasm_memory_cast<char>(mem, io.buf);
 			read_amount += std::fread(buf, 1, io.buf_len, f);
 		}
 	}
@@ -128,7 +125,7 @@ wasm_trap_t* ecsactsi_wasi_fd_close(
 	auto fd = args->data[0].of.i32;
 
 	if(fd != WASI_STDOUT_FD && fd != WASI_STDERR_FD && fd != WASI_STDIN_FD) {
-		ecsactsi_wasi::detail::fs::close(fd);
+		ecsact::wasm::detail::wasi::fs::close(fd);
 		results->data[0].kind = WASM_I32;
 		results->data[0].of.i32 = 0;
 	} else {
@@ -143,11 +140,9 @@ wasm_trap_t* ecsactsi_wasi_environ_sizes_get(
 	const wasm_val_vec_t* args,
 	wasm_val_vec_t*       results
 ) {
-	auto mem = ecsactsi_wasm::current_wasm_memory_rw();
-	auto retptr0 =
-		ecsactsi_wasm::wasm_memory_cast<size_t>(mem, args->data[0].of.i32);
-	auto retptr1 =
-		ecsactsi_wasm::wasm_memory_cast<size_t>(mem, args->data[1].of.i32);
+	auto mem = call_mem_read<wasm_memory_t*>(0);
+	auto retptr0 = wasm_memory_cast<size_t>(mem, args->data[0].of.i32);
+	auto retptr1 = wasm_memory_cast<size_t>(mem, args->data[1].of.i32);
 
 	*retptr0 = 0;
 	*retptr1 = 0;
@@ -162,11 +157,9 @@ wasm_trap_t* ecsactsi_wasi_environ_get(
 	const wasm_val_vec_t* args,
 	wasm_val_vec_t*       results
 ) {
-	auto mem = ecsactsi_wasm::current_wasm_memory_rw();
-	auto environ_arg =
-		ecsactsi_wasm::wasm_memory_cast<uint8_t>(mem, args->data[0].of.i32);
-	auto environ_buf_arg =
-		ecsactsi_wasm::wasm_memory_cast<uint8_t>(mem, args->data[1].of.i32);
+	auto mem = call_mem_read<wasm_memory_t*>(0);
+	auto environ_arg = wasm_memory_cast<uint8_t>(mem, args->data[0].of.i32);
+	auto environ_buf_arg = wasm_memory_cast<uint8_t>(mem, args->data[1].of.i32);
 
 	// Even though our environment variable size is `0` the API expects the key
 	// values pairs to be null terminated.
@@ -216,21 +209,19 @@ wasm_trap_t* ecsactsi_wasi_fd_fdstat_get(
 		},
 	};
 
-	auto mem = ecsactsi_wasm::current_wasm_memory_rw();
+	auto mem = call_mem_read<wasm_memory_t*>(0);
 
 	assert(args->data[0].kind == WASM_I32);
 	auto fd = args->data[0].of.i32;
 
 	assert(args->data[1].kind == WASM_I32);
-	auto ret = ecsactsi_wasm::wasm_memory_cast<ecsactsi_wasi_fdstat_t>(
-		mem,
-		args->data[1].of.i32
-	);
+	auto ret =
+		wasm_memory_cast<ecsactsi_wasi_fdstat_t>(mem, args->data[1].of.i32);
 
 	if(default_fdstats.contains(fd)) {
 		*ret = default_fdstats.at(fd);
 	} else {
-		*ret = ecsactsi_wasi::detail::fs::fdstat(fd);
+		*ret = ecsact::wasm::detail::wasi::fs::fdstat(fd);
 	}
 
 	if(ret->fs_filetype != ecsactsi_wasi_filetype::unknown) {

@@ -6,7 +6,7 @@
 
 #include "ecsact/wasm.h"
 
-namespace ecsactsi_wasm::detail {
+namespace ecsact::wasm::detail {
 
 struct log_line_entry {
 	ecsactsi_wasm_log_level log_level = {};
@@ -41,4 +41,4 @@ auto push_stdio_str(ecsactsi_wasm_log_level level, std::string_view str)
 auto consume_stdio_str_as_log_lines(const log_transaction& transaction)
 	-> std::vector<log_line_entry>;
 
-} // namespace ecsactsi_wasm::detail
+} // namespace ecsact::wasm::detail

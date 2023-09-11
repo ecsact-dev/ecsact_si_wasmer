@@ -23,6 +23,7 @@ cc_binary(
         "mock_set_system_impl.cc",
         "mock_set_system_impl.hh",
         "//:sources",
+        "//:headers",
     ],
     copts = copts,
     features = ["-pic"],
@@ -32,7 +33,6 @@ cc_binary(
         "ECSACT_DYNAMIC_API=",
     ],
     deps = [
-        "//:ecsactsi_wasm",
         "@bazelregistry_docopt_cpp//:docopt",
         "@ecsact_runtime//:core",
         "@ecsact_runtime//:dynamic",

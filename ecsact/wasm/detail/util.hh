@@ -31,4 +31,13 @@ inline wasm_functype_t* wasm_functype_new_4_1(
 	wasm_valtype_vec_new(&results, 1, rs);
 	return wasm_functype_new(&params, &results);
 }
+
+template<typename T>
+auto wasm_memory_cast( //
+	wasm_memory_t* wasm_mem,
+	int32_t        wasm_guest_ptr
+) -> T* {
+	auto mem_bytes = wasm_memory_data(wasm_mem);
+	return reinterpret_cast<T*>(mem_bytes + wasm_guest_ptr);
+}
 } // namespace ecsact::wasm::detail

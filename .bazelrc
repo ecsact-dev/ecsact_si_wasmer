@@ -1,4 +1,5 @@
 startup --windows_enable_symlinks
+common --enable_bzlmod
 build --enable_platform_specific_config
 build --incompatible_use_platforms_repo_for_constraints
 build --incompatible_enable_cc_toolchain_resolution
@@ -6,12 +7,6 @@ build --incompatible_strict_action_env
 build --enable_runfiles
 build --noincompatible_remove_rule_name_parameter
 query --noincompatible_remove_rule_name_parameter
-
-build:windows --platforms=//bazel/platforms:windows
-build:windows --host_platform=//bazel/platforms:windows
-
-build:linux --platforms=//bazel/platforms:linux
-build:linux --extra_toolchains=@llvm_toolchain//:cc-toolchain-x86_64-linux
 
 common:ci --announce_rc
 common:ci --verbose_failures

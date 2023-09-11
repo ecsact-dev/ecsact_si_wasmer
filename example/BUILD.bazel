@@ -18,7 +18,7 @@ cc_binary(
     srcs = [
         "system_impls.cc",
     ],
-    copts = copts,
+    copts = ["-std=c++20"],
     features = [
         "wasm_no_entry",
         "-wasm_warnings_as_errors",
@@ -64,12 +64,13 @@ cc_binary(
     srcs = [
         "example.cc",
         "//:sources",
+        "//:headers",
     ],
     copts = copts,
     defines = ["ECSACTSI_WASM_API="],
     deps = [
         ":runtime",
-        "//:ecsactsi_wasm",
+        "//:minst",
         "@ecsact_runtime//:core",
         "@ecsact_runtime//:dynamic",
         "@ecsact_runtime//:meta",
@@ -149,6 +150,7 @@ ecsact_entt_runtime(
     srcs = [
         "wasi_test.cc",
         "//:sources",
+        "//:headers",
     ],
     copts = copts,
     data = [
@@ -158,7 +160,6 @@ ecsact_entt_runtime(
     defines = ["ECSACTSI_WASM_API="],
     deps = [
         ":wasi_test_runtime",
-        "//:ecsactsi_wasm",
         "@ecsact_runtime//:core",
         "@ecsact_runtime//:dynamic",
         "@ecsact_runtime//:meta",
