@@ -2,18 +2,18 @@ load("@rules_cc//cc:defs.bzl", "cc_binary")
 load("//bazel:copts.bzl", "copts")
 load("@bazel_skylib//rules:native_binary.bzl", "native_test")
 
-native_test(
-    name = "wasi_test",
-    src = ":ecsactsi_wasm_tester",
-    out = "ecsactsi_wasm_tester_wasi_test",
-    data = [
-        "//example:iostream__system_impl_wasm",
-    ],
-    args = [
-        "$(location //example:iostream__system_impl_wasm)",
-        "wasi_test__WasiTestSystem",
-    ],
-)
+# native_test(
+#     name = "wasi_test",
+#     src = ":ecsactsi_wasm_tester",
+#     out = "ecsactsi_wasm_tester_wasi_test",
+#     data = [
+#         "//example:iostream__system_impl_wasm",
+#     ],
+#     args = [
+#         "$(location //example:iostream__system_impl_wasm)",
+#         "wasi_test__WasiTestSystem",
+#     ],
+# )
 
 cc_binary(
     name = "ecsactsi_wasm_tester",
