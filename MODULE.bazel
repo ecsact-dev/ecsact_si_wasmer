@@ -2,3 +2,10 @@ module(name = "ecsact_si_wasm", version = "0.2.0")
 
 bazel_dep(name = "rules_cc", version = "0.0.8")
 bazel_dep(name = "bazel_skylib", version = "1.4.2")
+bazel_dep(name = "magic_enum")
+
+git_override(
+    module_name = "magic_enum",
+    remote = "https://github.com/Neargye/magic_enum",
+    commit = "745bf36a64962aa113bd04fb9d2d377e7878d2ef",
+)
