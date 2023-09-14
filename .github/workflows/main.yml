@@ -1,22 +1,21 @@
-name: CI
+# This file is maintained by ecsact-dev/ecsact_common
+# If changes are required please make them there
+
+name: main
 
 on:
   push:
     branches:
       - "**"
 
-concurrency:
-  group: ${{ github.ref }}
-  cancel-in-progress: true
-
 jobs:
   formatting-check:
     name: Formatting Check
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - uses: jidicula/clang-format-action@v4.9.0
-        with: { clang-format-version: "15" }
+        with: { clang-format-version: "16" }
 
   test-windows:
     runs-on: windows-latest
@@ -27,19 +26,23 @@ jobs:
             /Users/runneradmin/AppData/Local/bazelisk
             /Users/runneradmin/.cache/bazel-disk-cache
           key: ${{runner.os}}-bazel-cache
-      - uses: actions/checkout@v3
-      - run: bazel test --config=ci //...
+      - uses: actions/checkout@v4
+      - run: bazelisk build --config=ci //...
+      - if: ${{ hashfiles('test/MODULE.bazel') != '' }}
+        run: bazelisk test --config=ci ...
+        working-directory: test
 
   test-linux:
     runs-on: ubuntu-latest
     steps:
-      # needed for wasmer 2.x
-      - run: sudo apt install libtinfo5
       - uses: actions/cache@v3
         with:
           path: |
             ~/.cache/bazelisk
             ~/.cache/bazel-disk-cache
           key: ${{runner.os}}-bazel-cache
-      - uses: actions/checkout@v3
-      - run: bazel test --config=ci //...
+      - uses: actions/checkout@v4
+      - run: bazelisk build --config=ci //...
+      - if: ${{ hashfiles('test/MODULE.bazel') != '' }}
+        run: bazelisk test --config=ci ...
+        working-directory: test
