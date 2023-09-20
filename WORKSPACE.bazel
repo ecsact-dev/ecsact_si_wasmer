@@ -1,26 +1,9 @@
-workspace(name = "ecsactsi_wasm")
+load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
+load("@ecsact_si_wasm//:wasmer.bzl", "wasmer_repo")
 
-load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive", "http_file")
-
-http_archive(
-    name = "ecsact_lang_cpp",
-    sha256 = "f66c5d31cc303022c313a424f4c432c41ff517b73143915436c6c6f06a969a47",
-    strip_prefix = "ecsact_lang_cpp-34d73ebce5e99ae9711efa79a30ca7acda8599f0",
-    url = "https://github.com/ecsact-dev/ecsact_lang_cpp/archive/34d73ebce5e99ae9711efa79a30ca7acda8599f0.zip",
-)
-
-http_archive(
-    name = "ecsact_rt_entt",
-    sha256 = "7608497049cfca47f283ab0a7e8a6490d5a75033c9e732150284afc806f20b6d",
-    strip_prefix = "ecsact_rt_entt-0.2.0",
-    urls = ["https://github.com/ecsact-dev/ecsact_rt_entt/archive/refs/tags/0.2.0.tar.gz"],
-)
-
-http_archive(
-    name = "com_github_skypjack_entt",
-    sha256 = "0ac010f232d3089200c5e545bcbd6480cf68b705de6930d8ff7cdb0a29f5b47b",
-    strip_prefix = "entt-3.11.1",
-    url = "https://github.com/skypjack/entt/archive/refs/tags/v3.11.1.tar.gz",
+wasmer_repo(
+    name = "wasmer",
+    wasmer_version = "3.3.0",
 )
 
 http_archive(
@@ -38,21 +21,12 @@ load("@com_grail_bazel_toolchain//toolchain:rules.bzl", "llvm_toolchain")
 
 llvm_toolchain(
     name = "llvm_toolchain",
-    cxx_standard = {"linux": "c++20"},
-    distribution = "clang+llvm-15.0.6-x86_64-linux-gnu-ubuntu-18.04.tar.xz",
-    llvm_version = "15.0.6",
+    llvm_version = "16.0.4",
 )
 
 load("@llvm_toolchain//:toolchains.bzl", "llvm_register_toolchains")
 
 llvm_register_toolchains()
-
-load("//:wasmer.bzl", "wasmer_repo")
-
-wasmer_repo(
-    name = "wasmer",
-    wasmer_version = "3.3.0",
-)
 
 http_archive(
     name = "hedron_compile_commands",
@@ -64,31 +38,3 @@ http_archive(
 load("@hedron_compile_commands//:workspace_setup.bzl", "hedron_compile_commands_setup")
 
 hedron_compile_commands_setup()
-
-http_archive(
-    name = "emsdk",
-    sha256 = "2e9958d05cbb31e4464de23938884db9562c83a3ffc0b0b67ebc29c7f951f384",
-    strip_prefix = "emsdk-64337f3e2615a821e7f4f533d876217a85489f53/bazel",
-    url = "https://github.com/zaucy/emsdk/archive/64337f3e2615a821e7f4f533d876217a85489f53.zip",
-)
-
-load("@emsdk//:deps.bzl", emsdk_deps = "deps")
-
-emsdk_deps()
-
-load("@emsdk//:emscripten_deps.bzl", emsdk_emscripten_deps = "emscripten_deps")
-
-emsdk_emscripten_deps()
-
-load("@emsdk//:toolchains.bzl", "register_emscripten_toolchains")
-
-register_emscripten_toolchains()
-
-load("@rules_ecsact//ecsact:repositories.bzl", "ecsact_register_toolchains", "rules_ecsact_dependencies")
-
-rules_ecsact_dependencies()
-
-register_toolchains(
-    "//:ecsact_windows_toolchain",
-    "//:ecsact_linux_toolchain",
-)

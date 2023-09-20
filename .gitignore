@@ -1,6 +1,6 @@
-/bazel-*
-/user.bazelrc
-/.doxygen
-/external
-/compile_commands.json
-/.cache/
+bazel-*
+user.bazelrc
+.doxygen
+external
+compile_commands.json
+.cache

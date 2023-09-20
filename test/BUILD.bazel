@@ -1,20 +1,25 @@
 load("@rules_cc//cc:defs.bzl", "cc_binary", "cc_test")
 load("@emsdk//emscripten_toolchain:wasm_rules.bzl", "wasm_cc_binary")
-load("//bazel:copts.bzl", "copts")
+load("//:copts.bzl", "copts")
+
+config_setting(
+    name = "compiler_emscripten",
+    flag_values = {"@bazel_tools//tools/cpp:compiler": "emscripten"},
+)
 
 cc_test(
     name = "minst_test",
     srcs = ["minst_test.cc"],
-    args = ["ecsactsi_wasm/tests/minst_test.wasm"],
+    args = ["ecsact_si_wasm_test/minst_test.wasm"],
     copts = copts,
-    deps = ["//:minst", "@bazel_tools//tools/cpp/runfiles"],
+    deps = ["@ecsact_si_wasm//:minst", "@bazel_tools//tools/cpp/runfiles"],
     data = [":minst_test_wasm"],
 )
 
 cc_binary(
     name = "minst_test_wasm_cc",
     srcs = ["minst_test_wasm.cc"],
-    copts = copts,
+    # copts = copts,
     features = [
         "wasm_no_entry",
         "-wasm_warnings_as_errors",

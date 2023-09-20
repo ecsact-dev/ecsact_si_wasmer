@@ -1,6 +1,4 @@
 load("@rules_cc//cc:defs.bzl", "cc_library")
-load("@hedron_compile_commands//:refresh_compile_commands.bzl", "refresh_compile_commands")
-load("@rules_ecsact//ecsact:toolchain.bzl", "ecsact_toolchain")
 load("//bazel:copts.bzl", "copts")
 
 package(default_visibility = ["//visibility:public"])
@@ -21,7 +19,6 @@ filegroup(
 
 cc_library(
     name = "minst",
-    visibility = ["//:__subpackages__"],
     copts = copts,
     hdrs = [
         "ecsact/wasm/detail/minst/minst.hh",
@@ -31,58 +28,6 @@ cc_library(
     ],
     deps = [
         "@ecsact_runtime//:common",
-        "@wasmer//:wasmer-c-api",
+        "@wasmer",
     ],
-)
-
-refresh_compile_commands(
-    name = "refresh_compile_commands",
-    tags = ["manual"],
-    targets = {
-        # "//ecsactsi_wasm_tester:ecsactsi_wasm_tester": "",
-        # "//:ecsactsi_wasm": "",
-        # "//example:runtime": "",
-        # "//example:wasi_test_runtime": "",
-        # "//example:system_impls": "",
-        # "//example:wasmer_example": "",
-        # "//tests:minst_test": "",
-        # "//example:iostream__system_impl": "",
-        # "//example:iostream__wasi": "",
-        # "//example:printf__system_impl": "",
-        # "//example:printf__wasi": "",
-        # "//example:puts__system_impl": "",
-        # "//example:puts__wasi": "",
-    },
-)
-
-#### ECSACT TOOLCHAIN STUFF FOR TESTS BELOW HERE ####
-
-ecsact_toolchain(
-    name = "ecsact_cli_windows",
-    target_tool = "@ecsact_cli_windows//file",
-)
-
-ecsact_toolchain(
-    name = "ecsact_cli_linux",
-    target_tool = "@ecsact_cli_linux//file",
-)
-
-toolchain(
-    name = "ecsact_windows_toolchain",
-    exec_compatible_with = [
-        "@platforms//os:windows",
-        "@platforms//cpu:x86_64",
-    ],
-    toolchain = ":ecsact_cli_windows",
-    toolchain_type = "@rules_ecsact//ecsact:toolchain_type",
-)
-
-toolchain(
-    name = "ecsact_linux_toolchain",
-    exec_compatible_with = [
-        "@platforms//os:linux",
-        "@platforms//cpu:x86_64",
-    ],
-    toolchain = ":ecsact_cli_linux",
-    toolchain_type = "@rules_ecsact//ecsact:toolchain_type",
 )
