@@ -1,10 +1,4 @@
 load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
-load("@ecsact_si_wasm//:wasmer.bzl", "wasmer_repo")
-
-wasmer_repo(
-    name = "wasmer",
-    wasmer_version = "3.3.0",
-)
 
 http_archive(
     name = "com_grail_bazel_toolchain",

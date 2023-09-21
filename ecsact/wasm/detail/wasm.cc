@@ -20,7 +20,6 @@
 #include <array>
 #include <cstddef>
 #include "ecsact/runtime/dynamic.h"
-#include "ecsact/runtime/meta.h"
 #include "ecsact/wasm/detail/minst/minst.hh"
 #include "ecsact/wasm/detail/logger.hh"
 #include "ecsact/wasm/detail/wasi_fs.hh"

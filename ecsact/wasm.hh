@@ -27,8 +27,8 @@ struct system_load_options {
 };
 
 inline auto load_file(
-	std::filesystem::path          wasm_file_path,
-	std::span<system_load_options> systems
+	std::filesystem::path                wasm_file_path,
+	std::span<const system_load_options> systems
 ) -> ecsactsi_wasm_error {
 	auto system_ids = std::vector<ecsact_system_like_id>{};
 	auto wasm_exports = std::vector<std::string>{};
@@ -50,7 +50,7 @@ inline auto load_file(
 		wasm_file_path.string().c_str(),
 		static_cast<std::int32_t>(systems.size()),
 		system_ids.data(),
-		wasm_exports.data()
+		wasm_exports_c.data()
 	);
 }
 
@@ -75,11 +75,11 @@ inline auto load(
 	}
 
 	return ecsactsi_wasm_load(
-		static_cast<char*>(wasm_data.data()),
+		reinterpret_cast<char*>(wasm_data.data()),
 		static_cast<std::int32_t>(wasm_data.size()),
 		static_cast<std::int32_t>(systems.size()),
 		system_ids.data(),
-		wasm_exports.data()
+		wasm_exports_c.data()
 	);
 }
 
@@ -116,8 +116,8 @@ auto consume_logs(log_consumer auto&& f) -> void {
 			std::int32_t            message_length,
 			void*                   user_data
 		) {
-			static_cast<decltype(&f)>(user_data)(
-				reinterpret_cast<log_level>(level),
+			(*static_cast<decltype(&f)>(user_data))(
+				static_cast<log_level>(level),
 				std::string_view{message, static_cast<std::size_t>(message_length)}
 			);
 		},
