@@ -3,5 +3,5 @@
 #include <wasm.h>
 
 namespace ecsact::wasm::detail {
-  auto engine() -> wasm_engine_t*;
+auto engine() -> wasm_engine_t*;
 }
