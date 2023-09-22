@@ -21,8 +21,6 @@ jobs:
     runs-on: windows-latest
     steps:
       - uses: wasmerio/setup-wasmer@v2
-        with:
-          version: '3.3.0'
       - uses: actions/cache@v3
         with:
           path: |
@@ -39,8 +37,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: wasmerio/setup-wasmer@v2
-        with:
-          version: '3.3.0'
       - uses: actions/cache@v3
         with:
           path: |
