@@ -74,7 +74,7 @@ auto minst_export::func_call() -> std::optional<minst_trap> {
 auto minst_export::func_call(int32_t p0) -> std::optional<minst_trap> {
 	assert(kind() == WASM_EXTERN_FUNC);
 
-	wasm_val_t args_val[] = {WASM_I32_VAL(p0)};
+	wasm_val_t     args_val[] = {WASM_I32_VAL(p0)};
 	wasm_val_vec_t args = WASM_ARRAY_VEC(args_val);
 	wasm_val_vec_t results = {};
 	auto           trap = wasm_func_call(func, &args, &results);
