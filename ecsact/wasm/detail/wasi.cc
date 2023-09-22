@@ -7,7 +7,6 @@
 #include "ecsact/wasm/detail/logger.hh"
 #include "ecsact/wasm/detail/mem_stack.hh"
 #include "ecsact/wasm/detail/util.hh"
-#include "mem_stack.hh"
 
 using ecsact::wasm::detail::call_mem_read;
 using ecsact::wasm::detail::debug_trace_method;
