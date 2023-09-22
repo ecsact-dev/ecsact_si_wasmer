@@ -7,8 +7,10 @@
 #include "ecsact/wasm/detail/logger.hh"
 #include "ecsact/wasm/detail/mem_stack.hh"
 #include "ecsact/wasm/detail/util.hh"
+#include "mem_stack.hh"
 
 using ecsact::wasm::detail::call_mem_read;
+using ecsact::wasm::detail::debug_trace_method;
 using ecsact::wasm::detail::wasm_memory_cast;
 
 constexpr int32_t WASI_STDIN_FD = 0;
@@ -19,6 +21,7 @@ wasm_trap_t* ecsactsi_wasi_proc_exit(
 	const wasm_val_vec_t* args,
 	wasm_val_vec_t*       results
 ) {
+	debug_trace_method("proc_exit");
 	return nullptr;
 }
 
@@ -26,6 +29,7 @@ wasm_trap_t* ecsactsi_wasi_fd_seek(
 	const wasm_val_vec_t* args,
 	wasm_val_vec_t*       results
 ) {
+	debug_trace_method("fd_seek");
 	results->data[0].kind = WASM_I32;
 	results->data[0].of.i32 = 0;
 
@@ -36,6 +40,7 @@ wasm_trap_t* ecsactsi_wasi_fd_write(
 	const wasm_val_vec_t* args,
 	wasm_val_vec_t*       results
 ) {
+	debug_trace_method("fd_write");
 	auto mem = call_mem_read<wasm_memory_t*>(0);
 	assert(args->data[0].kind == WASM_I32);
 	auto fd = args->data[0].of.i32;
@@ -83,6 +88,7 @@ wasm_trap_t* ecsactsi_wasi_fd_read(
 	const wasm_val_vec_t* args,
 	wasm_val_vec_t*       results
 ) {
+	debug_trace_method("fd_read");
 	auto mem = call_mem_read<wasm_memory_t*>(0);
 	assert(args->data[0].kind == WASM_I32);
 	auto fd = args->data[0].of.i32;
@@ -121,6 +127,7 @@ wasm_trap_t* ecsactsi_wasi_fd_close(
 	const wasm_val_vec_t* args,
 	wasm_val_vec_t*       results
 ) {
+	debug_trace_method("fd_close");
 	assert(args->data[0].kind == WASM_I32);
 	auto fd = args->data[0].of.i32;
 
@@ -140,6 +147,7 @@ wasm_trap_t* ecsactsi_wasi_environ_sizes_get(
 	const wasm_val_vec_t* args,
 	wasm_val_vec_t*       results
 ) {
+	debug_trace_method("environ_sizes_get");
 	auto mem = call_mem_read<wasm_memory_t*>(0);
 	auto retptr0 = wasm_memory_cast<size_t>(mem, args->data[0].of.i32);
 	auto retptr1 = wasm_memory_cast<size_t>(mem, args->data[1].of.i32);
@@ -157,6 +165,7 @@ wasm_trap_t* ecsactsi_wasi_environ_get(
 	const wasm_val_vec_t* args,
 	wasm_val_vec_t*       results
 ) {
+	debug_trace_method("environ_get");
 	auto mem = call_mem_read<wasm_memory_t*>(0);
 	auto environ_arg = wasm_memory_cast<uint8_t>(mem, args->data[0].of.i32);
 	auto environ_buf_arg = wasm_memory_cast<uint8_t>(mem, args->data[1].of.i32);
@@ -176,6 +185,7 @@ wasm_trap_t* ecsactsi_wasi_fd_fdstat_get(
 	const wasm_val_vec_t* args,
 	wasm_val_vec_t*       results
 ) {
+	debug_trace_method("fd_fdstat_get");
 	const auto default_fdstats = std::map<int32_t, ecsactsi_wasi_fdstat_t>{
 		{
 			WASI_STDIN_FD,

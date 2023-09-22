@@ -69,6 +69,7 @@ struct minst_export {
 	auto kind() const -> wasm_externkind_enum;
 
 	auto func_call() -> std::optional<minst_trap>;
+	auto func_call(int32_t p0) -> std::optional<minst_trap>;
 };
 
 /**

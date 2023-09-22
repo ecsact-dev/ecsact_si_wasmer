@@ -27,35 +27,63 @@
 #include "ecsact/wasm/detail/guest_imports/wasi_snapshot_preview1.hh"
 #include "ecsact/wasm/detail/guest_imports/env.hh"
 #include "ecsact/wasm/detail/cpp_util.hh"
+#include "ecsact/wasm/detail/mem_stack.hh"
+#include "mem_stack.hh"
 
 using namespace std::string_literals;
+using ecsact::wasm::detail::call_mem_alloc;
 using ecsact::wasm::detail::clear_log_lines;
 using ecsact::wasm::detail::consume_stdio_str_as_log_lines;
 using ecsact::wasm::detail::get_log_lines;
 using ecsact::wasm::detail::guest_env_module_imports;
 using ecsact::wasm::detail::guest_wasi_module_imports;
+using ecsact::wasm::detail::minst;
 using ecsact::wasm::detail::minst_error;
+using ecsact::wasm::detail::minst_export;
 using ecsact::wasm::detail::minst_import;
 using ecsact::wasm::detail::minst_import_resolve_t;
+using ecsact::wasm::detail::set_call_mem_data;
 using ecsact::wasm::detail::start_transaction;
 
 namespace {
 
-struct minst_ecsact_system_impl_export {
-	ecsact_system_like_id system_id;
-	size_t                export_index;
-};
-
 struct minst_ecsact_system_impls {
-	std::shared_ptr<std::vector<std::byte>>      wasm_data;
-	ecsact::wasm::detail::minst                  minst;
-	std::vector<minst_ecsact_system_impl_export> system_impl_exports;
+	minst                                                   minst;
+	std::unordered_map<ecsact_system_like_id, minst_export> sys_impl_exports;
+	minst_export                                            memory;
+
+	minst_ecsact_system_impls() = delete;
+	minst_ecsact_system_impls(const minst_ecsact_system_impls&) = delete;
+
+	minst_ecsact_system_impls(minst_ecsact_system_impls&&) = default;
+
+	minst_ecsact_system_impls( //
+		class minst&&                                           minst,
+		std::unordered_map<ecsact_system_like_id, minst_export> exports,
+		minst_export                                            memory
+	)
+		: minst(std::move(minst))
+		, sys_impl_exports(std::move(exports))
+		, memory(memory) {
+	}
 };
 
 auto trap_handler = ecsactsi_wasm_trap_handler{};
 
-void ecsactsi_wasm_system_impl(ecsact_system_execution_context* ctx) {
+thread_local auto thread_minst = std::optional<minst_ecsact_system_impls>{};
+
+void ecsact_si_wasm_system_impl(ecsact_system_execution_context* ctx) {
 	auto system_id = ecsact_system_execution_context_id(ctx);
+	auto itr = thread_minst->sys_impl_exports.find(system_id);
+	assert(itr != thread_minst->sys_impl_exports.end());
+
+	auto mem_data = std::array<std::byte, 4096>{};
+	set_call_mem_data(mem_data.data(), mem_data.size());
+	defer {
+		set_call_mem_data(nullptr, 0);
+	};
+	call_mem_alloc(thread_minst->memory.memory);
+	itr->second.func_call(call_mem_alloc(ctx));
 }
 } // namespace
 
@@ -88,9 +116,10 @@ ecsactsi_wasm_error ecsactsi_wasm_load(
 	ecsact_system_like_id* system_ids,
 	const char**           wasm_exports
 ) {
+	using ecsact::wasm::detail::engine;
 	using ecsact::wasm::detail::minst;
 	using ecsact::wasm::detail::minst_error_code;
-	using ecsact::wasm::detail::engine;
+	using ecsact::wasm::detail::minst_export;
 
 	auto result = ecsact::wasm::detail::minst::create(
 		engine(),
@@ -137,8 +166,12 @@ ecsactsi_wasm_error ecsactsi_wasm_load(
 	}
 
 	auto& inst = std::get<minst>(result);
+	auto  system_impl_exports =
+		std::unordered_map<ecsact_system_like_id, minst_export>{};
 
-	for(auto i=0; systems_count > i; ++i) {
+	system_impl_exports.reserve(systems_count);
+
+	for(auto i = 0; systems_count > i; ++i) {
 		auto sys_id = system_ids[i];
 		auto system_impl_export_name = std::string_view{
 			wasm_exports[i],
@@ -154,12 +187,41 @@ ecsactsi_wasm_error ecsactsi_wasm_load(
 		if(exp->kind() != WASM_EXTERN_FUNC) {
 			return ECSACTSI_WASM_ERR_EXPORT_INVALID;
 		}
+
+		system_impl_exports[sys_id] = *exp;
 	}
 
+	auto wasm_mem = std::optional<minst_export>{};
+
+	for(auto exp : inst.exports()) {
+		if(exp.kind() == WASM_EXTERN_MEMORY) {
+			wasm_mem = exp;
+			break;
+		}
+	}
+
+	assert(wasm_mem);
+
+	auto mem_data = std::array<std::byte, 4096>{};
+	set_call_mem_data(mem_data.data(), mem_data.size());
+	call_mem_alloc<wasm_memory_t*>(wasm_mem->memory);
+	defer {
+		set_call_mem_data(nullptr, 0);
+	};
 	auto init_trap = inst.initialize();
 	if(init_trap) {
 		return ECSACTSI_WASM_ERR_INITIALIZE_FAIL;
 	}
+
+	for(auto&& [sys_id, exp] : system_impl_exports) {
+		ecsact_set_system_execution_impl(sys_id, &ecsact_si_wasm_system_impl);
+	}
+
+	thread_minst.emplace( //
+		std::move(inst),
+		system_impl_exports,
+		*wasm_mem
+	);
 
 	return ECSACTSI_WASM_OK;
 }

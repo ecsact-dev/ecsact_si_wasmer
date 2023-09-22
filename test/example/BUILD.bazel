@@ -59,10 +59,13 @@ wasm_cc_binary(
     standalone = True,
 )
 
-cc_binary(
+cc_test(
     name = "wasmer_example",
     srcs = [
         "example.cc",
+    ],
+    args = [
+        "$(location :system_impls.wasm)",
     ],
     copts = copts,
     defines = [
@@ -79,18 +82,7 @@ cc_binary(
         "@wasmer",
         "@ecsact_si_wasm",
     ],
-)
-
-cc_test(
-    name = "wasmer_example_test",
-    srcs = ["//:test.cc"],
-    args = [
-        "--exe=$(location :wasmer_example)",
-        "$(location :system_impls.wasm)",
-    ],
-    copts = copts,
     data = [
         ":system_impls.wasm",
-        ":wasmer_example",
     ],
 )

@@ -57,6 +57,7 @@ auto ecsact::wasm::detail::call_mem_alloc_raw( //
 	size_t                data_size,
 	const std::type_info& type
 ) -> std::int32_t {
+	assert(call_mem_info.has_value());
 	assert(data_size > 0);
 	auto index = static_cast<std::int32_t>(call_mem_info->data_offset);
 	ASSIGN_OFFSET_TYPE(call_mem_info->data_offset, type);
