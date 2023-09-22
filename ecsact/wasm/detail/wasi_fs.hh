@@ -17,4 +17,4 @@ auto fdstat(int32_t fd) -> ecsactsi_wasi_fdstat_t;
 auto fdstat(std::string_view virtual_path) -> ecsactsi_wasi_fdstat_t;
 auto ensure_open(int32_t pseudo_fd) -> std::FILE*;
 auto close(int32_t pseudo_fd) -> void;
-} // namespace ecsactsi_wasi::detail::fs
+} // namespace ecsact::wasm::detail::wasi::fs

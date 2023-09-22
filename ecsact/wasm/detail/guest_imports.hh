@@ -14,4 +14,4 @@ using allowed_guest_imports_t = std::unordered_map<
 using allowed_guest_modules_t = std::unordered_map<
 	std::string_view, // Module name
 	allowed_guest_imports_t>;
-} // namespace ecsactsi_wasm::detail
+} // namespace ecsact::wasm::detail

@@ -44,4 +44,4 @@ template<typename T>
 auto call_mem_replace(std::int32_t offset, T value) -> void {
 	call_mem_read<T>(offset, typeid(T)) = value;
 }
-} // namespace ecsactsi_wasm::detail
+} // namespace ecsact::wasm::detail
