@@ -1,9 +1,10 @@
-#include "minst.hh"
+#include "ecsact/wasm/detail/minst/minst.hh"
 
 #include <format>
 #include <cassert>
 #include <wasm.h>
 #include <wasmer.h>
+#include "ecsact/wasm/detail/cpp_util.hh"
 
 using ecsact::wasm::detail::minst;
 using ecsact::wasm::detail::minst_export;
@@ -12,14 +13,6 @@ using ecsact::wasm::detail::minst_import_resolve_func;
 using ecsact::wasm::detail::minst_trap;
 
 namespace {
-// https://en.cppreference.com/w/cpp/utility/variant/visit
-template<class... Ts>
-struct overloaded : Ts... {
-	using Ts::operator()...;
-};
-template<class... Ts>
-overloaded(Ts...) -> overloaded<Ts...>;
-
 auto get_wasmer_last_error_message() -> std::string {
 	auto msg = std::string{};
 	msg.resize(wasmer_last_error_length());
@@ -110,7 +103,7 @@ auto minst::create( //
 	wasm_engine_t*       engine,
 	std::span<std::byte> wasm_data,
 	import_resolver_t    import_resolver
-) -> std::expected<minst, minst_error> {
+) -> std::variant<minst, minst_error> {
 	auto self = minst{};
 
 	auto wasm_bytes = wasm_byte_vec_t{
@@ -123,10 +116,10 @@ auto minst::create( //
 	self._module = wasm_module_new(self._store, &wasm_bytes);
 
 	if(self._module == nullptr) {
-		return std::unexpected(minst_error{
+		return minst_error{
 			minst_error_code::compile_fail,
 			get_wasmer_last_error_message(),
-		});
+		};
 	}
 
 	auto imports = wasm_importtype_vec_t{};
@@ -149,14 +142,14 @@ auto minst::create( //
 		auto guest_import_resolve = import_resolver(self._imports[i]);
 
 		if(!guest_import_resolve) {
-			return std::unexpected(minst_error{
+			return minst_error{
 				minst_error_code::unresolved_guest_import,
 				std::format(
 					"Guest import '{}.{}' is unresolved",
 					self._imports[i].module(),
 					self._imports[i].name()
 				),
-			});
+			};
 		}
 
 		wasm_extern_t* guest_import_extern = std::visit(
@@ -180,10 +173,10 @@ auto minst::create( //
 	);
 
 	if(self._instance == nullptr) {
-		return std::unexpected(minst_error{
+		return minst_error{
 			minst_error_code::instantiate_fail,
 			get_wasmer_last_error_message(),
-		});
+		};
 	}
 
 	auto inst_exports = wasm_extern_vec_t{};
@@ -257,6 +250,30 @@ auto minst::initialize() -> std::optional<minst_trap> {
 	for(auto exp : exports()) {
 		if(exp.name() == "_initialize") {
 			return exp.func_call();
+		}
+	}
+
+	return std::nullopt;
+}
+
+auto minst::find_import( //
+	std::string_view module_name,
+	std::string_view import_name
+) -> std::optional<minst_import> {
+	for(auto imp : imports()) {
+		if(imp.module() == module_name && imp.name() == import_name) {
+			return imp;
+		}
+	}
+
+	return std::nullopt;
+}
+auto minst::find_export( //
+	std::string_view export_name
+) -> std::optional<minst_export> {
+	for(auto exp : exports()) {
+		if(exp.name() == export_name) {
+			return exp;
 		}
 	}
 

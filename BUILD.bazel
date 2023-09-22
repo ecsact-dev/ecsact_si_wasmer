@@ -23,7 +23,10 @@ filegroup(
 cc_library(
     name = "ecsact_si_wasm",
     copts = copts,
-    defines = ["ECSACTSI_WASM_API="],
+    defines = [
+        "ECSACTSI_WASM_API=",
+        "ECSACT_DYNAMIC_API=",
+    ],
     hdrs = [":headers"],
     srcs = [":sources"],
     deps = [
@@ -43,7 +46,14 @@ cc_library(
         "ecsact/wasm/detail/minst/minst.cc",
     ],
     deps = [
+        ":cpp_util",
         "@ecsact_runtime//:common",
         "@wasmer",
     ],
+)
+
+cc_library(
+    name = "cpp_util",
+    copts = copts,
+    hdrs = ["ecsact/wasm/detail/cpp_util.hh"],
 )

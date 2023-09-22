@@ -23,11 +23,20 @@
 #include "ecsact/wasm/detail/minst/minst.hh"
 #include "ecsact/wasm/detail/logger.hh"
 #include "ecsact/wasm/detail/wasi_fs.hh"
+#include "ecsact/wasm/detail/globals.hh"
+#include "ecsact/wasm/detail/guest_imports/wasi_snapshot_preview1.hh"
+#include "ecsact/wasm/detail/guest_imports/env.hh"
+#include "ecsact/wasm/detail/cpp_util.hh"
 
 using namespace std::string_literals;
 using ecsact::wasm::detail::clear_log_lines;
 using ecsact::wasm::detail::consume_stdio_str_as_log_lines;
 using ecsact::wasm::detail::get_log_lines;
+using ecsact::wasm::detail::guest_env_module_imports;
+using ecsact::wasm::detail::guest_wasi_module_imports;
+using ecsact::wasm::detail::minst_error;
+using ecsact::wasm::detail::minst_import;
+using ecsact::wasm::detail::minst_import_resolve_t;
 using ecsact::wasm::detail::start_transaction;
 
 namespace {
@@ -79,8 +88,80 @@ ecsactsi_wasm_error ecsactsi_wasm_load(
 	ecsact_system_like_id* system_ids,
 	const char**           wasm_exports
 ) {
-	// auto result = ecsact::wasm::detail::minst::create();
-	return ECSACTSI_WASM_ERR_COMPILE_FAIL;
+	using ecsact::wasm::detail::minst;
+	using ecsact::wasm::detail::minst_error_code;
+	using ecsact::wasm::detail::engine;
+
+	auto result = ecsact::wasm::detail::minst::create(
+		engine(),
+		std::span{
+			reinterpret_cast<std::byte*>(wasm_data),
+			static_cast<size_t>(wasm_data_size),
+		},
+		[&](const minst_import imp) -> minst_import_resolve_t {
+			auto module_name = imp.module();
+			auto method_name = imp.name();
+
+			if(imp.module() == "env") {
+				auto itr = guest_env_module_imports.find(method_name);
+				if(itr == guest_env_module_imports.end()) {
+					return std::nullopt;
+				}
+				return itr->second();
+			}
+
+			if(imp.module() == "wasi_snapshot_preview1") {
+				auto itr = guest_wasi_module_imports.find(method_name);
+				if(itr == guest_wasi_module_imports.end()) {
+					return std::nullopt;
+				}
+				return itr->second();
+			}
+
+			return std::nullopt;
+		}
+	);
+
+	if(std::holds_alternative<minst_error>(result)) {
+		auto err = std::get<minst_error>(result);
+		switch(err.code) {
+			case minst_error_code::ok:
+				assert(err.code != minst_error_code::ok);
+			case minst_error_code::compile_fail:
+				return ECSACTSI_WASM_ERR_COMPILE_FAIL;
+			case minst_error_code::unresolved_guest_import:
+				return ECSACTSI_WASM_ERR_GUEST_IMPORT_INVALID;
+			case minst_error_code::instantiate_fail:
+				return ECSACTSI_WASM_ERR_INSTANTIATE_FAIL;
+		}
+	}
+
+	auto& inst = std::get<minst>(result);
+
+	for(auto i=0; systems_count > i; ++i) {
+		auto sys_id = system_ids[i];
+		auto system_impl_export_name = std::string_view{
+			wasm_exports[i],
+			std::strlen(wasm_exports[i]),
+		};
+
+		auto exp = inst.find_export(system_impl_export_name);
+
+		if(!exp) {
+			return ECSACTSI_WASM_ERR_EXPORT_NOT_FOUND;
+		}
+
+		if(exp->kind() != WASM_EXTERN_FUNC) {
+			return ECSACTSI_WASM_ERR_EXPORT_INVALID;
+		}
+	}
+
+	auto init_trap = inst.initialize();
+	if(init_trap) {
+		return ECSACTSI_WASM_ERR_INITIALIZE_FAIL;
+	}
+
+	return ECSACTSI_WASM_OK;
 }
 
 ecsactsi_wasm_error ecsactsi_wasm_load_file(

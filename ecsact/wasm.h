@@ -90,6 +90,11 @@ typedef enum ecsactsi_wasm_error {
 	 * WASM file contains correctly named guest import, but was not a function
 	 */
 	ECSACTSI_WASM_ERR_GUEST_IMPORT_INVALID,
+
+	/**
+	 * Invoking `_initialize()` resulted in a wasm trap
+	 */
+	ECSACTSI_WASM_ERR_INITIALIZE_FAIL,
 } ecsactsi_wasm_error;
 
 ECSACTSI_WASM_API_FN(void, ecsactsi_wasm_last_error_message)

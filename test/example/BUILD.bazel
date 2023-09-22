@@ -65,7 +65,10 @@ cc_binary(
         "example.cc",
     ],
     copts = copts,
-    defines = ["ECSACTSI_WASM_API="],
+    defines = [
+        "ECSACTSI_WASM_API=",
+        "ECSACT_CORE_API=",
+    ],
     deps = [
         ":runtime",
         "@ecsact_si_wasm//:minst",

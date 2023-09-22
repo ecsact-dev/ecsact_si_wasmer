@@ -14,6 +14,7 @@
 namespace fs = std::filesystem;
 using bazel::tools::cpp::runfiles::Runfiles;
 using ecsact::wasm::detail::minst;
+using ecsact::wasm::detail::minst_error;
 using ecsact::wasm::detail::minst_export;
 using ecsact::wasm::detail::minst_import;
 using ecsact::wasm::detail::minst_import_resolve_func;
@@ -82,8 +83,9 @@ auto main(int argc, char* argv[]) -> int {
 			test_guest_import_resolver
 		);
 
-		if(result) {
-			if(auto trap = result->initialize()) {
+		if(std::holds_alternative<minst>(result)) {
+			auto& inst = std::get<minst>(result);
+			if(auto trap = inst.initialize()) {
 				std::cerr //
 					<< "[INITIALIZE TRAP]: " << trap->message() << std::endl;
 				return 1;
@@ -91,7 +93,7 @@ auto main(int argc, char* argv[]) -> int {
 
 			auto minst_test_export_fn = std::optional<minst_export>{};
 
-			for(auto exp : result->exports()) {
+			for(auto exp : inst.exports()) {
 				if(exp.name() == "minst_test_export_fn") {
 					minst_test_export_fn = exp;
 				}
@@ -117,7 +119,10 @@ auto main(int argc, char* argv[]) -> int {
 			}
 
 		} else {
-			std::cerr << "[ERROR]: " << result.error().message << std::endl;
+			std::cerr << std::format( //
+				"[ERROR]: {}\n",
+				std::get<minst_error>(result).message
+			);
 			return 1;
 		}
 	}

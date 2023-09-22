@@ -5,7 +5,6 @@
 #include <vector>
 #include <span>
 #include <cstddef>
-#include <expected>
 #include <functional>
 #include <optional>
 #include <variant>
@@ -84,7 +83,14 @@ public:
 		wasm_engine_t*       engine,
 		std::span<std::byte> wasm_data,
 		import_resolver_t    import_resolver
-	) -> std::expected<minst, minst_error>;
+	) -> std::variant<minst, minst_error>;
+
+	/**
+	 * Create a new minst with internal memory copied over. If 'initialize' was
+	 * already called then the memory should be identical, thus 'initialize'
+	 * should not be called again.
+	 */
+	static auto copy(minst& other) -> minst;
 
 	minst(minst&& other);
 	~minst();
@@ -97,6 +103,15 @@ public:
 	 * (if present.)
 	 */
 	auto initialize() -> std::optional<minst_trap>;
+
+	auto find_import( //
+		std::string_view module_name,
+		std::string_view import_name
+	) -> std::optional<minst_import>;
+
+	auto find_export( //
+		std::string_view export_name
+	) -> std::optional<minst_export>;
 
 private:
 	minst();

@@ -6,7 +6,7 @@
 #include <csignal>
 #include <span>
 #include <array>
-#include <print>
+#include <format>
 #include "magic_enum.hpp"
 #include "ecsact/runtime/core.h"
 #include "ecsact/runtime/core.hh"
@@ -57,8 +57,7 @@ const auto test_systems = std::array{
 };
 
 void print_load_error(ecsactsi_wasm_error err, const std::string& wasm_path) {
-	std::print(
-		stderr,
+	std::cerr << std::format(
 		"[ERROR] loading wasm file {} failed: {}\n{}\n",
 		wasm_path,
 		magic_enum::enum_name(err),

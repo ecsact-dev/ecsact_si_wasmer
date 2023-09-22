@@ -1,16 +1,17 @@
 #pragma once
 
-#include <string>
+#include <string_view>
 #include <functional>
 #include <map>
 #include <wasm.h>
+#include "ecsact/wasm/detail/minst/minst.hh"
 
-namespace ecsactsi_wasm::detail {
+namespace ecsact::wasm::detail {
 using allowed_guest_imports_t = std::unordered_map<
-	std::string, // Function name
-	std::function<wasm_func_t*(wasm_store_t*)>>;
+	std::string_view, // Function name
+	std::function<minst_import_resolve_func()>>;
 
 using allowed_guest_modules_t = std::unordered_map<
-	std::string, // Module name
+	std::string_view, // Module name
 	allowed_guest_imports_t>;
 } // namespace ecsactsi_wasm::detail

@@ -1,12 +1,14 @@
 #pragma once
 
+#include <iostream>
+#include <format>
+#include <string>
 #include <cstdint>
 #include <filesystem>
 #include <optional>
 #include <string_view>
 #include <span>
 #include <concepts>
-#include <print>
 #include "ecsact/wasm.h"
 
 namespace ecsact::wasm {
@@ -130,13 +132,13 @@ inline auto consume_and_print_logs() -> void {
 		switch(l) {
 			default:
 			case log_level::info:
-				std::println(stdout, "[INFO] {}", m);
+				std::cout << std::format("[INFO] {}", m);
 				break;
 			case log_level::warning:
-				std::println(stderr, "[WARNING] {}", m);
+				std::cerr << std::format("[WARNING] {}", m);
 				break;
 			case log_level::error:
-				std::println(stderr, "[ERROR] {}", m);
+				std::cerr << std::format("[ERROR] {}", m);
 				break;
 		}
 	});
