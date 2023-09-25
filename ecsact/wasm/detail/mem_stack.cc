@@ -7,15 +7,17 @@
 #include <span>
 #include <typeindex>
 #include <unordered_map>
+#include <map>
 #include <vector>
 #include <string_view>
+#include <cstring>
 
 namespace {
 struct call_mem_info_t {
 	std::span<std::byte> data;
 	std::size_t          data_offset = 0;
 #ifndef NDEBUG
-	std::unordered_map<std::size_t, std::type_index> data_offset_types;
+	std::map<std::size_t, const char*> data_offset_types;
 	std::vector<std::string_view>                    method_trace;
 #endif
 };
@@ -24,13 +26,14 @@ thread_local auto call_mem_info = std::optional<call_mem_info_t>{};
 } // namespace
 
 #ifndef NDEBUG
-#	define ASSERT_OFFSET_TYPE(offset, type)                     \
-		assert(call_mem_info->data_offset_types.contains(offset)); \
-		assert(call_mem_info->data_offset_types.at(offset) == type)
-
+#	define ASSERT_OFFSET_TYPE(offset, type) {                    \
+		auto& types = call_mem_info->data_offset_types;\
+		assert(types.contains(offset)); \
+		assert(std::strcmp(types.at(offset), type.name()) == 0); \
+	} static_assert(true, "macro requires semi-colon")
 #	define ASSIGN_OFFSET_TYPE(offset, type)                      \
 		assert(!call_mem_info->data_offset_types.contains(offset)); \
-		call_mem_info->data_offset_types.insert({offset, std::type_index{type}})
+		call_mem_info->data_offset_types.insert({offset, type.name()})
 #else
 #	define ASSERT_OFFSET_TYPE(offset, type) \
 		static_assert(true, "macro requires semi-colon")
