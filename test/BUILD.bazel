@@ -2,6 +2,7 @@ load("@rules_cc//cc:defs.bzl", "cc_binary", "cc_test")
 load("@ecsact_rt_entt//runtime:index.bzl", "ecsact_entt_runtime")
 load("@emsdk//emscripten_toolchain:wasm_rules.bzl", "wasm_cc_binary")
 load("@ecsact_si_wasm//bazel:copts.bzl", "copts")
+load("@ecsact_si_wasm//bazel:linkopts.bzl", "linkopts")
 
 package(default_visibility = [":__subpackages__"])
 
@@ -12,6 +13,7 @@ cc_test(
     srcs = ["minst_test.cc"],
     args = ["ecsact_si_wasm_test/minst_test.wasm"],
     copts = copts,
+    linkopts = linkopts,
     deps = ["@ecsact_si_wasm//:minst", "@bazel_tools//tools/cpp/runfiles"],
     data = [":minst_test_wasm"],
 )
@@ -96,6 +98,7 @@ ecsact_entt_runtime(
         "wasi_test.cc",
     ],
     copts = copts,
+    linkopts = linkopts,
     data = [
         ":{}__system_impl.wasm".format(wasi_test),
         "wasi_test_file.txt",
@@ -120,6 +123,7 @@ ecsact_entt_runtime(
         "$(location :{}__system_impl.wasm)".format(wasi_test),
     ],
     copts = copts,
+    linkopts = linkopts,
     data = [
         ":{}__system_impl.wasm".format(wasi_test),
         ":{}__wasi".format(wasi_test),

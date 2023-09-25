@@ -7,6 +7,7 @@
 #include <filesystem>
 #include <vector>
 #include <fstream>
+#include <format>
 #include <wasm.h>
 #include "tools/cpp/runfiles/runfiles.h"
 #include "ecsact/wasm/detail/minst/minst.hh"

@@ -1,5 +1,6 @@
 load("@rules_cc//cc:defs.bzl", "cc_binary", "cc_test")
 load("@ecsact_si_wasm//bazel:copts.bzl", "copts")
+load("@ecsact_si_wasm//bazel:linkopts.bzl", "linkopts")
 load("@ecsact_rt_entt//runtime:index.bzl", "ecsact_entt_runtime")
 load("@emsdk//emscripten_toolchain:wasm_rules.bzl", "wasm_cc_binary")
 
@@ -18,7 +19,7 @@ cc_binary(
     srcs = [
         "system_impls.cc",
     ],
-    copts = ["-std=c++20"],
+    copts = copts,
     features = [
         "wasm_no_entry",
         "-wasm_warnings_as_errors",
@@ -68,6 +69,7 @@ cc_test(
         "$(location :system_impls.wasm)",
     ],
     copts = copts,
+    linkopts = linkopts,
     defines = [
         "ECSACTSI_WASM_API=",
         "ECSACT_CORE_API=",
