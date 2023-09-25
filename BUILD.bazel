@@ -1,73 +1,59 @@
 load("@rules_cc//cc:defs.bzl", "cc_library")
-load("@hedron_compile_commands//:refresh_compile_commands.bzl", "refresh_compile_commands")
+load("//bazel:copts.bzl", "copts")
 
 package(default_visibility = ["//visibility:public"])
 
 filegroup(
     name = "headers",
     srcs = [
-        "ecsactsi_wasm.h",
+        "ecsact/wasm.h",
+        "ecsact/wasm.hh",
     ],
 )
 
 filegroup(
     name = "sources",
-    # keep sorted
-    srcs = [
-        "detail/ecsactsi_logger.cc",
-        "detail/ecsactsi_logger.hh",
-        "detail/ecsactsi_wasi.cc",
-        "detail/ecsactsi_wasi.hh",
-        "detail/ecsactsi_wasi_fs.cc",
-        "detail/ecsactsi_wasi_fs.hh",
-        "detail/ecsactsi_wasm.cc",
-        "detail/ecsactsi_wasm_internal.cc",
-        "detail/ecsactsi_wasm_internal.hh",
-        "detail/guest_imports.hh",
-        "detail/guest_imports/env.hh",
-        "detail/guest_imports/wasi_snapshot_preview1.hh",
-        "detail/wasm_ecsact_memory.cc",
-        "detail/wasm_ecsact_memory.hh",
-        "detail/wasm_ecsact_pointer_map.cc",
-        "detail/wasm_ecsact_pointer_map.hh",
-        "detail/wasm_ecsact_system_execution.cc",
-        "detail/wasm_ecsact_system_execution.h",
-        "detail/wasm_file_binary.hh",
-        "detail/wasm_util.hh",
+    srcs = glob([
+        "ecsact/wasm/**/*.cc",
+        "ecsact/wasm/**/*.hh",
+        "ecsact/wasm/**/*.h",
+    ]),
+)
+
+cc_library(
+    name = "ecsact_si_wasm",
+    copts = copts,
+    defines = [
+        "ECSACTSI_WASM_API=",
+        "ECSACT_DYNAMIC_API=",
+    ],
+    hdrs = [":headers"],
+    srcs = [":sources"],
+    deps = [
+        "@wasmer",
+        "@ecsact_runtime//:common",
+        "@ecsact_runtime//:dynamic",
     ],
 )
 
 cc_library(
-    name = "ecsactsi_wasm",
-    hdrs = ["ecsactsi_wasm.h"],
+    name = "minst",
+    copts = copts,
+    hdrs = [
+        "ecsact/wasm/detail/minst/minst.hh",
+    ],
+    srcs = [
+        "ecsact/wasm/detail/minst/minst.cc",
+    ],
     deps = [
+        ":cpp_util",
         "@ecsact_runtime//:common",
+        "@wasmer",
     ],
 )
 
-platform(
-    name = "wasm",
-    constraint_values = [
-        "@platforms//cpu:wasm64",
-        "@bazel_tools//tools/cpp:clang",
-    ],
-)
-
-refresh_compile_commands(
-    name = "refresh_compile_commands",
-    tags = ["manual"],
-    targets = {
-        # "//ecsactsi_wasm_tester:ecsactsi_wasm_tester": "",
-        # "//:ecsactsi_wasm": "",
-        # "//example:runtime": "",
-        # "//example:wasi_test_runtime": "",
-        # "//example:system_impls": "",
-        "//example:wasmer_example": "",
-        # "//example:iostream__system_impl": "",
-        # "//example:iostream__wasi": "",
-        # "//example:printf__system_impl": "",
-        # "//example:printf__wasi": "",
-        # "//example:puts__system_impl": "",
-        # "//example:puts__wasi": "",
-    },
+cc_library(
+    name = "cpp_util",
+    copts = copts,
+    hdrs = ["ecsact/wasm/detail/cpp_util.hh"],
 )
