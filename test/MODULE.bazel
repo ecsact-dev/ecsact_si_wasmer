@@ -17,6 +17,7 @@ bazel_dep(name = "ecsact_cli", version = "0.3.4")
 bazel_dep(name = "rules_ecsact", version = "0.5.1")
 bazel_dep(name = "xxhash", version = "0.8.2")
 bazel_dep(name = "ecsact_si_wasm")
+
 local_path_override(
     module_name = "ecsact_si_wasm",
     path = "..",
