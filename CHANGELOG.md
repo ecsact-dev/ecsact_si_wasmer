@@ -2,6 +2,21 @@
 All notable changes to this project will be documented in this file. See [conventional commits](https://www.conventionalcommits.org/) for commit guidelines.
 
 - - -
+## 0.1.2 - 2024-04-22
+### Packages
+- test locked to 0.0.0
+### Global changes
+#### Miscellaneous Chores
+- **(deps)** update dependency rules_ecsact to v0.5.1 (#34) - (4db81ce) - renovate[bot]
+- update lock files - (c05c19e) - Ezekiel Warren
+- update test lock file automatically - (0fc670a) - Ezekiel Warren
+- change var names + cleanup typos (#51) - (6849936) - Ezekiel Warren
+- sync with ecsact_common (#50) - (9a9bd4e) - seaubot
+- bzlmod updates (#49) - (64741f1) - Ezekiel Warren
+- sync with ecsact_common (#40) - (298746d) - seaubot
+
+- - -
+
 ## 0.1.1 - 2023-10-06
 #### Features
 - bzlmodify + memory refactor (#37) - (bdd9c20) - Ezekiel Warren
