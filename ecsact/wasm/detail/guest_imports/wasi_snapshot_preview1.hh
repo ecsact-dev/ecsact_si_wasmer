@@ -115,4 +115,4 @@ const auto guest_wasi_module_imports = allowed_guest_imports_t{
 	},
 };
 
-}
+} // namespace ecsact::wasm::detail
