@@ -67,6 +67,10 @@ ecsact_entt_runtime(
     name = "{}__system_impl".format(wasi_test),
     srcs = ["wasi_test_{}.cc".format(wasi_test)],
     copts = copts,
+    linkopts = [
+        "-sERROR_ON_UNDEFINED_SYMBOLS=0",
+        "--no-entry",
+    ],
     features = [
         "wasm_no_entry",
         "-wasm_warnings_as_errors",
