@@ -181,17 +181,17 @@ wasm_trap_t* wasm_ecsact_system_execution_context_generate(
 	auto memory = get_execution_context_memory(args->data[0]);
 	auto components_count = args->data[1].of.i32;
 
-	std::vector<const void*> component_datas;
-	component_datas.resize(components_count);
+	std::vector<const void*> component_data_list;
+	component_data_list.resize(components_count);
 
 	// each i32 element represents a pointer in WASM memory
-	auto component_datas_wasm =
+	auto component_data_list_wasm =
 		static_cast<int32_t*>(get_void_ptr(args->data[3], memory));
 	for(int i = 0; components_count > i; ++i) {
-		component_datas[i] = get_const_void_ptr(
+		component_data_list[i] = get_const_void_ptr(
 			wasm_val_t{
 				.kind = WASM_I32,
-				.of{.i32 = component_datas_wasm[i]},
+				.of{.i32 = component_data_list_wasm[i]},
 			},
 			memory
 		);
@@ -201,7 +201,7 @@ wasm_trap_t* wasm_ecsact_system_execution_context_generate(
 		ctx,
 		components_count,
 		static_cast<ecsact_component_id*>(get_void_ptr(args->data[2], memory)),
-		component_datas.data()
+		component_data_list.data()
 	);
 	return nullptr;
 }

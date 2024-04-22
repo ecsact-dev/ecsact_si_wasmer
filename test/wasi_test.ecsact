@@ -1,9 +1,9 @@
 main package wasi_test;
 
-component DummyCompnent {
+component DummyComponent {
 	i32 n;
 }
 
 system WasiTestSystem {
-	readwrite DummyCompnent;
+	readwrite DummyComponent;
 }
