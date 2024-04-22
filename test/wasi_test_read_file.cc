@@ -9,7 +9,7 @@
 #include <string>
 
 static const auto example_text = []() -> std::string {
-	std::cout << "Initialzing static string\n";
+	std::cout << "Initializing static string\n";
 	auto content = std::string{};
 
 	auto f = std::fopen("example.txt", "rb");
