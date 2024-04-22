@@ -97,7 +97,8 @@ auto parse_args(int argc, char* argv[]) -> std::vector<std::string> {
 auto load_test_virtual_files() -> void {
 	auto real_path = std::string{
 		"C:/Users/zekew/projects/ecsact-dev/ecsact_si_wasm/example/"
-		"wasi_test_file.txt"};
+		"wasi_test_file.txt",
+	};
 	auto virtual_path = std::string{"example.txt"};
 
 	std::cout << "Mapping " << real_path << " -> " << virtual_path << "\n";

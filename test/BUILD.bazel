@@ -1,8 +1,9 @@
-load("@rules_cc//cc:defs.bzl", "cc_binary", "cc_test")
 load("@ecsact_rt_entt//runtime:index.bzl", "ecsact_entt_runtime")
-load("@emsdk//emscripten_toolchain:wasm_rules.bzl", "wasm_cc_binary")
 load("@ecsact_si_wasm//bazel:copts.bzl", "copts")
 load("@ecsact_si_wasm//bazel:linkopts.bzl", "linkopts")
+load("@emsdk//emscripten_toolchain:wasm_rules.bzl", "wasm_cc_binary")
+load("@hedron_compile_commands//:refresh_compile_commands.bzl", "refresh_compile_commands")
+load("@rules_cc//cc:defs.bzl", "cc_binary", "cc_test")
 
 package(default_visibility = [":__subpackages__"])
 
@@ -22,10 +23,11 @@ cc_binary(
     name = "minst_test_wasm_cc",
     srcs = ["minst_test_wasm.cc"],
     # copts = copts,
+    linkopts = [
+        "-sERROR_ON_UNDEFINED_SYMBOLS=0",
+        "--no-entry",
+    ],
     features = [
-        "wasm_no_entry",
-        "-wasm_warnings_as_errors",
-        "-wasm_error_on_undefined_symbols",
         "-exceptions",
     ],
     linkshared = True,
@@ -38,8 +40,7 @@ cc_binary(
 wasm_cc_binary(
     name = "minst_test_wasm",
     backend = "llvm",
-    cc_target = "minst_test_wasm_cc",
-    exported_functions = ["_minst_test_export_fn"],
+    cc_target = ":minst_test_wasm_cc",
     outputs = ["minst_test.wasm"],
     standalone = True,
 )
@@ -66,6 +67,10 @@ ecsact_entt_runtime(
     name = "{}__system_impl".format(wasi_test),
     srcs = ["wasi_test_{}.cc".format(wasi_test)],
     copts = copts,
+    linkopts = [
+        "-sERROR_ON_UNDEFINED_SYMBOLS=0",
+        "--no-entry",
+    ],
     features = [
         "wasm_no_entry",
         "-wasm_warnings_as_errors",
@@ -87,7 +92,7 @@ ecsact_entt_runtime(
     name = "{}__system_impl_wasm".format(wasi_test),
     backend = "llvm",
     cc_target = ":{}__system_impl".format(wasi_test),
-    exported_functions = ["_wasi_test__WasiTestSystem"],
+    # exported_functions = ["_wasi_test__WasiTestSystem"],
     outputs = ["{}__system_impl.wasm".format(wasi_test)],
     standalone = True,
 ) for wasi_test in _WASI_TESTS]
@@ -130,3 +135,10 @@ ecsact_entt_runtime(
         "wasi_test_file.txt",
     ],
 ) for wasi_test in _WASI_TESTS]
+
+refresh_compile_commands(
+    name = "refresh_compile_commands",
+    targets = {
+        ":minst_test": "",
+    },
+)

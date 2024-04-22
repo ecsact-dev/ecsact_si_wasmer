@@ -28,8 +28,8 @@ auto start_transaction() -> log_transaction;
 auto push_log_line(const log_transaction& transaction, log_line_entry entry)
 	-> void;
 
-auto get_log_lines(const log_transaction& transaction)
-	-> const std::vector<log_line_entry>&;
+auto get_log_lines(const log_transaction& transaction
+) -> const std::vector<log_line_entry>&;
 
 auto clear_log_lines(const log_transaction& transaction) -> void;
 
@@ -38,7 +38,7 @@ auto clear_log_lines(const log_transaction& transaction) -> void;
 auto push_stdio_str(ecsactsi_wasm_log_level level, std::string_view str)
 	-> void;
 
-auto consume_stdio_str_as_log_lines(const log_transaction& transaction)
-	-> std::vector<log_line_entry>;
+auto consume_stdio_str_as_log_lines(const log_transaction& transaction
+) -> std::vector<log_line_entry>;
 
 } // namespace ecsact::wasm::detail

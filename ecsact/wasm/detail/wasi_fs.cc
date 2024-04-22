@@ -61,8 +61,8 @@ auto ecsact::wasm::detail::wasi::fs::real_path(int32_t fd) -> std::string {
 	return virtual_files.at(fd).real_path;
 }
 
-auto ecsact::wasm::detail::wasi::fs::real_path(std::string_view virtual_path)
-	-> std::string {
+auto ecsact::wasm::detail::wasi::fs::real_path(std::string_view virtual_path
+) -> std::string {
 	const auto virtual_path_s = std::string{virtual_path};
 
 	auto itr = virtual_file_map.find(virtual_path_s);
@@ -74,8 +74,8 @@ auto ecsact::wasm::detail::wasi::fs::real_path(std::string_view virtual_path)
 	return "";
 }
 
-auto ecsact::wasm::detail::wasi::fs::fdstat(int32_t fd)
-	-> ecsactsi_wasi_fdstat_t {
+auto ecsact::wasm::detail::wasi::fs::fdstat(int32_t fd
+) -> ecsactsi_wasi_fdstat_t {
 	if(!virtual_files.contains(fd)) {
 		return {};
 	}
@@ -83,8 +83,8 @@ auto ecsact::wasm::detail::wasi::fs::fdstat(int32_t fd)
 	return virtual_files.at(fd).fdstat;
 }
 
-auto ecsact::wasm::detail::wasi::fs::fdstat(std::string_view virtual_path)
-	-> ecsactsi_wasi_fdstat_t {
+auto ecsact::wasm::detail::wasi::fs::fdstat(std::string_view virtual_path
+) -> ecsactsi_wasi_fdstat_t {
 	const auto virtual_path_s = std::string{virtual_path};
 
 	auto itr = virtual_file_map.find(virtual_path_s);
@@ -96,8 +96,8 @@ auto ecsact::wasm::detail::wasi::fs::fdstat(std::string_view virtual_path)
 	return {};
 }
 
-auto ecsact::wasm::detail::wasi::fs::ensure_open(int32_t pseudo_fd)
-	-> std::FILE* {
+auto ecsact::wasm::detail::wasi::fs::ensure_open(int32_t pseudo_fd
+) -> std::FILE* {
 	auto& info = virtual_files.at(pseudo_fd);
 	if(info.opened_file) {
 		return *info.opened_file;

@@ -1,8 +1,8 @@
-load("@rules_cc//cc:defs.bzl", "cc_binary", "cc_test")
+load("@ecsact_rt_entt//runtime:index.bzl", "ecsact_entt_runtime")
 load("@ecsact_si_wasm//bazel:copts.bzl", "copts")
 load("@ecsact_si_wasm//bazel:linkopts.bzl", "linkopts")
-load("@ecsact_rt_entt//runtime:index.bzl", "ecsact_entt_runtime")
 load("@emsdk//emscripten_toolchain:wasm_rules.bzl", "wasm_cc_binary")
+load("@rules_cc//cc:defs.bzl", "cc_binary", "cc_test")
 
 package(default_visibility = ["//:__subpackages__"])
 
@@ -20,10 +20,11 @@ cc_binary(
         "system_impls.cc",
     ],
     copts = copts,
+    linkopts = [
+        "-sERROR_ON_UNDEFINED_SYMBOLS=0",
+        "--no-entry",
+    ],
     features = [
-        "wasm_no_entry",
-        "-wasm_warnings_as_errors",
-        "-wasm_error_on_undefined_symbols",
         "-exceptions",
     ],
     linkshared = True,
@@ -49,13 +50,12 @@ wasm_cc_binary(
     name = "system_impls_wasm",
     backend = "llvm",
     cc_target = ":system_impls",
-    exported_functions = [
-        "_example__%s" % system_name
-        for system_name in _system_names
-    ],
+    # exported_functions = [
+    #     "_example__%s" % system_name
+    #     for system_name in _system_names
+    # ],
     outputs = [
         "system_impls.wasm",
-        "system_impls.debug.wasm",
     ],
     standalone = True,
 )
