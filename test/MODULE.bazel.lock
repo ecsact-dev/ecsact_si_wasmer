@@ -16,7 +16,7 @@
   },
   "localOverrideHashes": {
     "bazel_tools": "1ae69322ac3823527337acf02016e8ee95813d8d356f47060255b8956fa642f0",
-    "ecsact_si_wasm": "2e67b52d0de78992ab291e67ebf2a36311e9f6fd9d16ada5ecb175f3b37a8c42"
+    "ecsact_si_wasm": "69313dd5fec3990084a07f09b62f542783fba80b0c134525520442f21638c1d7"
   },
   "moduleDepGraph": {
     "<root>": {
