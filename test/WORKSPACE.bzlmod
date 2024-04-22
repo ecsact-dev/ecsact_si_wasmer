@@ -1,0 +1,24 @@
+load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
+
+# buildifier: disable
+http_archive(
+    name = "emsdk",
+    integrity = "sha256-+PGTiLh08ChWQSU+8PAj68ZvErR67mehPNxmb4cxoGw=",
+    strip_prefix = "emsdk-417ebd7045d3407d4f5dd79e03f811a36766ce22/bazel",
+    url = "https://github.com/zaucy/emsdk/archive/417ebd7045d3407d4f5dd79e03f811a36766ce22.zip",
+)
+
+# buildifier: disable=load-on-top
+load("@emsdk//:deps.bzl", emsdk_deps = "deps")
+
+emsdk_deps()
+
+# buildifier: disable=load-on-top
+load("@emsdk//:emscripten_deps.bzl", "emscripten_deps")
+
+emscripten_deps()
+
+# buildifier: disable=load-on-top
+load("@emsdk//:toolchains.bzl", "register_emscripten_toolchains")
+
+register_emscripten_toolchains()
