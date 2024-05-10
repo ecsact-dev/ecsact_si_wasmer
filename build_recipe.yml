@@ -1,0 +1,54 @@
+name: Wasm System Implementations (Wasmer)
+
+imports:
+  - ecsact_set_system_execution_impl
+  - ecsact_system_execution_context_id
+  - ecsact_system_execution_context_parent
+  - ecsact_system_execution_context_same
+  - ecsact_system_execution_context_get
+  - ecsact_system_execution_context_update
+  - ecsact_system_execution_context_has
+  - ecsact_system_execution_context_generate
+  - ecsact_system_execution_context_add
+  - ecsact_system_execution_context_remove
+  - ecsact_system_execution_context_other
+  - ecsact_system_execution_context_entity
+  - ecsact_system_execution_context_action
+
+sources:
+  - path: ecsact/wasm/detail/cpp_util.hh
+    outdir: include/ecsact/wasm/detail
+  - ecsact/wasm/detail/globals.cc
+  - path: ecsact/wasm/detail/globals.hh
+    outdir: include/ecsact/wasm/detail
+  - path: ecsact/wasm/detail/guest_imports/env.hh
+    outdir: include/ecsact/wasm/detail/guest_imports
+  - path: ecsact/wasm/detail/guest_imports/wasi_snapshot_preview1.hh
+    outdir: include/ecsact/wasm/detail/guest_imports
+  - path: ecsact/wasm/detail/guest_imports.hh
+    outdir: include/ecsact/wasm/detail
+  - ecsact/wasm/detail/logger.cc
+  - path: ecsact/wasm/detail/logger.hh
+    outdir: include/ecsact/wasm/detail
+  - ecsact/wasm/detail/mem_stack.cc
+  - path: ecsact/wasm/detail/mem_stack.hh
+    outdir: include/ecsact/wasm/detail
+  - ecsact/wasm/detail/minst/minst.cc
+  - path: ecsact/wasm/detail/minst/minst.hh
+    outdir: include/ecsact/wasm/detail/minst
+  - path: ecsact/wasm/detail/util.hh
+    outdir: include/ecsact/wasm/detail
+  - ecsact/wasm/detail/wasi.cc
+  - path: ecsact/wasm/detail/wasi.hh
+    outdir: include/ecsact/wasm/detail
+  - ecsact/wasm/detail/wasi_fs.cc
+  - path: ecsact/wasm/detail/wasi_fs.hh
+    outdir: include/ecsact/wasm/detail
+  - ecsact/wasm/detail/wasm.cc
+  - ecsact/wasm/detail/wasm_ecsact_system_execution.cc
+  - path: ecsact/wasm/detail/wasm_ecsact_system_execution.h
+    outdir: include/ecsact/wasm/detail
+  - path: ecsact/wasm.h
+    outdir: include/ecsact
+  - path: ecsact/wasm.hh
+    outdir: include/ecsact
