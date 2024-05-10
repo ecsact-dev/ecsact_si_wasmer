@@ -57,3 +57,5 @@ cc_library(
     copts = copts,
     hdrs = ["ecsact/wasm/detail/cpp_util.hh"],
 )
+
+exports_files(["build_recipe.yml"])
