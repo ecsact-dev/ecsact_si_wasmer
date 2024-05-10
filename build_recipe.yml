@@ -16,25 +16,39 @@ imports:
   - ecsact_system_execution_context_action
 
 sources:
-  - ecsact/wasm/detail/cpp_util.hh
+  - path: ecsact/wasm/detail/cpp_util.hh
+    outdir: include/ecsact/wasm/detail
   - ecsact/wasm/detail/globals.cc
-  - ecsact/wasm/detail/globals.hh
-  - ecsact/wasm/detail/guest_imports/env.hh
-  - ecsact/wasm/detail/guest_imports/wasi_snapshot_preview1.hh
-  - ecsact/wasm/detail/guest_imports.hh
+  - path: ecsact/wasm/detail/globals.hh
+    outdir: include/ecsact/wasm/detail
+  - path: ecsact/wasm/detail/guest_imports/env.hh
+    outdir: include/ecsact/wasm/detail/guest_imports
+  - path: ecsact/wasm/detail/guest_imports/wasi_snapshot_preview1.hh
+    outdir: include/ecsact/wasm/detail/guest_imports
+  - path: ecsact/wasm/detail/guest_imports.hh
+    outdir: include/ecsact/wasm/detail
   - ecsact/wasm/detail/logger.cc
-  - ecsact/wasm/detail/logger.hh
+  - path: ecsact/wasm/detail/logger.hh
+    outdir: include/ecsact/wasm/detail
   - ecsact/wasm/detail/mem_stack.cc
-  - ecsact/wasm/detail/mem_stack.hh
+  - path: ecsact/wasm/detail/mem_stack.hh
+    outdir: include/ecsact/wasm/detail
   - ecsact/wasm/detail/minst/minst.cc
-  - ecsact/wasm/detail/minst/minst.hh
-  - ecsact/wasm/detail/util.hh
+  - path: ecsact/wasm/detail/minst/minst.hh
+    outdir: include/ecsact/wasm/detail/minst
+  - path: ecsact/wasm/detail/util.hh
+    outdir: include/ecsact/wasm/detail
   - ecsact/wasm/detail/wasi.cc
-  - ecsact/wasm/detail/wasi.hh
+  - path: ecsact/wasm/detail/wasi.hh
+    outdir: include/ecsact/wasm/detail
   - ecsact/wasm/detail/wasi_fs.cc
-  - ecsact/wasm/detail/wasi_fs.hh
+  - path: ecsact/wasm/detail/wasi_fs.hh
+    outdir: include/ecsact/wasm/detail
   - ecsact/wasm/detail/wasm.cc
   - ecsact/wasm/detail/wasm_ecsact_system_execution.cc
-  - ecsact/wasm/detail/wasm_ecsact_system_execution.h
-  - ecsact/wasm.h
-  - ecsact/wasm.hh
+  - path: ecsact/wasm/detail/wasm_ecsact_system_execution.h
+    outdir: include/ecsact/wasm/detail
+  - path: ecsact/wasm.h
+    outdir: include/ecsact
+  - path: ecsact/wasm.hh
+    outdir: include/ecsact

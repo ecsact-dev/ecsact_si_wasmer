@@ -1,4 +1,5 @@
 load("@rules_cc//cc:defs.bzl", "cc_library")
+load("@rules_ecsact//ecsact:defs.bzl", "ecsact_build_recipe")
 load("//bazel:copts.bzl", "copts")
 
 package(default_visibility = ["//visibility:public"])
@@ -59,3 +60,27 @@ cc_library(
 )
 
 exports_files(["build_recipe.yml"])
+
+ecsact_build_recipe(
+    name = "build_recipe",
+    srcs = [
+        ":sources",
+        ":headers",
+    ],
+    imports = [
+        "ecsact_set_system_execution_impl",
+        "ecsact_system_execution_context_id",
+        "ecsact_system_execution_context_parent",
+        "ecsact_system_execution_context_same",
+        "ecsact_system_execution_context_get",
+        "ecsact_system_execution_context_update",
+        "ecsact_system_execution_context_has",
+        "ecsact_system_execution_context_generate",
+        "ecsact_system_execution_context_add",
+        "ecsact_system_execution_context_remove",
+        "ecsact_system_execution_context_other",
+        "ecsact_system_execution_context_entity",
+        "ecsact_system_execution_context_action",
+    ],
+    exports = [],
+)
