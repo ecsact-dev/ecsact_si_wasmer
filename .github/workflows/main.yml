@@ -28,6 +28,8 @@ jobs:
     if: (github.event_name == 'pull_request' && github.event.pull_request.user.login == 'renovate[bot]') || (github.event_name == 'merge_group' && github.event.pull_request.user.login != 'renovate[bot]')
     runs-on: windows-latest
     steps:
+      - name: Setup Wasmer
+        uses: wasmerio/setup-wasmer@v3.1
       - uses: actions/cache@v4
         with:
           path: |
@@ -44,6 +46,8 @@ jobs:
     if: (github.event_name == 'pull_request' && github.event.pull_request.user.login == 'renovate[bot]') || (github.event_name == 'merge_group' && github.event.pull_request.user.login != 'renovate[bot]')
     runs-on: ubuntu-latest
     steps:
+      - name: Setup Wasmer
+        uses: wasmerio/setup-wasmer@v3.1
       - uses: actions/cache@v4
         with:
           path: |
