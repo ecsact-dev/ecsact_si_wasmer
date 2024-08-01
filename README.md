@@ -1,3 +1,7 @@
+<p align="center">
+	<img src="https://ecsact.dev/assets/logo.svg" width="300" />
+</p>
+
 # Ecsact + Wasm = :heart:
 
 Compile your [Ecsact](https://ecsact.dev) system implementations in [WebAssembly](https://webassembly.org/) with your favourite language and use it _anywhere_.
