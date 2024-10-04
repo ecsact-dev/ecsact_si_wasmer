@@ -256,7 +256,7 @@ wasm_trap_t* wasm_ecsact_system_execution_context_other(
 
 	auto other = ecsact_system_execution_context_other(
 		ctx,
-		ecsact_id_from_wasm_i32<ecsact_entity_id>(args->data[1])
+		ecsact_id_from_wasm_i32<ecsact_system_assoc_id>(args->data[1])
 	);
 
 	call_mem_alloc(mem);
