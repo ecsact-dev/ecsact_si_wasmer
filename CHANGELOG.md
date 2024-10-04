@@ -2,6 +2,22 @@
 All notable changes to this project will be documented in this file. See [conventional commits](https://www.conventionalcommits.org/) for commit guidelines.
 
 - - -
+## 0.1.3 - 2024-10-04
+#### Features
+- use new execution context other api - (33e02b4) - Ezekiel
+#### Miscellaneous Chores
+- **(deps)** update dependency bazel to v7.3.0 (#64) - (7e3a737) - renovate[bot]
+- **(deps)** update dependency bazel_skylib to v1.6.1 (#45) - (648af33) - renovate[bot]
+- **(deps)** update dependency platforms to v0.0.10 (#52) - (6eed7c7) - renovate[bot]
+- **(deps)** update dependency bazel to v7.1.2 (#53) - (941327e) - renovate[bot]
+- update readme logo - (4d897c8) - Ezekiel Warren
+- sync with ecsact_common (#63) - (3f23917) - seaubot
+- sync with ecsact_common (#62) - (ec40202) - seaubot
+- sync with ecsact_common (#56) - (83a905d) - seaubot
+- remove bazel lock file - (cfd70b2) - Ezekiel Warren
+
+- - -
+
 ## 0.1.2 - 2024-04-22
 ### Packages
 - test locked to 0.0.0
