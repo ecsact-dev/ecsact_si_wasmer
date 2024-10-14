@@ -41,7 +41,7 @@ cc_library(
     copts = copts,
     defines = [
         "ECSACTSI_WASM_API=",
-        "ECSACT_DYNAMIC_API=ECSACT_DYNAMIC_API_LOAD_AT_RUNTIME",
+        "ECSACT_DYNAMIC_API_LOAD_AT_RUNTIME",
     ],
     hdrs = [":headers"],
     srcs = [":sources"],
