@@ -111,9 +111,13 @@ wasm_trap_t* wasm_ecsact_system_execution_context_remove(
 ) {
 	debug_trace_method("ecsact_system_execution_context_remove");
 
+	auto ctx = get_execution_context(args->data[0]);
+	auto memory = get_execution_context_memory(args->data[0]);
+
 	ecsact_system_execution_context_remove(
-		get_execution_context(args->data[0]),
-		ecsact_id_from_wasm_i32<ecsact_component_like_id>(args->data[1])
+		ctx,
+		ecsact_id_from_wasm_i32<ecsact_component_like_id>(args->data[1]),
+		get_void_ptr(args->data[2], memory)
 	);
 	return nullptr;
 }
@@ -130,7 +134,8 @@ wasm_trap_t* wasm_ecsact_system_execution_context_get(
 	ecsact_system_execution_context_get(
 		ctx,
 		ecsact_id_from_wasm_i32<ecsact_component_like_id>(args->data[1]),
-		get_void_ptr(args->data[2], memory)
+		get_void_ptr(args->data[2], memory),
+		get_void_ptr(args->data[3], memory)
 	);
 
 	return nullptr;
@@ -148,7 +153,8 @@ wasm_trap_t* wasm_ecsact_system_execution_context_update(
 	ecsact_system_execution_context_update(
 		ctx,
 		ecsact_id_from_wasm_i32<ecsact_component_like_id>(args->data[1]),
-		get_const_void_ptr(args->data[2], memory)
+		get_const_void_ptr(args->data[2], memory),
+		get_void_ptr(args->data[3], memory)
 	);
 
 	return nullptr;
@@ -160,9 +166,13 @@ wasm_trap_t* wasm_ecsact_system_execution_context_has(
 ) {
 	debug_trace_method("ecsact_system_execution_context_has");
 
+	auto ctx = get_execution_context(args->data[0]);
+	auto memory = get_execution_context_memory(args->data[0]);
+
 	bool has_component = ecsact_system_execution_context_has(
-		get_execution_context(args->data[0]),
-		ecsact_id_from_wasm_i32<ecsact_component_like_id>(args->data[1])
+		ctx,
+		ecsact_id_from_wasm_i32<ecsact_component_like_id>(args->data[1]),
+		get_void_ptr(args->data[2], memory)
 	);
 
 	results->data[0].kind = WASM_I32;

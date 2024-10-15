@@ -3,6 +3,7 @@
 #include <cstdint>
 #include <cstdio>
 #include <string_view>
+#include <string>
 #include "ecsact/wasm/detail/wasi.hh"
 
 namespace ecsact::wasm::detail::wasi::fs {
