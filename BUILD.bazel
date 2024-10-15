@@ -37,6 +37,22 @@ cc_library(
 )
 
 cc_library(
+    name = "ecsact_si_wasm_dynamic_lat",
+    copts = copts,
+    defines = [
+        "ECSACTSI_WASM_API=",
+        "ECSACT_DYNAMIC_API_LOAD_AT_RUNTIME",
+    ],
+    hdrs = [":headers"],
+    srcs = [":sources"],
+    deps = [
+        "@wasmer",
+        "@ecsact_runtime//:common",
+        "@ecsact_runtime//:dynamic",
+    ],
+)
+
+cc_library(
     name = "minst",
     copts = copts,
     hdrs = [
