@@ -2,6 +2,15 @@
 All notable changes to this project will be documented in this file. See [conventional commits](https://www.conventionalcommits.org/) for commit guidelines.
 
 - - -
+## 0.1.4 - 2024-10-17
+#### Bug Fixes
+- check for unavailable dynamic methods (#69) - (86ee6fc) - Ezekiel Warren
+#### Features
+- use new indexed fields api (#68) - (636b34b) - Ezekiel Warren
+- dynamic lat (#67) - (fd1f592) - Ezekiel Warren
+
+- - -
+
 ## 0.1.3 - 2024-10-04
 #### Features
 - use new execution context other api - (33e02b4) - Ezekiel
