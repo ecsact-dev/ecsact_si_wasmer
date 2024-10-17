@@ -1,5 +1,8 @@
 import %workspace%/../bazel/common.bazelrc
 
+# emsdk needs 'py' in PATH
+common:windows --action_env=PATH
+
 common --@boost.dll//:use_std_fs
 common --@boost.process//:use_std_fs
 
