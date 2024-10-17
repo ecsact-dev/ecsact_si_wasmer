@@ -48,10 +48,11 @@ const auto guest_env_module_imports = allowed_guest_imports_t{
 		"ecsact_system_execution_context_get",
 		[]() -> minst_import_resolve_func {
 			return {
-				wasm_functype_new_3_0(
+				wasm_functype_new_4_0(
 					wasm_valtype_new(WASM_I32), // context
 					wasm_valtype_new(WASM_I32), // component_id
-					wasm_valtype_new(WASM_I32) // out_component_data
+					wasm_valtype_new(WASM_I32), // out_component_data
+					wasm_valtype_new(WASM_I32) // indexed_fields
 				),
 				&wasm_ecsact_system_execution_context_get,
 			};
@@ -61,10 +62,11 @@ const auto guest_env_module_imports = allowed_guest_imports_t{
 		"ecsact_system_execution_context_update",
 		[]() -> minst_import_resolve_func {
 			return {
-				wasm_functype_new_3_0(
+				wasm_functype_new_4_0(
 					wasm_valtype_new(WASM_I32), // context
 					wasm_valtype_new(WASM_I32), // component_id
-					wasm_valtype_new(WASM_I32) // component_data
+					wasm_valtype_new(WASM_I32), // component_data
+					wasm_valtype_new(WASM_I32) // indexed_fields
 				),
 				&wasm_ecsact_system_execution_context_update,
 			};
@@ -74,9 +76,10 @@ const auto guest_env_module_imports = allowed_guest_imports_t{
 		"ecsact_system_execution_context_has",
 		[]() -> minst_import_resolve_func {
 			return {
-				wasm_functype_new_2_0(
+				wasm_functype_new_3_0(
 					wasm_valtype_new(WASM_I32), // context
-					wasm_valtype_new(WASM_I32) // component_id
+					wasm_valtype_new(WASM_I32), // component_id
+					wasm_valtype_new(WASM_I32) // indexed_fields
 				),
 				&wasm_ecsact_system_execution_context_has,
 			};
@@ -113,9 +116,10 @@ const auto guest_env_module_imports = allowed_guest_imports_t{
 		"ecsact_system_execution_context_remove",
 		[]() -> minst_import_resolve_func {
 			return {
-				wasm_functype_new_2_0(
+				wasm_functype_new_3_0(
 					wasm_valtype_new(WASM_I32), // context
-					wasm_valtype_new(WASM_I32) // component_id
+					wasm_valtype_new(WASM_I32), // component_id
+					wasm_valtype_new(WASM_I32) // indexed_fields
 				),
 				&wasm_ecsact_system_execution_context_remove,
 			};
