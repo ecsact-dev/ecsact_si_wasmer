@@ -95,6 +95,12 @@ typedef enum ecsactsi_wasm_error {
 	 * Invoking `_initialize()` resulted in a wasm trap
 	 */
 	ECSACTSI_WASM_ERR_INITIALIZE_FAIL,
+
+	/**
+	 * Ecsact dynamic module is 'load at runtime' but
+	 * 'ecsact_set_system_execution_impl' has not been set.
+	 */
+	ECSACTSI_WASM_ERR_NO_SET_SYSTEM_EXECUTION,
 } ecsactsi_wasm_error;
 
 ECSACTSI_WASM_API_FN(void, ecsactsi_wasm_last_error_message)

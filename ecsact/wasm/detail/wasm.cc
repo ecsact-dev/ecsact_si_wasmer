@@ -121,6 +121,12 @@ ecsactsi_wasm_error ecsactsi_wasm_load(
 	using ecsact::wasm::detail::minst_error_code;
 	using ecsact::wasm::detail::minst_export;
 
+#ifdef ECSACT_DYNAMIC_API_LOAD_AT_RUNTIME
+	if(ecsact_set_system_execution_impl == nullptr) {
+		return ECSACTSI_WASM_ERR_NO_SET_SYSTEM_EXECUTION;
+	}
+#endif
+
 	auto result = ecsact::wasm::detail::minst::create(
 		engine(),
 		std::span{
