@@ -2,6 +2,12 @@
 All notable changes to this project will be documented in this file. See [conventional commits](https://www.conventionalcommits.org/) for commit guidelines.
 
 - - -
+## 0.1.5 - 2024-10-25
+#### Features
+- add stream toggle context method (#70) - (0fffa26) - Ezekiel Warren
+
+- - -
+
 ## 0.1.4 - 2024-10-17
 #### Bug Fixes
 - check for unavailable dynamic methods (#69) - (86ee6fc) - Ezekiel Warren
