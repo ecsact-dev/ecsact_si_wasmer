@@ -300,10 +300,13 @@ wasm_trap_t* wasm_ecsact_system_execution_context_stream_toggle(
 	auto ctx = get_execution_context(args->data[0]);
 	auto memory = get_execution_context_memory(args->data[0]);
 
-	ecsact_system_execution_context_add(
+	assert(args->data[2].kind == WASM_I32);
+
+	ecsact_system_execution_context_stream_toggle(
 		ctx,
-		ecsact_id_from_wasm_i32<ecsact_component_like_id>(args->data[1]),
-		get_const_void_ptr(args->data[2], memory)
+		ecsact_id_from_wasm_i32<ecsact_component_id>(args->data[1]),
+		static_cast<bool>(args->data[2].of.i32),
+		get_const_void_ptr(args->data[2], memory) // indexed field values
 	);
 
 	return nullptr;
