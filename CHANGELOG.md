@@ -2,6 +2,12 @@
 All notable changes to this project will be documented in this file. See [conventional commits](https://www.conventionalcommits.org/) for commit guidelines.
 
 - - -
+## 0.1.7 - 2024-10-26
+#### Features
+- concurrency support (#41) - (5236dab) - Ezekiel Warren
+
+- - -
+
 ## 0.1.6 - 2024-10-25
 #### Bug Fixes
 - correctly call stream toggle in wasm binding (#71) - (37db438) - Ezekiel Warren
