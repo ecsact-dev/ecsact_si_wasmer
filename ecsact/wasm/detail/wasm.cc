@@ -196,6 +196,7 @@ ecsactsi_wasm_error ecsactsi_wasm_load(
 		return std::nullopt;
 	};
 
+	all_minsts.clear();
 	all_minsts.reserve(100);
 
 	for(auto i = 0; 100 > i; ++i) {
