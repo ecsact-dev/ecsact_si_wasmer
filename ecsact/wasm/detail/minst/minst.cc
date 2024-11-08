@@ -263,6 +263,11 @@ auto minst::exports() -> std::span<minst_export> {
 
 auto minst::initialize() -> std::optional<minst_trap> {
 	for(auto exp : exports()) {
+		if(exp.name() == "emscripten_stack_init") {
+			return exp.func_call();
+		}
+	}
+	for(auto exp : exports()) {
 		if(exp.name() == "_initialize") {
 			return exp.func_call();
 		}
