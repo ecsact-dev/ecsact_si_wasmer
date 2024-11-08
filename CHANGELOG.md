@@ -2,6 +2,14 @@
 All notable changes to this project will be documented in this file. See [conventional commits](https://www.conventionalcommits.org/) for commit guidelines.
 
 - - -
+## 0.1.8 - 2024-11-08
+#### Bug Fixes
+- allow system impls to be set multiple times (#73) - (79760ff) - Ezekiel Warren
+#### Miscellaneous Chores
+- update rules_wasmer - (fab6dbc) - Ezekiel Warren
+
+- - -
+
 ## 0.1.7 - 2024-10-26
 #### Features
 - concurrency support (#41) - (5236dab) - Ezekiel Warren
