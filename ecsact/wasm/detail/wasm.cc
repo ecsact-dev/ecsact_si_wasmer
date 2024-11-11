@@ -71,32 +71,34 @@ struct minst_ecsact_system_impls {
 
 auto trap_handler = ecsactsi_wasm_trap_handler{};
 
-auto              all_minsts = std::vector<minst_ecsact_system_impls>{};
-auto              next_available_minst_index = std::atomic_size_t{};
-thread_local auto thread_minst =
-	std::optional<std::reference_wrapper<minst_ecsact_system_impls>>{};
+auto all_minsts = std::vector<std::shared_ptr<minst_ecsact_system_impls>>{};
+auto next_available_minst_index = std::atomic_size_t{};
 
-auto ensure_minst() -> minst_ecsact_system_impls& {
-	if(!thread_minst) {
+thread_local auto thread_minst = std::weak_ptr<minst_ecsact_system_impls>{};
+
+auto ensure_minst() -> std::shared_ptr<minst_ecsact_system_impls> {
+	auto minst = thread_minst.lock();
+	if(!minst) {
 		auto index = ++next_available_minst_index % all_minsts.size();
-		thread_minst = all_minsts[index];
+		minst = all_minsts[index];
+		thread_minst = minst;
 	}
 
-	return thread_minst->get();
+	return minst;
 }
 
 void ecsact_si_wasm_system_impl(ecsact_system_execution_context* ctx) {
-	auto& minst = ensure_minst();
-	auto  system_id = ecsact_system_execution_context_id(ctx);
-	auto  itr = minst.sys_impl_exports.find(system_id);
-	assert(itr != minst.sys_impl_exports.end());
+	auto minst = ensure_minst();
+	auto system_id = ecsact_system_execution_context_id(ctx);
+	auto itr = minst->sys_impl_exports.find(system_id);
+	assert(itr != minst->sys_impl_exports.end());
 
 	auto mem_data = std::array<std::byte, 4096>{};
 	set_call_mem_data(mem_data.data(), mem_data.size());
 	defer {
 		set_call_mem_data(nullptr, 0);
 	};
-	call_mem_alloc(minst.memory.memory);
+	call_mem_alloc(minst->memory.memory);
 	itr->second.func_call(call_mem_alloc(ctx));
 }
 
@@ -261,11 +263,11 @@ ecsactsi_wasm_error ecsactsi_wasm_load(
 			return ECSACTSI_WASM_ERR_INITIALIZE_FAIL;
 		}
 
-		all_minsts.emplace_back( //
+		all_minsts.emplace_back(std::make_shared<minst_ecsact_system_impls>( //
 			std::move(inst),
 			system_impl_exports,
 			*wasm_mem
-		);
+		));
 	}
 
 	for(auto i = 0; systems_count > i; ++i) {
@@ -320,6 +322,8 @@ void ecsactsi_wasm_unload(
 }
 
 void ecsactsi_wasm_reset() {
+	all_minsts.clear();
+	next_available_minst_index = 0;
 }
 
 void ecsactsi_wasm_consume_logs(
