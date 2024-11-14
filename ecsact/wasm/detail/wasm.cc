@@ -25,6 +25,7 @@
 #include "ecsact/wasm/detail/logger.hh"
 #include "ecsact/wasm/detail/wasi_fs.hh"
 #include "ecsact/wasm/detail/globals.hh"
+#include "ecsact/wasm/detail/guest_imports/emscripten_debug.hh"
 #include "ecsact/wasm/detail/guest_imports/wasi_snapshot_preview1.hh"
 #include "ecsact/wasm/detail/guest_imports/env.hh"
 #include "ecsact/wasm/detail/cpp_util.hh"
@@ -166,6 +167,7 @@ ecsactsi_wasm_error ecsactsi_wasm_load(
 	const char**           wasm_exports
 ) {
 	using ecsact::wasm::detail::engine;
+	using ecsact::wasm::detail::guest_emscripten_debug_module_imports;
 	using ecsact::wasm::detail::minst;
 	using ecsact::wasm::detail::minst_error_code;
 	using ecsact::wasm::detail::minst_export;
@@ -182,6 +184,11 @@ ecsactsi_wasm_error ecsactsi_wasm_load(
 		if(imp.module() == "env") {
 			auto itr = guest_env_module_imports.find(method_name);
 			if(itr == guest_env_module_imports.end()) {
+				auto debug_itr =
+					guest_emscripten_debug_module_imports.find(method_name);
+				if(debug_itr != guest_emscripten_debug_module_imports.end()) {
+					return debug_itr->second();
+				}
 				return std::nullopt;
 			}
 			return itr->second();
