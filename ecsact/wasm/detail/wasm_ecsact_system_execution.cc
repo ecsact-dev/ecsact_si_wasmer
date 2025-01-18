@@ -6,6 +6,7 @@
 #include <vector>
 #include "ecsact/runtime/dynamic.h"
 #include "ecsact/wasm/detail/mem_stack.hh"
+#include "ecsact/wasm/detail/tracy.hh"
 
 using ecsact::wasm::detail::call_mem_alloc;
 using ecsact::wasm::detail::debug_trace_method;
@@ -15,6 +16,7 @@ namespace {
 auto get_execution_context( //
 	const wasm_val_t& val
 ) -> ecsact_system_execution_context* {
+	ECSACT_SI_WASM_ZONE_SCOPED;
 	assert(val.kind == WASM_I32);
 	return ecsact::wasm::detail::call_mem_read<ecsact_system_execution_context*>(
 		val.of.i32
@@ -24,6 +26,7 @@ auto get_execution_context( //
 auto get_const_execution_context( //
 	const wasm_val_t& val
 ) -> const ecsact_system_execution_context* {
+	ECSACT_SI_WASM_ZONE_SCOPED;
 	assert(val.kind == WASM_I32);
 	return ecsact::wasm::detail::call_mem_read<
 		const ecsact_system_execution_context*>(val.of.i32);
@@ -32,6 +35,7 @@ auto get_const_execution_context( //
 auto get_execution_context_memory( //
 	const wasm_val_t& val
 ) -> wasm_memory_t* {
+	ECSACT_SI_WASM_ZONE_SCOPED;
 	assert(val.kind == WASM_I32);
 	// wasm memory is always allocated right before the execution context
 	return ecsact::wasm::detail::call_mem_read<wasm_memory_t*>(
@@ -42,11 +46,13 @@ auto get_execution_context_memory( //
 
 template<typename EcsactID>
 EcsactID ecsact_id_from_wasm_i32(const wasm_val_t& val) {
+	ECSACT_SI_WASM_ZONE_SCOPED;
 	assert(val.kind == WASM_I32);
 	return static_cast<EcsactID>(val.of.i32);
 }
 
 void* get_void_ptr(const wasm_val_t& val, wasm_memory_t* memory) {
+	ECSACT_SI_WASM_ZONE_SCOPED;
 	assert(val.kind == WASM_I32);
 	if(val.of.i32 == 0) {
 		return nullptr;
@@ -58,6 +64,7 @@ void* get_void_ptr(const wasm_val_t& val, wasm_memory_t* memory) {
 }
 
 const void* get_const_void_ptr(const wasm_val_t& val, wasm_memory_t* memory) {
+	ECSACT_SI_WASM_ZONE_SCOPED;
 	assert(val.kind == WASM_I32);
 	if(val.of.i32 == 0) {
 		return nullptr;
@@ -74,6 +81,7 @@ wasm_trap_t* wasm_ecsact_system_execution_context_action(
 	const wasm_val_vec_t* args,
 	wasm_val_vec_t*       results
 ) {
+	ECSACT_SI_WASM_ZONE_SCOPED;
 	debug_trace_method("ecsact_system_execution_context_action");
 
 	auto ctx = get_execution_context(args->data[0]);
@@ -91,6 +99,7 @@ wasm_trap_t* wasm_ecsact_system_execution_context_add(
 	const wasm_val_vec_t* args,
 	wasm_val_vec_t*       results
 ) {
+	ECSACT_SI_WASM_ZONE_SCOPED;
 	debug_trace_method("ecsact_system_execution_context_add");
 
 	auto ctx = get_execution_context(args->data[0]);
@@ -109,6 +118,7 @@ wasm_trap_t* wasm_ecsact_system_execution_context_remove(
 	const wasm_val_vec_t* args,
 	wasm_val_vec_t*       results
 ) {
+	ECSACT_SI_WASM_ZONE_SCOPED;
 	debug_trace_method("ecsact_system_execution_context_remove");
 
 	auto ctx = get_execution_context(args->data[0]);
@@ -126,6 +136,7 @@ wasm_trap_t* wasm_ecsact_system_execution_context_get(
 	const wasm_val_vec_t* args,
 	wasm_val_vec_t*       results
 ) {
+	ECSACT_SI_WASM_ZONE_SCOPED;
 	debug_trace_method("ecsact_system_execution_context_get");
 
 	auto ctx = get_execution_context(args->data[0]);
@@ -145,6 +156,7 @@ wasm_trap_t* wasm_ecsact_system_execution_context_update(
 	const wasm_val_vec_t* args,
 	wasm_val_vec_t*       results
 ) {
+	ECSACT_SI_WASM_ZONE_SCOPED;
 	debug_trace_method("ecsact_system_execution_context_update");
 
 	auto ctx = get_execution_context(args->data[0]);
@@ -164,6 +176,7 @@ wasm_trap_t* wasm_ecsact_system_execution_context_has(
 	const wasm_val_vec_t* args,
 	wasm_val_vec_t*       results
 ) {
+	ECSACT_SI_WASM_ZONE_SCOPED;
 	debug_trace_method("ecsact_system_execution_context_has");
 
 	auto ctx = get_execution_context(args->data[0]);
@@ -185,6 +198,7 @@ wasm_trap_t* wasm_ecsact_system_execution_context_generate(
 	const wasm_val_vec_t* args,
 	wasm_val_vec_t*       results
 ) {
+	ECSACT_SI_WASM_ZONE_SCOPED;
 	debug_trace_method("ecsact_system_execution_context_generate");
 
 	auto ctx = get_execution_context(args->data[0]);
@@ -220,6 +234,7 @@ wasm_trap_t* wasm_ecsact_system_execution_context_parent(
 	const wasm_val_vec_t* args,
 	wasm_val_vec_t*       results
 ) {
+	ECSACT_SI_WASM_ZONE_SCOPED;
 	debug_trace_method("ecsact_system_execution_context_parent");
 
 	auto ctx = get_execution_context(args->data[0]);
@@ -241,6 +256,7 @@ wasm_trap_t* wasm_ecsact_system_execution_context_same(
 	const wasm_val_vec_t* args,
 	wasm_val_vec_t*       results
 ) {
+	ECSACT_SI_WASM_ZONE_SCOPED;
 	debug_trace_method("ecsact_system_execution_context_same");
 
 	bool same = ecsact_system_execution_context_same(
@@ -258,6 +274,7 @@ wasm_trap_t* wasm_ecsact_system_execution_context_other(
 	const wasm_val_vec_t* args,
 	wasm_val_vec_t*       results
 ) {
+	ECSACT_SI_WASM_ZONE_SCOPED;
 	debug_trace_method("ecsact_system_execution_context_other");
 
 	auto ctx = get_execution_context(args->data[0]);
@@ -280,6 +297,7 @@ wasm_trap_t* wasm_ecsact_system_execution_context_entity(
 	const wasm_val_vec_t* args,
 	wasm_val_vec_t*       results
 ) {
+	ECSACT_SI_WASM_ZONE_SCOPED;
 	debug_trace_method("ecsact_system_execution_context_entity");
 
 	auto entity = ecsact_system_execution_context_entity( //
@@ -295,6 +313,7 @@ wasm_trap_t* wasm_ecsact_system_execution_context_stream_toggle(
 	const wasm_val_vec_t* args,
 	wasm_val_vec_t*       results
 ) {
+	ECSACT_SI_WASM_ZONE_SCOPED;
 	debug_trace_method("ecsact_system_execution_context_stream_toggle");
 
 	auto ctx = get_execution_context(args->data[0]);

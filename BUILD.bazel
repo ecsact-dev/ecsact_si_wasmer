@@ -33,6 +33,7 @@ cc_library(
         "@wasmer",
         "@ecsact_runtime//:common",
         "@ecsact_runtime//:dynamic",
+        "@tracy",
     ],
 )
 
@@ -49,6 +50,7 @@ cc_library(
         "@wasmer",
         "@ecsact_runtime//:common",
         "@ecsact_runtime//:dynamic",
+        "@tracy",
     ],
 )
 
@@ -65,6 +67,7 @@ cc_library(
         ":cpp_util",
         "@ecsact_runtime//:common",
         "@wasmer",
+        "@tracy",
     ],
 )
 
