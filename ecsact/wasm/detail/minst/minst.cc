@@ -4,7 +4,15 @@
 #include <cassert>
 #include <wasm.h>
 #include <wasmer.h>
-#include "ecsact/wasm/detail/cpp_util.hh"
+#ifdef TRACY_ENABLE
+#	include <tracy/Tracy.hpp>
+#endif
+
+#ifdef TRACY_ENABLE
+#	define ECSACT_SI_WASM_ZONE_SCOPED ZoneScoped
+#else
+#	define ECSACT_SI_WASM_ZONE_SCOPED static_assert(true, "requires semi colon")
+#endif
 
 using ecsact::wasm::detail::minst;
 using ecsact::wasm::detail::minst_export;
@@ -14,6 +22,7 @@ using ecsact::wasm::detail::minst_trap;
 
 namespace {
 auto get_wasmer_last_error_message() -> std::string {
+	ECSACT_SI_WASM_ZONE_SCOPED;
 	auto msg = std::string{};
 	msg.resize(wasmer_last_error_length());
 	wasmer_last_error_message(msg.data(), static_cast<int>(msg.size()));
@@ -22,6 +31,7 @@ auto get_wasmer_last_error_message() -> std::string {
 } // namespace
 
 auto minst_import::name() const -> std::string_view {
+	ECSACT_SI_WASM_ZONE_SCOPED;
 	auto name = wasm_importtype_name(import_type);
 	return std::string_view{
 		name->data,
@@ -30,6 +40,7 @@ auto minst_import::name() const -> std::string_view {
 }
 
 auto minst_import::module() const -> std::string_view {
+	ECSACT_SI_WASM_ZONE_SCOPED;
 	auto name = wasm_importtype_module(import_type);
 	return std::string_view{
 		name->data,
@@ -38,12 +49,14 @@ auto minst_import::module() const -> std::string_view {
 }
 
 auto minst_import::kind() const -> wasm_externkind_enum {
+	ECSACT_SI_WASM_ZONE_SCOPED;
 	return static_cast<wasm_externkind_enum>( //
 		wasm_externtype_kind(wasm_importtype_type(import_type))
 	);
 }
 
 auto minst_export::name() const -> std::string_view {
+	ECSACT_SI_WASM_ZONE_SCOPED;
 	auto name = wasm_exporttype_name(export_type);
 	return std::string_view{
 		name->data,
@@ -52,12 +65,14 @@ auto minst_export::name() const -> std::string_view {
 }
 
 auto minst_export::kind() const -> wasm_externkind_enum {
+	ECSACT_SI_WASM_ZONE_SCOPED;
 	return static_cast<wasm_externkind_enum>( //
 		wasm_externtype_kind(wasm_exporttype_type(export_type))
 	);
 }
 
 auto minst_export::func_call() -> std::optional<minst_trap> {
+	ECSACT_SI_WASM_ZONE_SCOPED;
 	assert(kind() == WASM_EXTERN_FUNC);
 
 	auto args = wasm_val_vec_t{};
@@ -72,6 +87,7 @@ auto minst_export::func_call() -> std::optional<minst_trap> {
 }
 
 auto minst_export::func_call(int32_t p0) -> std::optional<minst_trap> {
+	ECSACT_SI_WASM_ZONE_SCOPED;
 	assert(kind() == WASM_EXTERN_FUNC);
 
 	wasm_val_t     args_val[] = {WASM_I32_VAL(p0)};
@@ -104,11 +120,13 @@ minst_trap::~minst_trap() {
 auto minst_import_resolve_func::as_extern( //
 	wasm_store_t* store
 ) -> wasm_extern_t* {
+	ECSACT_SI_WASM_ZONE_SCOPED;
 	auto func = wasm_func_new(store, func_type, func_callback);
 	return wasm_func_as_extern(func);
 }
 
 auto minst_trap::message() const -> std::string {
+	ECSACT_SI_WASM_ZONE_SCOPED;
 	auto trap_msg = wasm_message_t{};
 	wasm_trap_message(trap, &trap_msg);
 	return std::string{trap_msg.data, trap_msg.size - 1};
@@ -119,6 +137,7 @@ auto minst::create( //
 	std::span<std::byte> wasm_data,
 	import_resolver_t    import_resolver
 ) -> std::variant<minst, minst_error> {
+	ECSACT_SI_WASM_ZONE_SCOPED;
 	auto self = minst{};
 
 	auto wasm_bytes = wasm_byte_vec_t{
@@ -262,6 +281,7 @@ auto minst::exports() -> std::span<minst_export> {
 }
 
 auto minst::initialize() -> std::optional<minst_trap> {
+	ECSACT_SI_WASM_ZONE_SCOPED;
 	for(auto exp : exports()) {
 		if(exp.name() == "_initialize") {
 			return exp.func_call();
@@ -275,6 +295,7 @@ auto minst::find_import( //
 	std::string_view module_name,
 	std::string_view import_name
 ) -> std::optional<minst_import> {
+	ECSACT_SI_WASM_ZONE_SCOPED;
 	for(auto imp : imports()) {
 		if(imp.module() == module_name && imp.name() == import_name) {
 			return imp;
@@ -287,6 +308,7 @@ auto minst::find_import( //
 auto minst::find_export( //
 	std::string_view export_name
 ) -> std::optional<minst_export> {
+	ECSACT_SI_WASM_ZONE_SCOPED;
 	for(auto exp : exports()) {
 		if(exp.name() == export_name) {
 			return exp;

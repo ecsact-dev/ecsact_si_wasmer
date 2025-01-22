@@ -29,6 +29,7 @@
 #include "ecsact/wasm/detail/guest_imports/env.hh"
 #include "ecsact/wasm/detail/cpp_util.hh"
 #include "ecsact/wasm/detail/mem_stack.hh"
+#include "ecsact/wasm/detail/tracy.hh"
 #include "mem_stack.hh"
 
 using namespace std::string_literals;
@@ -77,6 +78,7 @@ auto next_available_minst_index = std::atomic_size_t{};
 thread_local auto thread_minst = std::weak_ptr<minst_ecsact_system_impls>{};
 
 auto ensure_minst() -> std::shared_ptr<minst_ecsact_system_impls> {
+	ECSACT_SI_WASM_ZONE_SCOPED;
 	auto minst = thread_minst.lock();
 	if(!minst) {
 		auto index = ++next_available_minst_index % all_minsts.size();
@@ -88,6 +90,7 @@ auto ensure_minst() -> std::shared_ptr<minst_ecsact_system_impls> {
 }
 
 void ecsact_si_wasm_system_impl(ecsact_system_execution_context* ctx) {
+	ECSACT_SI_WASM_ZONE_SCOPED;
 	auto minst = ensure_minst();
 	auto system_id = ecsact_system_execution_context_id(ctx);
 	auto itr = minst->sys_impl_exports.find(system_id);
@@ -109,6 +112,7 @@ auto get_system_impl_exports(
 	const char**                                             wasm_exports,
 	std::unordered_map<ecsact_system_like_id, minst_export>& system_impl_exports
 ) -> ecsactsi_wasm_error {
+	ECSACT_SI_WASM_ZONE_SCOPED;
 	system_impl_exports.clear();
 	system_impl_exports.reserve(systems_count);
 
@@ -169,6 +173,8 @@ ecsactsi_wasm_error ecsactsi_wasm_load(
 	using ecsact::wasm::detail::minst;
 	using ecsact::wasm::detail::minst_error_code;
 	using ecsact::wasm::detail::minst_export;
+
+	ECSACT_SI_WASM_ZONE_SCOPED;
 
 #ifdef ECSACT_DYNAMIC_API_LOAD_AT_RUNTIME
 	if(ecsact_set_system_execution_impl == nullptr) {
@@ -286,6 +292,7 @@ ecsactsi_wasm_error ecsactsi_wasm_load_file(
 	ecsact_system_like_id* system_ids,
 	const char**           wasm_exports
 ) {
+	ECSACT_SI_WASM_ZONE_SCOPED;
 	FILE* file = std::fopen(wasm_file_path, "rb");
 	if(!file) {
 		return ECSACTSI_WASM_ERR_FILE_OPEN_FAIL;
@@ -330,6 +337,7 @@ void ecsactsi_wasm_consume_logs(
 	ecsactsi_wasm_log_consumer consumer,
 	void*                      consumer_user_data
 ) {
+	ECSACT_SI_WASM_ZONE_SCOPED;
 	auto t = start_transaction();
 	for(auto& entry : get_log_lines(t)) {
 		consumer(
@@ -358,6 +366,7 @@ int32_t ecsactsi_wasm_allow_file_read_access(
 	const char* virtual_file_path,
 	int32_t     virtual_file_path_length
 ) {
+	ECSACT_SI_WASM_ZONE_SCOPED;
 	return ecsact::wasm::detail::wasi::fs::allow_file_read_access(
 		std::string_view{
 			real_file_path,

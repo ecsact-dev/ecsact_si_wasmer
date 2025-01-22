@@ -11,6 +11,7 @@
 #include <vector>
 #include <string_view>
 #include <cstring>
+#include "ecsact/wasm/detail/tracy.hh"
 
 namespace {
 struct call_mem_info_t {
@@ -47,6 +48,7 @@ auto ecsact::wasm::detail::set_call_mem_data( //
 	void*  data,
 	size_t max_size
 ) -> void {
+	ECSACT_SI_WASM_ZONE_SCOPED;
 	if(data == nullptr) {
 		call_mem_info = std::nullopt;
 		return;
@@ -62,6 +64,7 @@ auto ecsact::wasm::detail::call_mem_alloc_raw( //
 	size_t                data_size,
 	const std::type_info& type
 ) -> std::int32_t {
+	ECSACT_SI_WASM_ZONE_SCOPED;
 	assert(call_mem_info.has_value());
 	assert(data_size > 0);
 	auto index = static_cast<std::int32_t>(call_mem_info->data_offset);
@@ -75,6 +78,7 @@ auto ecsact::wasm::detail::call_mem_read_raw( //
 	std::int32_t          offset,
 	const std::type_info& type
 ) -> void* {
+	ECSACT_SI_WASM_ZONE_SCOPED;
 	assert(call_mem_info.has_value());
 	assert(offset < call_mem_info->data_offset);
 	ASSERT_OFFSET_TYPE(offset, type);
@@ -85,6 +89,7 @@ auto ecsact::wasm::detail::debug_trace_method( //
 	[[maybe_unused]] const char* method_name
 ) -> void {
 #ifndef NDEBUG
+	ECSACT_SI_WASM_ZONE_SCOPED;
 	assert(call_mem_info.has_value());
 	call_mem_info->method_trace.push_back(std::string_view{method_name});
 #endif
