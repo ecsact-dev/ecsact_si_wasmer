@@ -2,6 +2,14 @@
 All notable changes to this project will be documented in this file. See [conventional commits](https://www.conventionalcommits.org/) for commit guidelines.
 
 - - -
+## 0.1.11 - 2025-01-30
+#### Features
+- allow si module implementation linking to be configurable (#82) - (8d1808e) - Ezekiel Warren
+- add FOR_EACH api macro similar to ecsact_runtime (#83) - (75cf289) - Ezekiel Warren
+- API defines same as ecsact_runtime modules (#81) - (e95be89) - Ezekiel Warren
+
+- - -
+
 ## 0.1.10 - 2025-01-22
 #### Miscellaneous Chores
 - **(deps)** update ecsact repositories (#76) - (11360f5) - renovate[bot]
