@@ -20,12 +20,12 @@ cc_binary(
         "system_impls.cc",
     ],
     copts = copts,
+    features = [
+        "-exceptions",
+    ],
     linkopts = [
         "-sERROR_ON_UNDEFINED_SYMBOLS=0",
         "--no-entry",
-    ],
-    features = [
-        "-exceptions",
     ],
     linkshared = True,
     tags = ["manual"],
@@ -64,27 +64,28 @@ cc_test(
     name = "wasmer_example",
     srcs = [
         "example.cc",
+        "@ecsact_si_wasm//:sources",
     ],
     args = [
         "$(location :system_impls.wasm)",
     ],
     copts = copts,
-    linkopts = linkopts,
+    data = [
+        ":system_impls.wasm",
+    ],
     defines = [
         "ECSACTSI_WASM_API=",
         "ECSACT_CORE_API=",
     ],
+    linkopts = linkopts,
     deps = [
         ":runtime",
-        "@ecsact_si_wasm//:minst",
         "@ecsact_runtime//:core",
         "@ecsact_runtime//:dynamic",
         "@ecsact_runtime//:meta",
+        "@ecsact_si_wasm",
+        "@ecsact_si_wasm//:minst",
         "@magic_enum",
         "@wasmer",
-        "@ecsact_si_wasm",
-    ],
-    data = [
-        ":system_impls.wasm",
     ],
 )
