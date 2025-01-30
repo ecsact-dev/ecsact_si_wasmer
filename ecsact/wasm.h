@@ -201,4 +201,20 @@ ECSACTSI_WASM_API_FN(int32_t, ecsactsi_wasm_allow_file_read_access)
 	int32_t     virtual_file_path_length
 );
 
+// # BEGIN FOR_EACH_ECSACTSI_WASM_API_FN
+#ifdef ECSACT_MSVC_TRADITIONAL
+#	define FOR_EACH_ECSACTSI_WASM_API_FN(fn, ...) ECSACT_MSVC_TRADITIONAL_ERROR()
+#else
+#	define FOR_EACH_ECSACTSI_WASM_API_FN(fn, ...)              \
+		fn(ecsactsi_wasm_last_error_message, __VA_ARGS__);        \
+		fn(ecsactsi_wasm_last_error_message_length, __VA_ARGS__); \
+		fn(ecsactsi_wasm_load_file, __VA_ARGS__);                 \
+		fn(ecsactsi_wasm_load, __VA_ARGS__);                      \
+		fn(ecsactsi_wasm_unload, __VA_ARGS__);                    \
+		fn(ecsactsi_wasm_reset, __VA_ARGS__);                     \
+		fn(ecsactsi_wasm_set_trap_handler, __VA_ARGS__);          \
+		fn(ecsactsi_wasm_consume_logs, __VA_ARGS__);              \
+		fn(ecsactsi_wasm_allow_file_read_access, __VA_ARGS__)
+#endif
+
 #endif // ECSACTSI_WASM_H
