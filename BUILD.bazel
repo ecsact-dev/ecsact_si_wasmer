@@ -22,45 +22,65 @@ filegroup(
 
 cc_library(
     name = "ecsact_si_wasm",
-    copts = copts,
-    defines = [
-        "ECSACTSI_WASM_API=",
-        "ECSACT_DYNAMIC_API=",
-    ],
     hdrs = [":headers"],
-    srcs = [":sources"],
+    copts = copts,
     deps = [
-        "@wasmer",
         "@ecsact_runtime//:common",
         "@ecsact_runtime//:dynamic",
+        "@wasmer",
     ],
 )
 
+"""
+It is expected that users of this target are to set ECSACTSI_WASM_API* and ECSACT_DYNAMIC_API* macros for their configuration
+Example 1:
+```
 cc_library(
-    name = "ecsact_si_wasm_dynamic_lat",
-    copts = copts,
+    name = "my_si_wasm_impl",
+    deps = ["@ecsact_si_wasm//:implementation"],
     defines = [
+        # Statically link the si_wasm api
         "ECSACTSI_WASM_API=",
+        # Load the dynamic module at runtime
         "ECSACT_DYNAMIC_API_LOAD_AT_RUNTIME",
     ],
-    hdrs = [":headers"],
+)
+```
+
+```
+Example 2:
+cc_library(
+    name = "my_si_wasm_impl",
+    deps = ["@ecsact_si_wasm//:implementation"],
+    defines = [
+        # Statically link the si_wasm api
+        "ECSACTSI_WASM_API=",
+        # Statically link dynamic module
+        "ECSACT_DYNAMIC_API=",
+    ],
+)
+```
+"""
+
+cc_library(
+    name = "implementation",
     srcs = [":sources"],
+    hdrs = [":headers"],
+    copts = copts,
     deps = [
-        "@wasmer",
-        "@ecsact_runtime//:common",
-        "@ecsact_runtime//:dynamic",
+        ":ecsact_si_wasm",
     ],
 )
 
 cc_library(
     name = "minst",
-    copts = copts,
-    hdrs = [
-        "ecsact/wasm/detail/minst/minst.hh",
-    ],
     srcs = [
         "ecsact/wasm/detail/minst/minst.cc",
     ],
+    hdrs = [
+        "ecsact/wasm/detail/minst/minst.hh",
+    ],
+    copts = copts,
     deps = [
         ":cpp_util",
         "@ecsact_runtime//:common",
@@ -70,6 +90,6 @@ cc_library(
 
 cc_library(
     name = "cpp_util",
-    copts = copts,
     hdrs = ["ecsact/wasm/detail/cpp_util.hh"],
+    copts = copts,
 )
