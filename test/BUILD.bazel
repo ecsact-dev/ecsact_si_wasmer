@@ -4,10 +4,20 @@ load("@ecsact_si_wasmer//bazel:linkopts.bzl", "linkopts")
 load("@emsdk//emscripten_toolchain:wasm_rules.bzl", "wasm_cc_binary")
 load("@hedron_compile_commands//:refresh_compile_commands.bzl", "refresh_compile_commands")
 load("@rules_cc//cc:defs.bzl", "cc_binary", "cc_test")
+load("@rules_ecsact//ecsact:defs.bzl", "ecsact_binary")
 
 package(default_visibility = [":__subpackages__"])
 
 exports_files(["test.cc"])
+
+ecsact_binary(
+    name = "bundle_runtime",
+    srcs = ["wasi_test.ecsact"],
+    recipes = [
+        "@ecsact_si_wasmer",
+        "@ecsact_rt_entt",
+    ],
+)
 
 cc_library(
     name = "impl",

@@ -29,7 +29,6 @@
 #include "ecsact/si/wasmer/detail/guest_imports/env.hh"
 #include "ecsact/si/wasmer/detail/cpp_util.hh"
 #include "ecsact/si/wasmer/detail/mem_stack.hh"
-#include "mem_stack.hh"
 
 using namespace std::string_literals;
 using ecsact::wasm::detail::call_mem_alloc;

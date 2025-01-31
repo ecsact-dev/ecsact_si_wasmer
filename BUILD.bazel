@@ -91,7 +91,22 @@ ecsact_build_recipe(
     srcs = [
         ":sources",
     ],
-    imports = [],
+    imports = [
+        "ecsact_set_system_execution_impl",
+        "ecsact_system_execution_context_action",
+        "ecsact_system_execution_context_add",
+        "ecsact_system_execution_context_entity",
+        "ecsact_system_execution_context_generate",
+        "ecsact_system_execution_context_get",
+        "ecsact_system_execution_context_has",
+        "ecsact_system_execution_context_other",
+        "ecsact_system_execution_context_parent",
+        "ecsact_system_execution_context_remove",
+        "ecsact_system_execution_context_same",
+        "ecsact_system_execution_context_stream_toggle",
+        "ecsact_system_execution_context_update",
+    ],
+    system_libs = ["wasmer"],
     exports = [
         "ecsact_si_wasm_allow_file_read_access",
         "ecsact_si_wasm_consume_logs",
@@ -106,11 +121,6 @@ ecsact_build_recipe(
 )
 
 ecsact_build_recipe_bundle(
-    name = "ecsact_si_wasmer_build_recipe_bundle",
-    recipes = [":ecsact_si_wasmer_build_recipe"],
-)
-
-alias(
     name = "ecsact_si_wasmer",
-    actual = ":ecsact_si_wasmer_build_recipe_bundle",
+    recipes = [":ecsact_si_wasmer_build_recipe"],
 )
