@@ -139,8 +139,8 @@ void ecsact_si_wasm_last_error_message(
 	char*   out_message,
 	int32_t message_max_length
 ) {
-	// auto& last_error_message = ecsact_si_wasm::detail::get_last_error_message();
-	// std::copy_n(
+	// auto& last_error_message =
+	// ecsact_si_wasm::detail::get_last_error_message(); std::copy_n(
 	// 	last_error_message.begin(),
 	// 	std::min(
 	// 		message_max_length,
@@ -327,7 +327,7 @@ void ecsact_si_wasm_reset() {
 
 void ecsact_si_wasm_consume_logs(
 	ecsact_si_wasm_log_consumer consumer,
-	void*                      consumer_user_data
+	void*                       consumer_user_data
 ) {
 	auto t = start_transaction();
 	for(auto& entry : get_log_lines(t)) {

@@ -48,7 +48,7 @@ auto ecsact::wasm::detail::clear_log_lines(const log_transaction&) -> void {
 
 auto ecsact::wasm::detail::push_stdio_str(
 	ecsact_si_wasm_log_level level,
-	std::string_view        str
+	std::string_view         str
 ) -> void {
 	std::scoped_lock lk(_logger_mutex);
 	_stdio_strings[level] += std::string(str);
