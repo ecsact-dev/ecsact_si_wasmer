@@ -10,7 +10,7 @@
 #include <format>
 #include <wasm.h>
 #include "tools/cpp/runfiles/runfiles.h"
-#include "ecsact/wasm/detail/minst/minst.hh"
+#include "ecsact/si/wasmer/detail/minst/minst.hh"
 
 namespace fs = std::filesystem;
 using bazel::tools::cpp::runfiles::Runfiles;

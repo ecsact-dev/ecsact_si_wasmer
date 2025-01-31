@@ -4,7 +4,7 @@
 #include <functional>
 #include <map>
 #include <wasm.h>
-#include "ecsact/wasm/detail/minst/minst.hh"
+#include "ecsact/si/wasmer/detail/minst/minst.hh"
 
 namespace ecsact::wasm::detail {
 using allowed_guest_imports_t = std::unordered_map<

@@ -4,12 +4,12 @@
 #include <mutex>
 #include <vector>
 
-#include "ecsact/wasm.h"
+#include "ecsact/si/wasm.h"
 
 namespace ecsact::wasm::detail {
 
 struct log_line_entry {
-	ecsactsi_wasm_log_level log_level = {};
+	ecsact_si_wasm_log_level log_level = {};
 	std::string             message;
 };
 
@@ -35,7 +35,7 @@ auto clear_log_lines(const log_transaction& transaction) -> void;
 
 // Safely push string from stdio to a queue that will be consumed later in
 // proper log lines.
-auto push_stdio_str(ecsactsi_wasm_log_level level, std::string_view str)
+auto push_stdio_str(ecsact_si_wasm_log_level level, std::string_view str)
 	-> void;
 
 auto consume_stdio_str_as_log_lines(const log_transaction& transaction

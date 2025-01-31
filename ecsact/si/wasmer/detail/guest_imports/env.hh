@@ -1,8 +1,8 @@
 #pragma once
 
-#include "ecsact/wasm/detail/guest_imports.hh"
-#include "ecsact/wasm/detail/util.hh"
-#include "ecsact/wasm/detail/wasm_ecsact_system_execution.h"
+#include "ecsact/si/wasmer/detail/guest_imports.hh"
+#include "ecsact/si/wasmer/detail/util.hh"
+#include "ecsact/si/wasmer/detail/wasm_ecsact_system_execution.h"
 
 namespace ecsact::wasm::detail {
 

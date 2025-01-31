@@ -1,11 +1,11 @@
-#include "ecsact/wasm/detail/wasm_ecsact_system_execution.h"
+#include "ecsact/si/wasmer/detail/wasm_ecsact_system_execution.h"
 
 #include <cassert>
 #include <iostream>
 #include <unordered_map>
 #include <vector>
 #include "ecsact/runtime/dynamic.h"
-#include "ecsact/wasm/detail/mem_stack.hh"
+#include "ecsact/si/wasmer/detail/mem_stack.hh"
 
 using ecsact::wasm::detail::call_mem_alloc;
 using ecsact::wasm::detail::debug_trace_method;

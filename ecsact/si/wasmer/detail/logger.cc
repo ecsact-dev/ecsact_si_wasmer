@@ -1,4 +1,4 @@
-#include "ecsact/wasm/detail/logger.hh"
+#include "ecsact/si/wasmer/detail/logger.hh"
 
 #include <mutex>
 #include <map>
@@ -9,9 +9,9 @@ static auto _logger_mutex = std::recursive_mutex{};
 static auto _logger_entries =
 	std::vector<ecsact::wasm::detail::log_line_entry>{};
 static auto _stdio_strings = [] {
-	return std::map<ecsactsi_wasm_log_level, std::string>{
-		{ECSACTSI_WASM_LOG_LEVEL_INFO, {}},
-		{ECSACTSI_WASM_LOG_LEVEL_ERROR, {}},
+	return std::map<ecsact_si_wasm_log_level, std::string>{
+		{ECSACT_SI_WASM_LOG_LEVEL_INFO, {}},
+		{ECSACT_SI_WASM_LOG_LEVEL_ERROR, {}},
 	};
 }();
 
@@ -47,7 +47,7 @@ auto ecsact::wasm::detail::clear_log_lines(const log_transaction&) -> void {
 }
 
 auto ecsact::wasm::detail::push_stdio_str(
-	ecsactsi_wasm_log_level level,
+	ecsact_si_wasm_log_level level,
 	std::string_view        str
 ) -> void {
 	std::scoped_lock lk(_logger_mutex);

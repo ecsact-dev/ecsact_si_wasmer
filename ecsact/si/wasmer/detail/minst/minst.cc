@@ -1,10 +1,10 @@
-#include "ecsact/wasm/detail/minst/minst.hh"
+#include "ecsact/si/wasmer/detail/minst/minst.hh"
 
 #include <format>
 #include <cassert>
 #include <wasm.h>
 #include <wasmer.h>
-#include "ecsact/wasm/detail/cpp_util.hh"
+#include "ecsact/si/wasmer/detail/cpp_util.hh"
 
 using ecsact::wasm::detail::minst;
 using ecsact::wasm::detail::minst_export;

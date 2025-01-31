@@ -7,21 +7,21 @@
 #include "magic_enum.hpp"
 #include "ecsact/runtime/core.h"
 #include "ecsact/runtime/core.hh"
-#include "ecsact/wasm.h"
+#include "ecsact/si/wasm.h"
 
 #include "wasi_test.ecsact.hh"
 
 namespace fs = std::filesystem;
 
-void print_load_error(ecsactsi_wasm_error err, const std::string& wasm_path) {
+void print_load_error(ecsact_si_wasm_error err, const std::string& wasm_path) {
 	std::cerr //
 		<< "[ERROR] loading wasm file " << wasm_path
 		<< " failed: " << magic_enum::enum_name(err) << "\n";
 
-	auto err_msg_len = ecsactsi_wasm_last_error_message_length();
+	auto err_msg_len = ecsact_si_wasm_last_error_message_length();
 	auto err_msg = std::string{};
 	err_msg.resize(err_msg_len);
-	ecsactsi_wasm_last_error_message(err_msg.data(), err_msg_len);
+	ecsact_si_wasm_last_error_message(err_msg.data(), err_msg_len);
 	std::cerr << err_msg << "\n";
 }
 
@@ -49,14 +49,14 @@ auto load_wasm_files(const std::vector<std::string>& wasm_file_paths) {
 
 		assert(system_ids.size() == wasm_exports.size());
 
-		auto err = ecsactsi_wasm_load_file(
+		auto err = ecsact_si_wasm_load_file(
 			wasm_path.c_str(),
 			static_cast<int>(system_ids.size()),
 			system_ids.data(),
 			wasm_exports.data()
 		);
 
-		if(err != ECSACTSI_WASM_OK) {
+		if(err != ECSACT_SI_WASM_OK) {
 			print_load_error(err, wasm_path);
 			return std::exit(2);
 		}
@@ -102,7 +102,7 @@ auto load_test_virtual_files() -> void {
 	auto virtual_path = std::string{"example.txt"};
 
 	std::cout << "Mapping " << real_path << " -> " << virtual_path << "\n";
-	ecsactsi_wasm_allow_file_read_access(
+	ecsact_si_wasm_allow_file_read_access(
 		real_path.c_str(),
 		static_cast<int32_t>(real_path.size()),
 		virtual_path.c_str(),
@@ -111,23 +111,23 @@ auto load_test_virtual_files() -> void {
 }
 
 auto forward_logs_consumer(
-	ecsactsi_wasm_log_level log_level,
-	const char*             message,
-	int32_t                 message_length,
-	void*                   user_data
+	ecsact_si_wasm_log_level log_level,
+	const char*              message,
+	int32_t                  message_length,
+	void*                    user_data
 ) -> void {
 	using namespace std::string_view_literals;
 	auto message_view = std::string_view(message, message_length);
 
 	auto out_iostream = std::ref(std::cout);
-	if(log_level == ECSACTSI_WASM_LOG_LEVEL_ERROR) {
+	if(log_level == ECSACT_SI_WASM_LOG_LEVEL_ERROR) {
 		out_iostream = std::ref(std::cerr);
 	}
 
 	out_iostream.get() //
 		<< "["
 		<< magic_enum::enum_name(log_level).substr(
-				 "ECSACTSI_WASM_LOG_LEVEL_"sv.size()
+				 "ECSACT_SI_WASM_LOG_LEVEL_"sv.size()
 			 )
 		<< "] " << message_view << "\n";
 }
@@ -140,15 +140,15 @@ int main(int argc, char* argv[]) {
 	auto test_entity = test_registry.create_entity();
 	test_registry.add_component(test_entity, wasi_test::DummyComponent{});
 
-	ecsactsi_wasm_set_trap_handler(&trap_handler);
+	ecsact_si_wasm_set_trap_handler(&trap_handler);
 	load_test_virtual_files();
 	load_wasm_files(wasm_file_paths);
-	ecsactsi_wasm_consume_logs(forward_logs_consumer, nullptr);
+	ecsact_si_wasm_consume_logs(forward_logs_consumer, nullptr);
 
 	for(int i = 0; 10 > i; ++i) {
 		std::cout << "\n==== EXECUTION (" << i << ") ====\n";
 		ecsact_execute_systems(test_registry.id(), 1, nullptr, nullptr);
-		ecsactsi_wasm_consume_logs(forward_logs_consumer, nullptr);
+		ecsact_si_wasm_consume_logs(forward_logs_consumer, nullptr);
 	}
 
 	std::cout << "\n (( Done ))\n";

@@ -1,4 +1,4 @@
-#include "ecsact/wasm/detail/globals.hh"
+#include "ecsact/si/wasmer/detail/globals.hh"
 
 namespace {
 wasm_engine_t* _engine = nullptr;

@@ -10,7 +10,7 @@
 #include "magic_enum.hpp"
 #include "ecsact/runtime/core.h"
 #include "ecsact/runtime/core.hh"
-#include "ecsact/wasm.hh"
+#include "ecsact/si/wasm.hh"
 
 #include "example.ecsact.hh"
 
@@ -18,50 +18,50 @@ namespace fs = std::filesystem;
 using namespace std::string_view_literals;
 
 const auto test_systems = std::array{
-	ecsact::wasm::system_load_options{
+	ecsact::si::wasm::system_load_options{
 		ecsact_id_cast<ecsact_system_like_id>(example::ExampleSystem::id),
 		"example__ExampleSystem"sv,
 	},
-	ecsact::wasm::system_load_options{
+	ecsact::si::wasm::system_load_options{
 		ecsact_id_cast<ecsact_system_like_id>(example::ExampleParallelSystem::id),
 		"example__ExampleParallelSystem"sv,
 	},
-	ecsact::wasm::system_load_options{
+	ecsact::si::wasm::system_load_options{
 		ecsact_id_cast<ecsact_system_like_id>(
 			example::ExampleParallelSystemParent::id
 		),
 		"example__ExampleParallelSystemParent"sv,
 	},
-	ecsact::wasm::system_load_options{
+	ecsact::si::wasm::system_load_options{
 		ecsact_id_cast<ecsact_system_like_id>(
 			example::ExampleParallelSystemParent::ExampleParallelSystemNested::id
 		),
 		"example__ExampleParallelSystemParent__ExampleParallelSystemNested"sv,
 	},
-	ecsact::wasm::system_load_options{
+	ecsact::si::wasm::system_load_options{
 		ecsact_id_cast<ecsact_system_like_id>(example::Generator::id),
 		"example__Generator"sv,
 	},
-	ecsact::wasm::system_load_options{
+	ecsact::si::wasm::system_load_options{
 		ecsact_id_cast<ecsact_system_like_id>(example::AddsSystem::id),
 		"example__AddsSystem"sv,
 	},
-	ecsact::wasm::system_load_options{
+	ecsact::si::wasm::system_load_options{
 		ecsact_id_cast<ecsact_system_like_id>(example::CheckShouldRemove::id),
 		"example__CheckShouldRemove"sv,
 	},
-	ecsact::wasm::system_load_options{
+	ecsact::si::wasm::system_load_options{
 		ecsact_id_cast<ecsact_system_like_id>(example::RemovesSystem::id),
 		"example__RemovesSystem"sv,
 	},
 };
 
-void print_load_error(ecsactsi_wasm_error err, const std::string& wasm_path) {
+void print_load_error(ecsact_si_wasm_error err, const std::string& wasm_path) {
 	std::cerr << std::format(
 		"[ERROR] loading wasm file {} failed: {}\n{}\n",
 		wasm_path,
 		magic_enum::enum_name(err),
-		ecsact::wasm::last_error_message()
+		ecsact::si::wasm::last_error_message()
 	);
 }
 
@@ -136,9 +136,9 @@ auto load_wasm_files(const std::vector<std::string>& wasm_file_paths) {
 	using namespace std::string_view_literals;
 
 	for(auto& wasm_path : wasm_file_paths) {
-		auto err = ecsact::wasm::load_file(wasm_path, std::span{test_systems});
+		auto err = ecsact::si::wasm::load_file(wasm_path, std::span{test_systems});
 
-		if(err != ECSACTSI_WASM_OK) {
+		if(err != ECSACT_SI_WASM_OK) {
 			print_load_error(err, wasm_path);
 			return std::exit(2);
 		}
@@ -177,23 +177,23 @@ auto parse_args(int argc, char* argv[]) -> std::vector<std::string> {
 }
 
 auto forward_logs_consumer(
-	ecsactsi_wasm_log_level log_level,
-	const char*             message,
-	int32_t                 message_length,
-	void*                   user_data
+	ecsact_si_wasm_log_level log_level,
+	const char*              message,
+	int32_t                  message_length,
+	void*                    user_data
 ) -> void {
 	using namespace std::string_view_literals;
 	auto message_view = std::string_view(message, message_length);
 
 	auto out_iostream = std::ref(std::cout);
-	if(log_level == ECSACTSI_WASM_LOG_LEVEL_ERROR) {
+	if(log_level == ECSACT_SI_WASM_LOG_LEVEL_ERROR) {
 		out_iostream = std::ref(std::cerr);
 	}
 
 	out_iostream.get() //
 		<< "["
 		<< magic_enum::enum_name(log_level).substr(
-				 "ECSACTSI_WASM_LOG_LEVEL_"sv.size()
+				 "ECSACT_SI_WASM_LOG_LEVEL_"sv.size()
 			 )
 		<< "] " << message_view << "\n";
 }
@@ -209,9 +209,9 @@ int main(int argc, char* argv[]) {
 	test_registry.add_component(test_entity, example::Spawner{});
 	test_registry.add_component(test_entity, example::ExampleComponent{});
 
-	ecsact::wasm::set_trap_handler(&trap_handler);
+	ecsact::si::wasm::set_trap_handler(&trap_handler);
 	load_wasm_files(wasm_file_paths);
-	ecsact::wasm::consume_and_print_logs();
+	ecsact::si::wasm::consume_and_print_logs();
 
 	for(auto i = 0; 200 > i; ++i) {
 		auto para_entity = test_registry.create_entity();
@@ -234,7 +234,7 @@ int main(int argc, char* argv[]) {
 		};
 
 		ecsact_execute_systems(test_registry.id(), 1, nullptr, &ev_collector);
-		ecsact::wasm::consume_and_print_logs();
+		ecsact::si::wasm::consume_and_print_logs();
 
 		std::cout //
 			<< "[POST-EXECUTE]: Entity Count="

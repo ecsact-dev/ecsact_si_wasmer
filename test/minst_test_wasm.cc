@@ -1,4 +1,3 @@
-
 #include "ecsact/runtime/common.h"
 
 ECSACT_IMPORT("mod", "minst_test_import_fn")
