@@ -2,6 +2,14 @@
 All notable changes to this project will be documented in this file. See [conventional commits](https://www.conventionalcommits.org/) for commit guidelines.
 
 - - -
+## 0.2.0 - 2025-01-31
+#### Features
+- use ecsact_runtime si/wasm header + recipe bundle (#84) - (a491f2f) - Ezekiel Warren
+#### Miscellaneous Chores
+- use clang-format 19 - (ca6513c) - Ezekiel Warren
+
+- - -
+
 ## 0.1.11 - 2025-01-30
 #### Features
 - allow si module implementation linking to be configurable (#82) - (8d1808e) - Ezekiel Warren
