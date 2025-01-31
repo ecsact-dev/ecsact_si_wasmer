@@ -1,5 +1,5 @@
-#ifndef ECSACTSI_WASI_H
-#define ECSACTSI_WASI_H
+#ifndef ECSACT_SI_WASI_H
+#define ECSACT_SI_WASI_H
 
 #include <wasm.h>
 #include <cstdint>
@@ -7,7 +7,7 @@
 /**
  * A region of memory for scatter/gather writes.
  */
-typedef struct ecsactsi_wasi_ciovec_t {
+typedef struct ecsact_si_wasi_ciovec_t {
 	/**
 	 * The guest pointer of the buffer to be written.
 	 */
@@ -17,14 +17,14 @@ typedef struct ecsactsi_wasi_ciovec_t {
 	 * The length of the buffer to be written.
 	 */
 	int32_t buf_len;
-} ecsactsi_wasi_ciovec_t;
+} ecsact_si_wasi_ciovec_t;
 
-static_assert(sizeof(ecsactsi_wasi_ciovec_t) == 8);
-static_assert(alignof(ecsactsi_wasi_ciovec_t) == 4);
-// static_assert(offsetof(ecsactsi_wasi_ciovec_t, buf) == 0);
-// static_assert(offsetof(ecsactsi_wasi_ciovec_t, buf_len) == 4);
+static_assert(sizeof(ecsact_si_wasi_ciovec_t) == 8);
+static_assert(alignof(ecsact_si_wasi_ciovec_t) == 4);
+// static_assert(offsetof(ecsact_si_wasi_ciovec_t, buf) == 0);
+// static_assert(offsetof(ecsact_si_wasi_ciovec_t, buf_len) == 4);
 
-enum class ecsactsi_wasi_filetype : uint8_t {
+enum class ecsact_si_wasi_filetype : uint8_t {
 	/**
 	 * The type of the file descriptor or file is unknown or is different from any
 	 * of the other types specified.
@@ -67,7 +67,7 @@ enum class ecsactsi_wasi_filetype : uint8_t {
 	symbolic_link = 7,
 };
 
-enum class ecsactsi_wasi_fdflags : uint16_t {
+enum class ecsact_si_wasi_fdflags : uint16_t {
 	/**
 	 * Append mode: Data written to the file is always appended to the file's end.
 	 */
@@ -97,20 +97,20 @@ enum class ecsactsi_wasi_fdflags : uint16_t {
 	sync = 1 << 4,
 };
 
-inline ecsactsi_wasi_fdflags operator|(
-	ecsactsi_wasi_fdflags a,
-	ecsactsi_wasi_fdflags b
+inline ecsact_si_wasi_fdflags operator|(
+	ecsact_si_wasi_fdflags a,
+	ecsact_si_wasi_fdflags b
 ) {
-	return static_cast<ecsactsi_wasi_fdflags>(
+	return static_cast<ecsact_si_wasi_fdflags>(
 		static_cast<uint16_t>(a) | static_cast<uint16_t>(b)
 	);
 }
 
-inline ecsactsi_wasi_fdflags operator&(
-	ecsactsi_wasi_fdflags a,
-	ecsactsi_wasi_fdflags b
+inline ecsact_si_wasi_fdflags operator&(
+	ecsact_si_wasi_fdflags a,
+	ecsact_si_wasi_fdflags b
 ) {
-	return static_cast<ecsactsi_wasi_fdflags>(
+	return static_cast<ecsact_si_wasi_fdflags>(
 		static_cast<uint16_t>(a) & static_cast<uint16_t>(b)
 	);
 }
@@ -118,7 +118,7 @@ inline ecsactsi_wasi_fdflags operator&(
 /**
  * File descriptor rights, determining which actions may be performed.
  */
-enum class ecsactsi_wasi_rights : uint64_t {
+enum class ecsact_si_wasi_rights : uint64_t {
 	/**
 	 * The right to invoke `fd_datasync`.
 	 * If `path_open` is set, includes the right to invoke
@@ -287,49 +287,49 @@ enum class ecsactsi_wasi_rights : uint64_t {
 	sock_accept = 1 << 29,
 };
 
-inline ecsactsi_wasi_rights operator|(
-	ecsactsi_wasi_rights a,
-	ecsactsi_wasi_rights b
+inline ecsact_si_wasi_rights operator|(
+	ecsact_si_wasi_rights a,
+	ecsact_si_wasi_rights b
 ) {
-	return static_cast<ecsactsi_wasi_rights>(
+	return static_cast<ecsact_si_wasi_rights>(
 		static_cast<uint64_t>(a) | static_cast<uint64_t>(b)
 	);
 }
 
-inline ecsactsi_wasi_rights operator&(
-	ecsactsi_wasi_rights a,
-	ecsactsi_wasi_rights b
+inline ecsact_si_wasi_rights operator&(
+	ecsact_si_wasi_rights a,
+	ecsact_si_wasi_rights b
 ) {
-	return static_cast<ecsactsi_wasi_rights>(
+	return static_cast<ecsact_si_wasi_rights>(
 		static_cast<uint64_t>(a) & static_cast<uint64_t>(b)
 	);
 }
 
-typedef struct ecsactsi_wasi_fdstat_t {
+typedef struct ecsact_si_wasi_fdstat_t {
 	/**
 	 * File type.
 	 */
-	ecsactsi_wasi_filetype fs_filetype;
+	ecsact_si_wasi_filetype fs_filetype;
 
 	/**
 	 * File descriptor flags.
 	 */
-	ecsactsi_wasi_fdflags fs_flags;
+	ecsact_si_wasi_fdflags fs_flags;
 
 	/**
 	 * Rights that apply to this file descriptor.
 	 */
-	ecsactsi_wasi_rights fs_rights_base;
+	ecsact_si_wasi_rights fs_rights_base;
 
 	/**
 	 * Maximum set of rights that may be installed on new file descriptors that
 	 * are created through this file descriptor, e.g., through `path_open`.
 	 */
-	ecsactsi_wasi_rights fs_rights_inheriting;
+	ecsact_si_wasi_rights fs_rights_inheriting;
 
-} ecsactsi_wasi_fdstat_t;
+} ecsact_si_wasi_fdstat_t;
 
-static_assert(sizeof(ecsactsi_wasi_fdstat_t) == 24);
+static_assert(sizeof(ecsact_si_wasi_fdstat_t) == 24);
 
 /**
  * Ecsact system implementation exited prematurely. Unlike normal usage of this
@@ -337,45 +337,45 @@ static_assert(sizeof(ecsactsi_wasi_fdstat_t) == 24);
  * @param exit_code may be logged to the host, but otherwise is meaningless to
  *        the ecsact wasm host.
  */
-// void ecsactsi_wasi_proc_exit(int32_t exit_code);
-wasm_trap_t* ecsactsi_wasi_proc_exit(
+// void ecsact_si_wasi_proc_exit(int32_t exit_code);
+wasm_trap_t* ecsact_si_wasi_proc_exit(
 	const wasm_val_vec_t* args,
 	wasm_val_vec_t*       results
 );
 
-wasm_trap_t* ecsactsi_wasi_fd_seek(
+wasm_trap_t* ecsact_si_wasi_fd_seek(
 	const wasm_val_vec_t* args,
 	wasm_val_vec_t*       results
 );
 
-wasm_trap_t* ecsactsi_wasi_fd_write(
+wasm_trap_t* ecsact_si_wasi_fd_write(
 	const wasm_val_vec_t* args,
 	wasm_val_vec_t*       results
 );
 
-wasm_trap_t* ecsactsi_wasi_fd_read(
+wasm_trap_t* ecsact_si_wasi_fd_read(
 	const wasm_val_vec_t* args,
 	wasm_val_vec_t*       results
 );
 
-wasm_trap_t* ecsactsi_wasi_fd_close(
+wasm_trap_t* ecsact_si_wasi_fd_close(
 	const wasm_val_vec_t* args,
 	wasm_val_vec_t*       results
 );
 
-wasm_trap_t* ecsactsi_wasi_environ_sizes_get(
+wasm_trap_t* ecsact_si_wasi_environ_sizes_get(
 	const wasm_val_vec_t* args,
 	wasm_val_vec_t*       results
 );
 
-wasm_trap_t* ecsactsi_wasi_environ_get(
+wasm_trap_t* ecsact_si_wasi_environ_get(
 	const wasm_val_vec_t* args,
 	wasm_val_vec_t*       results
 );
 
-wasm_trap_t* ecsactsi_wasi_fd_fdstat_get(
+wasm_trap_t* ecsact_si_wasi_fd_fdstat_get(
 	const wasm_val_vec_t* args,
 	wasm_val_vec_t*       results
 );
 
-#endif // ECSACTSI_WASI_H
+#endif // ECSACT_SI_WASI_H

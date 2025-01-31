@@ -3,6 +3,9 @@ import %workspace%/../bazel/common.bazelrc
 # emsdk needs 'py' in PATH
 common:windows --action_env=PATH
 
+# ecsact cli will look for the env var if a recipe uses 'wasmer' as a system lib
+common --action_env=WASMER_DIR
+
 common --@boost.dll//:use_std_fs
 common --@boost.process//:use_std_fs
 

@@ -1,4 +1,4 @@
-#include "ecsact/wasm/detail/mem_stack.hh"
+#include "ecsact/si/wasmer/detail/mem_stack.hh"
 
 #include <cassert>
 #include <cstdint>

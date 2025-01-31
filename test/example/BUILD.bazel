@@ -1,6 +1,6 @@
 load("@ecsact_rt_entt//runtime:index.bzl", "ecsact_entt_runtime")
-load("@ecsact_si_wasm//bazel:copts.bzl", "copts")
-load("@ecsact_si_wasm//bazel:linkopts.bzl", "linkopts")
+load("@ecsact_si_wasmer//bazel:copts.bzl", "copts")
+load("@ecsact_si_wasmer//bazel:linkopts.bzl", "linkopts")
 load("@emsdk//emscripten_toolchain:wasm_rules.bzl", "wasm_cc_binary")
 load("@rules_cc//cc:defs.bzl", "cc_binary", "cc_test")
 
@@ -64,7 +64,7 @@ cc_test(
     name = "wasmer_example",
     srcs = [
         "example.cc",
-        "@ecsact_si_wasm//:sources",
+        "@ecsact_si_wasmer//:sources",
     ],
     args = [
         "$(location :system_impls.wasm)",
@@ -74,7 +74,7 @@ cc_test(
         ":system_impls.wasm",
     ],
     defines = [
-        "ECSACTSI_WASM_API=",
+        "ECSACT_SI_WASM_API=",
         "ECSACT_CORE_API=",
     ],
     linkopts = linkopts,
@@ -83,8 +83,8 @@ cc_test(
         "@ecsact_runtime//:core",
         "@ecsact_runtime//:dynamic",
         "@ecsact_runtime//:meta",
-        "@ecsact_si_wasm",
-        "@ecsact_si_wasm//:minst",
+        "@ecsact_runtime//:si_wasm",
+        "@ecsact_si_wasmer//:minst",
         "@magic_enum",
         "@wasmer",
     ],

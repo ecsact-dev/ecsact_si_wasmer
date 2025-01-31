@@ -1,12 +1,12 @@
-#include "ecsact/wasm/detail/wasi.hh"
+#include "ecsact/si/wasmer/detail/wasi.hh"
 
 #include <cstdio>
 #include <map>
 #include <string_view>
-#include "ecsact/wasm/detail/wasi_fs.hh"
-#include "ecsact/wasm/detail/logger.hh"
-#include "ecsact/wasm/detail/mem_stack.hh"
-#include "ecsact/wasm/detail/util.hh"
+#include "ecsact/si/wasmer/detail/wasi_fs.hh"
+#include "ecsact/si/wasmer/detail/logger.hh"
+#include "ecsact/si/wasmer/detail/mem_stack.hh"
+#include "ecsact/si/wasmer/detail/util.hh"
 
 using ecsact::wasm::detail::call_mem_read;
 using ecsact::wasm::detail::debug_trace_method;
@@ -16,7 +16,7 @@ constexpr int32_t WASI_STDIN_FD = 0;
 constexpr int32_t WASI_STDOUT_FD = 1;
 constexpr int32_t WASI_STDERR_FD = 2;
 
-wasm_trap_t* ecsactsi_wasi_proc_exit(
+wasm_trap_t* ecsact_si_wasi_proc_exit(
 	const wasm_val_vec_t* args,
 	wasm_val_vec_t*       results
 ) {
@@ -24,7 +24,7 @@ wasm_trap_t* ecsactsi_wasi_proc_exit(
 	return nullptr;
 }
 
-wasm_trap_t* ecsactsi_wasi_fd_seek(
+wasm_trap_t* ecsact_si_wasi_fd_seek(
 	const wasm_val_vec_t* args,
 	wasm_val_vec_t*       results
 ) {
@@ -35,7 +35,7 @@ wasm_trap_t* ecsactsi_wasi_fd_seek(
 	return nullptr;
 }
 
-wasm_trap_t* ecsactsi_wasi_fd_write(
+wasm_trap_t* ecsact_si_wasi_fd_write(
 	const wasm_val_vec_t* args,
 	wasm_val_vec_t*       results
 ) {
@@ -46,7 +46,7 @@ wasm_trap_t* ecsactsi_wasi_fd_write(
 
 	assert(args->data[1].kind == WASM_I32);
 	auto iovec =
-		wasm_memory_cast<ecsactsi_wasi_ciovec_t>(mem, args->data[1].of.i32);
+		wasm_memory_cast<ecsact_si_wasi_ciovec_t>(mem, args->data[1].of.i32);
 
 	assert(args->data[2].kind == WASM_I32);
 	auto iovec_len = args->data[2].of.i32;
@@ -57,8 +57,8 @@ wasm_trap_t* ecsactsi_wasi_fd_write(
 	if(fd == WASI_STDERR_FD || fd == WASI_STDOUT_FD) {
 		auto write_amount = size_t{};
 		auto log_level = fd == WASI_STDOUT_FD //
-			? ECSACTSI_WASM_LOG_LEVEL_INFO
-			: ECSACTSI_WASM_LOG_LEVEL_ERROR;
+			? ECSACT_SI_WASM_LOG_LEVEL_INFO
+			: ECSACT_SI_WASM_LOG_LEVEL_ERROR;
 
 		for(int i = 0; iovec_len > i; ++i) {
 			auto io = iovec[i];
@@ -83,7 +83,7 @@ wasm_trap_t* ecsactsi_wasi_fd_write(
 	return nullptr;
 }
 
-wasm_trap_t* ecsactsi_wasi_fd_read(
+wasm_trap_t* ecsact_si_wasi_fd_read(
 	const wasm_val_vec_t* args,
 	wasm_val_vec_t*       results
 ) {
@@ -94,7 +94,7 @@ wasm_trap_t* ecsactsi_wasi_fd_read(
 
 	assert(args->data[1].kind == WASM_I32);
 	auto iovec =
-		wasm_memory_cast<ecsactsi_wasi_ciovec_t>(mem, args->data[1].of.i32);
+		wasm_memory_cast<ecsact_si_wasi_ciovec_t>(mem, args->data[1].of.i32);
 
 	assert(args->data[2].kind == WASM_I32);
 	auto iovec_len = args->data[2].of.i32;
@@ -122,7 +122,7 @@ wasm_trap_t* ecsactsi_wasi_fd_read(
 	return nullptr;
 }
 
-wasm_trap_t* ecsactsi_wasi_fd_close(
+wasm_trap_t* ecsact_si_wasi_fd_close(
 	const wasm_val_vec_t* args,
 	wasm_val_vec_t*       results
 ) {
@@ -142,7 +142,7 @@ wasm_trap_t* ecsactsi_wasi_fd_close(
 	return nullptr;
 }
 
-wasm_trap_t* ecsactsi_wasi_environ_sizes_get(
+wasm_trap_t* ecsact_si_wasi_environ_sizes_get(
 	const wasm_val_vec_t* args,
 	wasm_val_vec_t*       results
 ) {
@@ -160,7 +160,7 @@ wasm_trap_t* ecsactsi_wasi_environ_sizes_get(
 	return nullptr;
 }
 
-wasm_trap_t* ecsactsi_wasi_environ_get(
+wasm_trap_t* ecsact_si_wasi_environ_get(
 	const wasm_val_vec_t* args,
 	wasm_val_vec_t*       results
 ) {
@@ -180,39 +180,39 @@ wasm_trap_t* ecsactsi_wasi_environ_get(
 	return nullptr;
 }
 
-wasm_trap_t* ecsactsi_wasi_fd_fdstat_get(
+wasm_trap_t* ecsact_si_wasi_fd_fdstat_get(
 	const wasm_val_vec_t* args,
 	wasm_val_vec_t*       results
 ) {
 	debug_trace_method("fd_fdstat_get");
-	const auto default_fdstats = std::map<int32_t, ecsactsi_wasi_fdstat_t>{
+	const auto default_fdstats = std::map<int32_t, ecsact_si_wasi_fdstat_t>{
 		{
 			WASI_STDIN_FD,
-			ecsactsi_wasi_fdstat_t{},
+			ecsact_si_wasi_fdstat_t{},
 		},
 		{
 			WASI_STDOUT_FD,
-			ecsactsi_wasi_fdstat_t{
-				.fs_filetype = ecsactsi_wasi_filetype::character_device,
+			ecsact_si_wasi_fdstat_t{
+				.fs_filetype = ecsact_si_wasi_filetype::character_device,
 				.fs_flags = {},
-				.fs_rights_base = ecsactsi_wasi_rights::fd_datasync |
-					ecsactsi_wasi_rights::fd_sync | ecsactsi_wasi_rights::fd_write |
-					ecsactsi_wasi_rights::fd_advise |
-					ecsactsi_wasi_rights::fd_filestat_get |
-					ecsactsi_wasi_rights::poll_fd_readwrite,
+				.fs_rights_base = ecsact_si_wasi_rights::fd_datasync |
+					ecsact_si_wasi_rights::fd_sync | ecsact_si_wasi_rights::fd_write |
+					ecsact_si_wasi_rights::fd_advise |
+					ecsact_si_wasi_rights::fd_filestat_get |
+					ecsact_si_wasi_rights::poll_fd_readwrite,
 				.fs_rights_inheriting = {},
 			},
 		},
 		{
 			WASI_STDERR_FD,
-			ecsactsi_wasi_fdstat_t{
-				.fs_filetype = ecsactsi_wasi_filetype::character_device,
+			ecsact_si_wasi_fdstat_t{
+				.fs_filetype = ecsact_si_wasi_filetype::character_device,
 				.fs_flags = {},
-				.fs_rights_base = ecsactsi_wasi_rights::fd_datasync |
-					ecsactsi_wasi_rights::fd_sync | ecsactsi_wasi_rights::fd_write |
-					ecsactsi_wasi_rights::fd_advise |
-					ecsactsi_wasi_rights::fd_filestat_get |
-					ecsactsi_wasi_rights::poll_fd_readwrite,
+				.fs_rights_base = ecsact_si_wasi_rights::fd_datasync |
+					ecsact_si_wasi_rights::fd_sync | ecsact_si_wasi_rights::fd_write |
+					ecsact_si_wasi_rights::fd_advise |
+					ecsact_si_wasi_rights::fd_filestat_get |
+					ecsact_si_wasi_rights::poll_fd_readwrite,
 				.fs_rights_inheriting = {},
 			},
 		},
@@ -225,7 +225,7 @@ wasm_trap_t* ecsactsi_wasi_fd_fdstat_get(
 
 	assert(args->data[1].kind == WASM_I32);
 	auto ret =
-		wasm_memory_cast<ecsactsi_wasi_fdstat_t>(mem, args->data[1].of.i32);
+		wasm_memory_cast<ecsact_si_wasi_fdstat_t>(mem, args->data[1].of.i32);
 
 	if(default_fdstats.contains(fd)) {
 		*ret = default_fdstats.at(fd);
@@ -233,7 +233,7 @@ wasm_trap_t* ecsactsi_wasi_fd_fdstat_get(
 		*ret = ecsact::wasm::detail::wasi::fs::fdstat(fd);
 	}
 
-	if(ret->fs_filetype != ecsactsi_wasi_filetype::unknown) {
+	if(ret->fs_filetype != ecsact_si_wasi_filetype::unknown) {
 		results->data[0].kind = WASM_I32;
 		results->data[0].of.i32 = 0;
 	} else {

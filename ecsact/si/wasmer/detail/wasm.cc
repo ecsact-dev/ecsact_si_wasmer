@@ -1,4 +1,4 @@
-#include "ecsact/wasm.h"
+#include "ecsact/si/wasm.h"
 
 #include <map>
 #include <unordered_map>
@@ -21,15 +21,14 @@
 #include <cstddef>
 #include <thread>
 #include "ecsact/runtime/dynamic.h"
-#include "ecsact/wasm/detail/minst/minst.hh"
-#include "ecsact/wasm/detail/logger.hh"
-#include "ecsact/wasm/detail/wasi_fs.hh"
-#include "ecsact/wasm/detail/globals.hh"
-#include "ecsact/wasm/detail/guest_imports/wasi_snapshot_preview1.hh"
-#include "ecsact/wasm/detail/guest_imports/env.hh"
-#include "ecsact/wasm/detail/cpp_util.hh"
-#include "ecsact/wasm/detail/mem_stack.hh"
-#include "mem_stack.hh"
+#include "ecsact/si/wasmer/detail/minst/minst.hh"
+#include "ecsact/si/wasmer/detail/logger.hh"
+#include "ecsact/si/wasmer/detail/wasi_fs.hh"
+#include "ecsact/si/wasmer/detail/globals.hh"
+#include "ecsact/si/wasmer/detail/guest_imports/wasi_snapshot_preview1.hh"
+#include "ecsact/si/wasmer/detail/guest_imports/env.hh"
+#include "ecsact/si/wasmer/detail/cpp_util.hh"
+#include "ecsact/si/wasmer/detail/mem_stack.hh"
 
 using namespace std::string_literals;
 using ecsact::wasm::detail::call_mem_alloc;
@@ -69,7 +68,7 @@ struct minst_ecsact_system_impls {
 	}
 };
 
-auto trap_handler = ecsactsi_wasm_trap_handler{};
+auto trap_handler = ecsact_si_wasm_trap_handler{};
 
 auto all_minsts = std::vector<std::shared_ptr<minst_ecsact_system_impls>>{};
 auto next_available_minst_index = std::atomic_size_t{};
@@ -108,7 +107,7 @@ auto get_system_impl_exports(
 	ecsact_system_like_id*                                   system_ids,
 	const char**                                             wasm_exports,
 	std::unordered_map<ecsact_system_like_id, minst_export>& system_impl_exports
-) -> ecsactsi_wasm_error {
+) -> ecsact_si_wasm_error {
 	system_impl_exports.clear();
 	system_impl_exports.reserve(systems_count);
 
@@ -122,25 +121,25 @@ auto get_system_impl_exports(
 		auto exp = inst.find_export(system_impl_export_name);
 
 		if(!exp) {
-			return ECSACTSI_WASM_ERR_EXPORT_NOT_FOUND;
+			return ECSACT_SI_WASM_ERR_EXPORT_NOT_FOUND;
 		}
 
 		if(exp->kind() != WASM_EXTERN_FUNC) {
-			return ECSACTSI_WASM_ERR_EXPORT_INVALID;
+			return ECSACT_SI_WASM_ERR_EXPORT_INVALID;
 		}
 
 		system_impl_exports[sys_id] = *exp;
 	}
 
-	return ECSACTSI_WASM_OK;
+	return ECSACT_SI_WASM_OK;
 }
 } // namespace
 
-void ecsactsi_wasm_last_error_message(
+void ecsact_si_wasm_last_error_message(
 	char*   out_message,
 	int32_t message_max_length
 ) {
-	// auto& last_error_message = ecsactsi_wasm::detail::get_last_error_message();
+	// auto& last_error_message = ecsact_si_wasm::detail::get_last_error_message();
 	// std::copy_n(
 	// 	last_error_message.begin(),
 	// 	std::min(
@@ -151,14 +150,14 @@ void ecsactsi_wasm_last_error_message(
 	// );
 }
 
-int32_t ecsactsi_wasm_last_error_message_length() {
+int32_t ecsact_si_wasm_last_error_message_length() {
 	return 0;
 	// return static_cast<int32_t>(
-	// 	ecsactsi_wasm::detail::get_last_error_message().size()
+	// 	ecsact_si_wasm::detail::get_last_error_message().size()
 	// );
 }
 
-ecsactsi_wasm_error ecsactsi_wasm_load(
+ecsact_si_wasm_error ecsact_si_wasm_load(
 	char*                  wasm_data,
 	int                    wasm_data_size,
 	int                    systems_count,
@@ -172,7 +171,7 @@ ecsactsi_wasm_error ecsactsi_wasm_load(
 
 #ifdef ECSACT_DYNAMIC_API_LOAD_AT_RUNTIME
 	if(ecsact_set_system_execution_impl == nullptr) {
-		return ECSACTSI_WASM_ERR_NO_SET_SYSTEM_EXECUTION;
+		return ECSACT_SI_WASM_ERR_NO_SET_SYSTEM_EXECUTION;
 	}
 #endif
 	auto import_resolver = [&](const minst_import imp) -> minst_import_resolve_t {
@@ -217,11 +216,11 @@ ecsactsi_wasm_error ecsactsi_wasm_load(
 				case minst_error_code::ok:
 					assert(err.code != minst_error_code::ok);
 				case minst_error_code::compile_fail:
-					return ECSACTSI_WASM_ERR_COMPILE_FAIL;
+					return ECSACT_SI_WASM_ERR_COMPILE_FAIL;
 				case minst_error_code::unresolved_guest_import:
-					return ECSACTSI_WASM_ERR_GUEST_IMPORT_INVALID;
+					return ECSACT_SI_WASM_ERR_GUEST_IMPORT_INVALID;
 				case minst_error_code::instantiate_fail:
-					return ECSACTSI_WASM_ERR_INSTANTIATE_FAIL;
+					return ECSACT_SI_WASM_ERR_INSTANTIATE_FAIL;
 			}
 		}
 
@@ -237,7 +236,7 @@ ecsactsi_wasm_error ecsactsi_wasm_load(
 			system_impl_exports
 		);
 
-		if(err != ECSACTSI_WASM_OK) {
+		if(err != ECSACT_SI_WASM_OK) {
 			return err;
 		}
 
@@ -260,7 +259,7 @@ ecsactsi_wasm_error ecsactsi_wasm_load(
 		};
 		auto init_trap = inst.initialize();
 		if(init_trap) {
-			return ECSACTSI_WASM_ERR_INITIALIZE_FAIL;
+			return ECSACT_SI_WASM_ERR_INITIALIZE_FAIL;
 		}
 
 		all_minsts.emplace_back(std::make_shared<minst_ecsact_system_impls>( //
@@ -277,10 +276,10 @@ ecsactsi_wasm_error ecsactsi_wasm_load(
 		);
 	}
 
-	return ECSACTSI_WASM_OK;
+	return ECSACT_SI_WASM_OK;
 }
 
-ecsactsi_wasm_error ecsactsi_wasm_load_file(
+ecsact_si_wasm_error ecsact_si_wasm_load_file(
 	const char*            wasm_file_path,
 	int                    systems_count,
 	ecsact_system_like_id* system_ids,
@@ -288,7 +287,7 @@ ecsactsi_wasm_error ecsactsi_wasm_load_file(
 ) {
 	FILE* file = std::fopen(wasm_file_path, "rb");
 	if(!file) {
-		return ECSACTSI_WASM_ERR_FILE_OPEN_FAIL;
+		return ECSACT_SI_WASM_ERR_FILE_OPEN_FAIL;
 	}
 
 	auto binary_data = std::make_shared<std::vector<std::byte>>();
@@ -299,10 +298,10 @@ ecsactsi_wasm_error ecsactsi_wasm_load_file(
 	binary_data->resize(file_size);
 
 	if(std::fread(binary_data->data(), file_size, 1, file) != 1) {
-		return ECSACTSI_WASM_ERR_FILE_READ_FAIL;
+		return ECSACT_SI_WASM_ERR_FILE_READ_FAIL;
 	}
 
-	return ecsactsi_wasm_load(
+	return ecsact_si_wasm_load(
 		reinterpret_cast<char*>(binary_data->data()),
 		static_cast<int>(binary_data->size()),
 		systems_count,
@@ -311,23 +310,23 @@ ecsactsi_wasm_error ecsactsi_wasm_load_file(
 	);
 }
 
-void ecsactsi_wasm_set_trap_handler(ecsactsi_wasm_trap_handler handler) {
+void ecsact_si_wasm_set_trap_handler(ecsact_si_wasm_trap_handler handler) {
 	trap_handler = handler;
 }
 
-void ecsactsi_wasm_unload(
+void ecsact_si_wasm_unload(
 	int                    systems_count,
 	ecsact_system_like_id* system_ids
 ) {
 }
 
-void ecsactsi_wasm_reset() {
+void ecsact_si_wasm_reset() {
 	all_minsts.clear();
 	next_available_minst_index = 0;
 }
 
-void ecsactsi_wasm_consume_logs(
-	ecsactsi_wasm_log_consumer consumer,
+void ecsact_si_wasm_consume_logs(
+	ecsact_si_wasm_log_consumer consumer,
 	void*                      consumer_user_data
 ) {
 	auto t = start_transaction();
@@ -352,7 +351,7 @@ void ecsactsi_wasm_consume_logs(
 	clear_log_lines(t);
 }
 
-int32_t ecsactsi_wasm_allow_file_read_access(
+int32_t ecsact_si_wasm_allow_file_read_access(
 	const char* real_file_path,
 	int32_t     real_file_path_length,
 	const char* virtual_file_path,

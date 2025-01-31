@@ -1,4 +1,4 @@
-#include "ecsact/wasm/detail/wasi_fs.hh"
+#include "ecsact/si/wasmer/detail/wasi_fs.hh"
 
 #include <map>
 #include <cstdio>
@@ -12,7 +12,7 @@ struct virtual_file_info {
 
 	// if set the file is open
 	std::optional<std::FILE*> opened_file;
-	ecsactsi_wasi_fdstat_t    fdstat = {};
+	ecsact_si_wasi_fdstat_t    fdstat = {};
 };
 
 static auto last_file_descriptor = int32_t{10};
@@ -41,10 +41,10 @@ auto ecsact::wasm::detail::wasi::fs::allow_file_read_access(
 	virtual_file_info.virtual_path = virtual_path;
 	virtual_file_info.real_path = real_path;
 	virtual_file_info.fdstat = {
-		.fs_filetype = ecsactsi_wasi_filetype::regular_file,
-		.fs_flags = ecsactsi_wasi_fdflags::rsync | ecsactsi_wasi_fdflags::sync,
-		.fs_rights_base = ecsactsi_wasi_rights::fd_read |
-			ecsactsi_wasi_rights::fd_seek,
+		.fs_filetype = ecsact_si_wasi_filetype::regular_file,
+		.fs_flags = ecsact_si_wasi_fdflags::rsync | ecsact_si_wasi_fdflags::sync,
+		.fs_rights_base = ecsact_si_wasi_rights::fd_read |
+			ecsact_si_wasi_rights::fd_seek,
 		.fs_rights_inheriting = {},
 	};
 
@@ -75,7 +75,7 @@ auto ecsact::wasm::detail::wasi::fs::real_path(std::string_view virtual_path
 }
 
 auto ecsact::wasm::detail::wasi::fs::fdstat(int32_t fd
-) -> ecsactsi_wasi_fdstat_t {
+) -> ecsact_si_wasi_fdstat_t {
 	if(!virtual_files.contains(fd)) {
 		return {};
 	}
@@ -84,7 +84,7 @@ auto ecsact::wasm::detail::wasi::fs::fdstat(int32_t fd
 }
 
 auto ecsact::wasm::detail::wasi::fs::fdstat(std::string_view virtual_path
-) -> ecsactsi_wasi_fdstat_t {
+) -> ecsact_si_wasi_fdstat_t {
 	const auto virtual_path_s = std::string{virtual_path};
 
 	auto itr = virtual_file_map.find(virtual_path_s);

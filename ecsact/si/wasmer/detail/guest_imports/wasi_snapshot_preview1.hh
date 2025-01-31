@@ -1,8 +1,8 @@
 #pragma once
 
-#include "ecsact/wasm/detail/guest_imports.hh"
-#include "ecsact/wasm/detail/util.hh"
-#include "ecsact/wasm/detail/wasi.hh"
+#include "ecsact/si/wasmer/detail/guest_imports.hh"
+#include "ecsact/si/wasmer/detail/util.hh"
+#include "ecsact/si/wasmer/detail/wasi.hh"
 
 namespace ecsact::wasm::detail {
 const auto guest_wasi_module_imports = allowed_guest_imports_t{
@@ -13,7 +13,7 @@ const auto guest_wasi_module_imports = allowed_guest_imports_t{
 				wasm_functype_new_1_0( //
 					wasm_valtype_new(WASM_I32) // exit_code
 				),
-				&ecsactsi_wasi_proc_exit,
+				&ecsact_si_wasi_proc_exit,
 			};
 		},
 	},
@@ -28,7 +28,7 @@ const auto guest_wasi_module_imports = allowed_guest_imports_t{
 					wasm_valtype_new_i32(), // retptr0
 					wasm_valtype_new_i32() // error code (return)
 				),
-				&ecsactsi_wasi_fd_seek,
+				&ecsact_si_wasi_fd_seek,
 			};
 		},
 	},
@@ -43,7 +43,7 @@ const auto guest_wasi_module_imports = allowed_guest_imports_t{
 					wasm_valtype_new_i32(), // retptr0
 					wasm_valtype_new_i32() // error code (return)
 				),
-				&ecsactsi_wasi_fd_write,
+				&ecsact_si_wasi_fd_write,
 			};
 		},
 	},
@@ -58,7 +58,7 @@ const auto guest_wasi_module_imports = allowed_guest_imports_t{
 					wasm_valtype_new_i32(), // retptr0
 					wasm_valtype_new_i32() // error code (return)
 				),
-				&ecsactsi_wasi_fd_read,
+				&ecsact_si_wasi_fd_read,
 			};
 		},
 	},
@@ -70,7 +70,7 @@ const auto guest_wasi_module_imports = allowed_guest_imports_t{
 					wasm_valtype_new_i32(), // fd
 					wasm_valtype_new_i32() // error code (return)
 				),
-				&ecsactsi_wasi_fd_close,
+				&ecsact_si_wasi_fd_close,
 			};
 		},
 	},
@@ -83,7 +83,7 @@ const auto guest_wasi_module_imports = allowed_guest_imports_t{
 					wasm_valtype_new_i32(), // retptr1
 					wasm_valtype_new_i32() // error code (return)
 				),
-				&ecsactsi_wasi_environ_sizes_get,
+				&ecsact_si_wasi_environ_sizes_get,
 			};
 		},
 	},
@@ -96,7 +96,7 @@ const auto guest_wasi_module_imports = allowed_guest_imports_t{
 					wasm_valtype_new_i32(), // environ_buf
 					wasm_valtype_new_i32() // error code (return)
 				),
-				&ecsactsi_wasi_environ_get,
+				&ecsact_si_wasi_environ_get,
 			};
 		},
 	},
@@ -109,7 +109,7 @@ const auto guest_wasi_module_imports = allowed_guest_imports_t{
 					wasm_valtype_new_i32(), // retptr0
 					wasm_valtype_new_i32() // error code (return)
 				),
-				&ecsactsi_wasi_fd_fdstat_get,
+				&ecsact_si_wasi_fd_fdstat_get,
 			};
 		},
 	},

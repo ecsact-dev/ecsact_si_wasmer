@@ -1,51 +1,63 @@
 load("@ecsact_rt_entt//runtime:index.bzl", "ecsact_entt_runtime")
-load("@ecsact_si_wasm//bazel:copts.bzl", "copts")
-load("@ecsact_si_wasm//bazel:linkopts.bzl", "linkopts")
+load("@ecsact_si_wasmer//bazel:copts.bzl", "copts")
+load("@ecsact_si_wasmer//bazel:linkopts.bzl", "linkopts")
 load("@emsdk//emscripten_toolchain:wasm_rules.bzl", "wasm_cc_binary")
 load("@hedron_compile_commands//:refresh_compile_commands.bzl", "refresh_compile_commands")
 load("@rules_cc//cc:defs.bzl", "cc_binary", "cc_test")
+load("@rules_ecsact//ecsact:defs.bzl", "ecsact_binary")
 
 package(default_visibility = [":__subpackages__"])
 
 exports_files(["test.cc"])
 
+ecsact_binary(
+    name = "bundle_runtime",
+    srcs = ["wasi_test.ecsact"],
+    recipes = [
+        "@ecsact_si_wasmer",
+        "@ecsact_rt_entt",
+    ],
+)
+
 cc_library(
     name = "impl",
     srcs = [
-        "@ecsact_si_wasm//:sources",
+        "@ecsact_si_wasmer//:sources",
     ],
     copts = copts,
     defines = [
         # Statically link the si_wasm api
-        "ECSACTSI_WASM_API=",
+        "ECSACT_SI_WASM_API=",
         # Statically link dynamic module
         "ECSACT_DYNAMIC_API=",
     ],
     deps = [
-        "@ecsact_si_wasm",
+        "@ecsact_runtime//:dynamic",
+        "@ecsact_runtime//:si_wasm",
+        "@ecsact_si_wasmer//:minst",
     ],
 )
 
 cc_test(
     name = "minst_test",
     srcs = ["minst_test.cc"],
-    args = ["ecsact_si_wasm_test/minst_test.wasm"],
+    args = ["ecsact_si_wasmer_test/minst_test.wasm"],
     copts = copts,
     data = [":minst_test_wasm"],
     linkopts = linkopts,
     deps = [
         "@bazel_tools//tools/cpp/runfiles",
-        "@ecsact_si_wasm//:minst",
+        "@ecsact_si_wasmer//:minst",
     ],
 )
 
 cc_binary(
     name = "minst_test_wasm_cc",
     srcs = ["minst_test_wasm.cc"],
+    copts = copts,
     features = [
         "-exceptions",
     ],
-    # copts = copts,
     linkopts = [
         "-sERROR_ON_UNDEFINED_SYMBOLS=0",
         "--no-entry",
@@ -127,7 +139,7 @@ ecsact_entt_runtime(
         ":{}__system_impl.wasm".format(wasi_test),
         "wasi_test_file.txt",
     ],
-    defines = ["ECSACTSI_WASM_API="],
+    defines = ["ECSACT_SI_WASM_API="],
     linkopts = linkopts,
     deps = [
         ":impl",
