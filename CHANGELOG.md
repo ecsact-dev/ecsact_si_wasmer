@@ -2,6 +2,14 @@
 All notable changes to this project will be documented in this file. See [conventional commits](https://www.conventionalcommits.org/) for commit guidelines.
 
 - - -
+## 0.2.1 - 2025-04-04
+#### Bug Fixes
+- break back 'last error message' - (97ed3d1) - Ezekiel
+#### Miscellaneous Chores
+- formatting - (764969e) - Ezekiel Warren
+
+- - -
+
 ## 0.2.0 - 2025-01-31
 #### Features
 - use ecsact_runtime si/wasm header + recipe bundle (#84) - (a491f2f) - Ezekiel Warren
