@@ -46,6 +46,7 @@ using ecsact::wasm::detail::set_call_mem_data;
 using ecsact::wasm::detail::start_transaction;
 
 namespace {
+std::string last_error_message = "";
 
 struct minst_ecsact_system_impls {
 	minst                                                   minst;
@@ -139,22 +140,18 @@ void ecsact_si_wasm_last_error_message(
 	char*   out_message,
 	int32_t message_max_length
 ) {
-	// auto& last_error_message =
-	// ecsact_si_wasm::detail::get_last_error_message(); std::copy_n(
-	// 	last_error_message.begin(),
-	// 	std::min(
-	// 		message_max_length,
-	// 		static_cast<int32_t>(last_error_message.size())
-	// 	),
-	// 	out_message
-	// );
+	std::copy_n(
+		last_error_message.begin(),
+		std::min(
+			message_max_length,
+			static_cast<int32_t>(last_error_message.size())
+		),
+		out_message
+	);
 }
 
 int32_t ecsact_si_wasm_last_error_message_length() {
-	return 0;
-	// return static_cast<int32_t>(
-	// 	ecsact_si_wasm::detail::get_last_error_message().size()
-	// );
+	return static_cast<int32_t>(last_error_message.size());
 }
 
 ecsact_si_wasm_error ecsact_si_wasm_load(
@@ -212,6 +209,7 @@ ecsact_si_wasm_error ecsact_si_wasm_load(
 
 		if(std::holds_alternative<minst_error>(result)) {
 			auto err = std::get<minst_error>(result);
+			last_error_message = err.message;
 			switch(err.code) {
 				case minst_error_code::ok:
 					assert(err.code != minst_error_code::ok);
