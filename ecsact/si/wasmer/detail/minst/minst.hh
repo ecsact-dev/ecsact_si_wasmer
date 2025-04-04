@@ -44,8 +44,29 @@ struct minst_import_resolve_func {
 	auto as_extern(wasm_store_t* store) -> wasm_extern_t*;
 };
 
-using minst_import_resolve_t =
-	std::optional<std::variant<minst_import_resolve_func>>;
+struct minst_import_resolve_memory {
+	wasm_limits_t memory_limits;
+
+	auto as_extern(wasm_store_t* store) -> wasm_extern_t*;
+};
+
+struct minst_import_resolve_table {
+	const wasm_tabletype_t* table_type;
+
+	auto as_extern(wasm_store_t* store) -> wasm_extern_t*;
+};
+
+struct minst_import_resolve_global {
+	// TODO
+
+	auto as_extern(wasm_store_t* store) -> wasm_extern_t*;
+};
+
+using minst_import_resolve_t = std::optional<std::variant<
+	minst_import_resolve_func,
+	minst_import_resolve_memory,
+	minst_import_resolve_table,
+	minst_import_resolve_global>>;
 
 struct minst_import {
 	wasm_importtype_t* import_type;
@@ -53,6 +74,9 @@ struct minst_import {
 	auto name() const -> std::string_view;
 	auto module() const -> std::string_view;
 	auto kind() const -> wasm_externkind_enum;
+
+	// only valid when kind() == WASM_EXTERN_TABLE
+	auto as_tabletype() const -> const wasm_tabletype_t*;
 };
 
 struct minst_export {

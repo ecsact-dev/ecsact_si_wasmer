@@ -9,7 +9,7 @@
 namespace ecsact::wasm::detail {
 using allowed_guest_imports_t = std::unordered_map<
 	std::string_view, // Function name
-	std::function<minst_import_resolve_func()>>;
+	std::function<minst_import_resolve_t(const minst_import)>>;
 
 using allowed_guest_modules_t = std::unordered_map<
 	std::string_view, // Module name
