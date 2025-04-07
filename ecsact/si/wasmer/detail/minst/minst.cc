@@ -10,6 +10,9 @@ using ecsact::wasm::detail::minst;
 using ecsact::wasm::detail::minst_export;
 using ecsact::wasm::detail::minst_import;
 using ecsact::wasm::detail::minst_import_resolve_func;
+using ecsact::wasm::detail::minst_import_resolve_global;
+using ecsact::wasm::detail::minst_import_resolve_memory;
+using ecsact::wasm::detail::minst_import_resolve_table;
 using ecsact::wasm::detail::minst_trap;
 
 namespace {
@@ -41,6 +44,10 @@ auto minst_import::kind() const -> wasm_externkind_enum {
 	return static_cast<wasm_externkind_enum>( //
 		wasm_externtype_kind(wasm_importtype_type(import_type))
 	);
+}
+
+auto minst_import::as_tabletype() const -> const wasm_tabletype_t* {
+	return wasm_externtype_as_tabletype_const(wasm_importtype_type(import_type));
 }
 
 auto minst_export::name() const -> std::string_view {
@@ -106,6 +113,21 @@ auto minst_import_resolve_func::as_extern( //
 ) -> wasm_extern_t* {
 	auto func = wasm_func_new(store, func_type, func_callback);
 	return wasm_func_as_extern(func);
+}
+
+auto minst_import_resolve_memory::as_extern( //
+	wasm_store_t* store
+) -> wasm_extern_t* {
+	auto memory_type = wasm_memorytype_new(&memory_limits);
+	auto memory = wasm_memory_new(store, memory_type);
+	return wasm_memory_as_extern(memory);
+}
+
+auto minst_import_resolve_table::as_extern( //
+	wasm_store_t* store
+) -> wasm_extern_t* {
+	auto* table = wasm_table_new(store, table_type, nullptr);
+	return wasm_table_as_extern(table);
 }
 
 auto minst_trap::message() const -> std::string {
