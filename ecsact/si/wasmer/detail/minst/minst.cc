@@ -116,14 +116,15 @@ auto minst_trap::message() const -> std::string {
 
 auto minst::create( //
 	wasm_engine_t*       engine,
-	std::span<std::byte> wasm_data,
+	std::span<const std::byte> wasm_data,
 	import_resolver_t    import_resolver
 ) -> std::variant<minst, minst_error> {
 	auto self = minst{};
 
 	auto wasm_bytes = wasm_byte_vec_t{
 		.size = wasm_data.size(),
-		.data = reinterpret_cast<wasm_byte_t*>(wasm_data.data()),
+		.data =
+			reinterpret_cast<wasm_byte_t*>(const_cast<std::byte*>(wasm_data.data())),
 	};
 
 	self._engine = engine;

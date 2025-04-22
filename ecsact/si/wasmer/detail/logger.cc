@@ -54,8 +54,9 @@ auto ecsact::wasm::detail::push_stdio_str(
 	_stdio_strings[level] += std::string(str);
 }
 
-auto ecsact::wasm::detail::consume_stdio_str_as_log_lines(const log_transaction&)
-	-> std::vector<log_line_entry> {
+auto ecsact::wasm::detail::consume_stdio_str_as_log_lines(
+	const log_transaction&
+) -> std::vector<log_line_entry> {
 	using namespace std::string_view_literals;
 
 	auto result = std::vector<log_line_entry>{};
@@ -74,10 +75,12 @@ auto ecsact::wasm::detail::consume_stdio_str_as_log_lines(const log_transaction&
 				continue;
 			}
 
-			result.push_back(log_line_entry{
-				.log_level = log_level,
-				.message = message,
-			});
+			result.push_back(
+				log_line_entry{
+					.log_level = log_level,
+					.message = message,
+				}
+			);
 		}
 	}
 
