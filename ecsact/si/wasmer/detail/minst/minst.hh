@@ -82,7 +82,7 @@ public:
 
 	static auto create( //
 		wasm_engine_t*       engine,
-		std::span<std::byte> wasm_data,
+		std::span<const std::byte> wasm_data,
 		import_resolver_t    import_resolver
 	) -> std::variant<minst, minst_error>;
 

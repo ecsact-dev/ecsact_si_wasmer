@@ -172,7 +172,6 @@ ecsact_si_wasm_error ecsact_si_wasm_load(
 	}
 #endif
 	auto import_resolver = [&](const minst_import imp) -> minst_import_resolve_t {
-		auto module_name = imp.module();
 		auto method_name = imp.name();
 
 		if(imp.module() == "env") {
