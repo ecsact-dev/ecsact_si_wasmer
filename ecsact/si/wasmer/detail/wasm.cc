@@ -174,15 +174,15 @@ ecsact_si_wasm_error ecsact_si_wasm_load(
 	auto import_resolver = [&](const minst_import imp) -> minst_import_resolve_t {
 		auto method_name = imp.name();
 
-		if(imp.module() == "env") {
+		if(module_name == "env") {
 			auto itr = guest_env_module_imports.find(method_name);
 			if(itr == guest_env_module_imports.end()) {
 				return std::nullopt;
 			}
-			return itr->second();
+			return itr->second(imp);
 		}
 
-		if(imp.module() == "wasi_snapshot_preview1") {
+		if(module_name == "wasi_snapshot_preview1") {
 			auto itr = guest_wasi_module_imports.find(method_name);
 			if(itr == guest_wasi_module_imports.end()) {
 				return std::nullopt;
